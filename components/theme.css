@@ -1,0 +1,180 @@
+@import '@fontsource/grenze-gotisch/latin-600.css';
+@import '@fontsource/grenze-gotisch/latin-700.css';
+@import '@fontsource/cormorant-sc/latin-600.css';
+@import '@fontsource/cormorant-sc/latin-700.css';
+@import '@fontsource/manrope/latin-400.css';
+@import '@fontsource/manrope/latin-500.css';
+@import '@fontsource/manrope/latin-600.css';
+
+:root {
+  --night: #0b0816;
+  --night-2: #140f27;
+  --crypt: #1b1533;
+  --stone: #241d42;
+  --edge: rgba(206, 203, 246, 0.12);
+  --edge-strong: rgba(206, 203, 246, 0.28);
+  --mist: #cecbf6;
+  --bone: #f3eef8;
+  --muted: #8f89b4;
+  --blood: #b3122e;
+  --blood-bright: #ff3344;
+  --ember: #ffb15c;
+  --garlic: #a6d36a;
+  --gold: #e0a43a;
+  --font-display: 'Grenze Gotisch', 'Cormorant SC', Georgia, serif;
+  --font-title: 'Cormorant SC', Georgia, serif;
+  --font-body: 'Manrope', system-ui, -apple-system, sans-serif;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+html, body { margin: 0; }
+body {
+  background: #170838;
+  color: var(--bone);
+  font: 14px/1.5 var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+h1, h2, h3 { margin: 0; font-weight: 500; }
+
+::selection { background: var(--blood); color: var(--bone); }
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  font: 500 13px/1 var(--font-body);
+  letter-spacing: 0.01em;
+  color: var(--mist);
+  background: rgba(36, 29, 66, 0.6);
+  border: 1px solid var(--edge-strong);
+  border-radius: 999px;
+  padding: 10px 16px;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: background 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s, transform 0.12s;
+}
+.btn:hover { background: rgba(60, 52, 137, 0.6); border-color: var(--mist); color: var(--bone); }
+.btn:active { transform: scale(0.97); }
+.btn:focus-visible, .icon-btn:focus-visible { outline: 2px solid var(--mist); outline-offset: 3px; }
+
+.btn-dawn {
+  color: #2a1204;
+  background: linear-gradient(180deg, #ffd27a 0%, #ff9a3c 55%, #e8612c 100%);
+  border-color: rgba(255, 210, 122, 0.8);
+  font-weight: 600;
+  box-shadow: 0 0 0 0 rgba(255, 154, 60, 0.5), 0 8px 24px rgba(232, 97, 44, 0.35);
+  animation: dawnPulse 2.6s ease-in-out infinite;
+}
+.btn-dawn:hover { color: #2a1204; background: linear-gradient(180deg, #ffe09a 0%, #ffab55 55%, #f07038 100%); border-color: #ffe09a; }
+.btn-dawn:disabled {
+  animation: none; cursor: default; opacity: 0.45; filter: grayscale(0.6);
+  box-shadow: none;
+}
+@keyframes dawnPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 154, 60, 0.45), 0 8px 24px rgba(232, 97, 44, 0.3); }
+  50% { box-shadow: 0 0 0 8px rgba(255, 154, 60, 0), 0 8px 32px rgba(232, 97, 44, 0.5); }
+}
+
+/* ---------- Night scene ---------- */
+.night {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+}
+.night svg { position: absolute; inset: -20px; width: calc(100% + 40px); height: calc(100% + 20px); }
+.night g, .night path { transform-box: view-box; }
+
+/* Parallax: nearer layers move further with the pointer */
+.n-moon { transform: translate(calc(var(--mx, 0) * 6px), calc(var(--my, 0) * 4px)); }
+.n-far { transform: translate(calc(var(--mx, 0) * -5px), 0); }
+.n-castle { transform: translate(calc(var(--mx, 0) * -9px), calc(var(--my, 0) * -2px)); }
+.n-mid { transform: translate(calc(var(--mx, 0) * -14px), calc(var(--my, 0) * -3px)); }
+.n-tree { transform: translate(calc(var(--mx, 0) * -22px), calc(var(--my, 0) * -4px)); }
+.n-near { transform: translate(calc(var(--mx, 0) * -28px), 0); }
+.n-moon, .n-far, .n-castle, .n-mid, .n-tree, .n-near { transition: transform 0.6s var(--ease-out); }
+
+.n-stars circle { animation: twinkle 3.4s ease-in-out infinite alternate; }
+@keyframes twinkle { to { opacity: 0.25; } }
+
+.n-cloud { animation: sail linear infinite; }
+.n-cloud-far { animation-duration: 160s; opacity: 0.85; }
+.n-cloud-mid { animation-duration: 105s; }
+.n-cloud-near { animation-duration: 70s; }
+@keyframes sail { from { transform: translateX(0); } to { transform: translateX(-2400px); } }
+
+/* Witches fly left-to-right past the moon, bobbing on their brooms */
+.n-witch { opacity: 0; }
+.n-witch-0 { animation: witchA 26s linear infinite 3s; }
+.n-witch-1 { animation: witchB 38s linear infinite 17s; }
+.n-witch-bob { animation: bob 2.4s ease-in-out infinite; }
+.n-witch-cape { transform-box: fill-box; transform-origin: 100% 50%; animation: cape 0.6s ease-in-out infinite alternate; }
+@keyframes witchA {
+  0% { transform: translate(-200px, 280px) rotate(-6deg); opacity: 0; }
+  4% { opacity: 1; }
+  50% { transform: translate(1100px, 170px) rotate(-3deg); }
+  96% { opacity: 1; }
+  100% { transform: translate(1800px, 60px) rotate(-8deg); opacity: 0; }
+}
+@keyframes witchB {
+  0% { transform: translate(-150px, 120px) scale(0.55); opacity: 0; }
+  5% { opacity: 0.9; }
+  95% { opacity: 0.9; }
+  100% { transform: translate(1750px, 40px) scale(0.55); opacity: 0; }
+}
+@keyframes bob { 50% { transform: translateY(-10px) rotate(2deg); } }
+@keyframes cape { to { transform: scaleX(0.82) skewY(4deg); } }
+
+/* Jack-o'-lanterns flicker like candles inside */
+.n-face { animation: flicker 2.2s ease-in-out infinite; }
+.n-pumpkin:nth-of-type(2n) .n-face { animation-delay: -0.8s; }
+.n-pumpkin:nth-of-type(3n) .n-face { animation-delay: -1.5s; }
+.n-pumpkin-light { animation: flicker 2.2s ease-in-out infinite; }
+@keyframes flicker { 0%, 100% { opacity: 1; } 30% { opacity: 0.75; } 45% { opacity: 0.95; } 70% { opacity: 0.82; } }
+
+/* Spider dangling from the web */
+.n-spider { animation: dangle 5s ease-in-out infinite; }
+@keyframes dangle { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(26px); } }
+
+.n-mist { animation: mist 26s ease-in-out infinite alternate; }
+@keyframes mist { from { transform: translateX(-60px); opacity: 0.8; } to { transform: translateX(60px); opacity: 1; } }
+
+.n-windows rect { animation: candle 4s ease-in-out infinite; }
+.n-windows rect:nth-child(2n) { animation-delay: -1.7s; }
+.n-windows rect:nth-child(3n) { animation-delay: -2.9s; }
+@keyframes candle { 0%, 100% { opacity: 1; } 45% { opacity: 0.78; } 55% { opacity: 0.95; } }
+
+/* Bats fly across the moon, wings flapping */
+.n-bat { opacity: 0; }
+.n-bat path { transform-box: fill-box; transform-origin: center; animation: flap 0.26s ease-in-out infinite alternate; }
+.n-bat-0 { animation: batA 16s linear infinite 1s; }
+.n-bat-1 { animation: batB 22s linear infinite 6s; }
+.n-bat-2 { animation: batC 19s linear infinite 11s; }
+@keyframes batA {
+  0% { transform: translate(1700px, 120px) scale(0.9); opacity: 0; }
+  5% { opacity: 1; }
+  50% { transform: translate(1180px, 200px) scale(1.1); }
+  95% { opacity: 1; }
+  100% { transform: translate(600px, 90px) scale(0.8); opacity: 0; }
+}
+@keyframes batB {
+  0% { transform: translate(-80px, 260px) scale(0.6); opacity: 0; }
+  5% { opacity: 1; }
+  60% { transform: translate(1150px, 160px) scale(0.75); }
+  95% { opacity: 1; }
+  100% { transform: translate(1700px, 60px) scale(0.6); opacity: 0; }
+}
+@keyframes batC {
+  0% { transform: translate(1300px, 420px) scale(0.5); opacity: 0; }
+  6% { opacity: 1; }
+  55% { transform: translate(1250px, 140px) scale(0.7) rotate(-8deg); }
+  94% { opacity: 1; }
+  100% { transform: translate(1500px, -60px) scale(0.5); opacity: 0; }
+}
+@keyframes flap { to { transform: scaleY(0.4); } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+  .n-bat, .n-witch { display: none; }
+}

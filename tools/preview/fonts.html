@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Font options</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Grenze+Gotisch:wght@500;700&family=Cormorant+SC:wght@600;700&family=Manrope:wght@400;600&family=Pirata+One&family=Spectral+SC:wght@600&family=Outfit:wght@400;600&family=Italiana&family=Marcellus+SC&family=Jost:wght@400;600&family=Cinzel+Decorative:wght@700&family=Cinzel:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+  body { margin: 0; background: #0b0816; color: #f3eef8; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; padding: 14px; font-size: 14px; }
+  .opt { background: linear-gradient(180deg, #1d1636, #120e22); border: 1px solid #ffffff1f; border-radius: 16px; padding: 18px 20px; }
+  .tag { font: 600 11px/1 system-ui; color: #ffb15c; letter-spacing: .1em; }
+  .eyebrow { margin: 10px 0 2px; font-size: 11px; letter-spacing: .4em; text-transform: uppercase; color: #ff3344; }
+  h1 { margin: 0; font-size: 46px; line-height: 1; background: linear-gradient(180deg,#fff,#e9e2f7 45%,#a79fd6); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .tagline { margin: 6px 0 12px; color: #8f89b4; font-style: italic; }
+  .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .chip { padding: 5px 11px; border-radius: 99px; border: 1px solid #ffffff22; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; }
+  .chip.r { color: #ff9aa8; border-color: #ff334470; }
+  .card { margin-top: 12px; padding: 10px 12px; border-radius: 12px; background: #251e46; width: 210px; }
+  .card b { display: block; font-size: 13.5px; font-weight: 600; }
+  .card small { color: #8f89b4; }
+  .num { font-size: 22px; font-weight: 600; }
+  /* pairings */
+  .a .eyebrow, .a .chip { font-family: 'Cinzel'; font-weight: 700; } .a h1 { font-family: 'Cinzel Decorative'; font-weight: 700; } .a, .a .tagline { font-family: 'Inter'; }
+  .b .eyebrow, .b .chip { font-family: 'Cormorant SC'; font-weight: 700; font-size: 13px; } .b h1 { font-family: 'Grenze Gotisch'; font-weight: 700; font-size: 58px; } .b, .b .tagline { font-family: 'Manrope'; }
+  .c .eyebrow, .c .chip { font-family: 'Spectral SC'; font-weight: 600; } .c h1 { font-family: 'Pirata One'; font-size: 60px; } .c, .c .tagline { font-family: 'Outfit'; }
+  .d .eyebrow, .d .chip { font-family: 'Marcellus SC'; } .d h1 { font-family: 'Italiana'; font-size: 58px; } .d, .d .tagline { font-family: 'Jost'; }
+</style>
+</head>
+<body>
+  <section class="opt a"><div class="tag">CURRENT · Cinzel Decorative + Inter</div>
+    <p class="eyebrow">Tabpire</p><h1>The Crypt</h1><p class="tagline">Your tabs are draining you. Stake them.</p>
+    <div class="row"><span class="chip r">Starving 4</span><span class="chip">Restless 2</span><span class="num">~2.4 GB</span></div>
+    <div class="card"><b>Inbox (1,204) – Gmail</b><small>3 days idle · ~280 MB</small></div></section>
+  <section class="opt b"><div class="tag">A · Grenze Gotisch + Cormorant SC + Manrope</div>
+    <p class="eyebrow">Tabpire</p><h1>The Crypt</h1><p class="tagline">Your tabs are draining you. Stake them.</p>
+    <div class="row"><span class="chip r">Starving 4</span><span class="chip">Restless 2</span><span class="num">~2.4 GB</span></div>
+    <div class="card"><b>Inbox (1,204) – Gmail</b><small>3 days idle · ~280 MB</small></div></section>
+  <section class="opt c"><div class="tag">B · Pirata One + Spectral SC + Outfit</div>
+    <p class="eyebrow">Tabpire</p><h1>The Crypt</h1><p class="tagline">Your tabs are draining you. Stake them.</p>
+    <div class="row"><span class="chip r">Starving 4</span><span class="chip">Restless 2</span><span class="num">~2.4 GB</span></div>
+    <div class="card"><b>Inbox (1,204) – Gmail</b><small>3 days idle · ~280 MB</small></div></section>
+  <section class="opt d"><div class="tag">C · Italiana + Marcellus SC + Jost</div>
+    <p class="eyebrow">Tabpire</p><h1>The Crypt</h1><p class="tagline">Your tabs are draining you. Stake them.</p>
+    <div class="row"><span class="chip r">Starving 4</span><span class="chip">Restless 2</span><span class="num">~2.4 GB</span></div>
+    <div class="card"><b>Inbox (1,204) – Gmail</b><small>3 days idle · ~280 MB</small></div></section>
+</body>
+</html>

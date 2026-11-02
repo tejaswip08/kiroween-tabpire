@@ -1,0 +1,15 @@
+body {
+  background:
+    radial-gradient(ellipse 120% 70% at 30% -10%, rgba(83, 74, 183, 0.45), transparent 70%),
+    radial-gradient(ellipse 90% 50% at 70% 120%, rgba(150, 20, 50, 0.4), transparent 70%),
+    var(--night);
+}
+.popup { width: 300px; padding: 18px; display: grid; gap: 12px; }
+.pop-head { display: flex; align-items: center; gap: 14px; }
+.pop-vamp { width: 92px; height: 108px; flex: none; margin: -8px -6px -10px -10px; }
+.pop-eyebrow { margin: 0; font: 700 12px/1 var(--font-title); letter-spacing: 0.38em; text-transform: uppercase; color: var(--blood-bright); }
+.pop-head h1 { font: 700 30px/1 var(--font-display); margin: 6px 0 4px; }
+.pop-sub { margin: 0; color: var(--muted); font-size: 12.5px; }
+.pop-wide { width: 100%; justify-content: center; padding: 12px; }
+.pop-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.pop-row .btn { justify-content: center; padding: 10px 8px; }

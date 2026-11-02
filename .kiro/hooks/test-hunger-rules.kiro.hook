@@ -1,0 +1,14 @@
+{
+  "enabled": true,
+  "name": "Test hunger rules on save",
+  "description": "When the pure hunger rules or their tests change, run the property tests and fix any failure.",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": ["lib/hunger.ts", "tests/**/*.ts"]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Run `npm test`. If any property test fails, explain the counterexample fast-check found and fix lib/hunger.ts (not the test) unless the requirement in .kiro/specs/tabpire-core/requirements.md changed."
+  }
+}
