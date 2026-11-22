@@ -244,6 +244,15 @@ describe('resurrect', () => {
     expect((await store.getStats()).mbFreed).toBe(0);
   });
 
+  it('opens the tab in the foreground only when asked', async () => {
+    await store.setCrypt([saved('a', 'https://example.com/a'), saved('b', 'https://other.org/')]);
+    await resurrect('a', NOW, { activate: true });
+    await resurrect('b', NOW);
+    const tabs = [...fake.tabs.values()];
+    expect(tabs.find((t) => t.url === 'https://example.com/a')?.active).toBe(true);
+    expect(tabs.find((t) => t.url === 'https://other.org/')?.active).toBe(false);
+  });
+
   it('keeps the item when opening fails', async () => {
     await store.setCrypt([saved('a', 'https://example.com/a')]);
     fake.failCreate = true;

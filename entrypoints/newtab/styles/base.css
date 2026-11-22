@@ -1,0 +1,122 @@
+/* Layout, type and motion rules. No colours here: they come from tokens.css. */
+
+:root {
+  color-scheme: dark;
+  --font-title: 'Grenze Gotisch', Georgia, serif;
+  --font-label: 'Sora', system-ui, sans-serif;
+  --font-body: 'Outfit', system-ui, sans-serif;
+
+  --page-width: 1400px;
+  --page-pad: 24px;
+  --card-width: 300px;
+  --card-height: 236px;
+  --radius-arch: 28px;
+  --radius-card: 14px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--sky-top);
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.4;
+  background:
+    radial-gradient(1200px 600px at 50% -10%, var(--sky-glow), transparent 70%),
+    linear-gradient(180deg, var(--sky-top), var(--sky-bottom)) fixed;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Static dark edge around the page. Spec 4 puts the 3D scene behind it. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 50% 35%, transparent 45%, var(--vignette) 100%);
+  z-index: 0;
+}
+
+#root {
+  position: relative;
+  z-index: 1;
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button[aria-disabled='true'] {
+  cursor: not-allowed;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  /* Hidden tooltips must never make the page scroll sideways. */
+  overflow-x: clip;
+}
+
+.main {
+  width: min(var(--page-width), 100% - 2 * var(--page-pad));
+  margin-inline: auto;
+  padding: 8px 0 96px;
+  display: grid;
+  gap: 28px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+:focus {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent-bright);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--focus-ring) 35%, transparent);
+}
+
+/* Reduced motion: no animation or transition anywhere. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

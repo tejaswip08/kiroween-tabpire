@@ -1,0 +1,253 @@
+/* Shrine cards. All colours come from tokens.css. */
+
+.card-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--card-width), 1fr));
+  gap: 24px 22px;
+  perspective: 1200px;
+}
+
+.card {
+  --rim: var(--state-awake);
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 10px;
+  height: var(--card-height);
+  padding: 14px 14px 12px;
+  border: 3px solid transparent;
+  border-radius: var(--radius-arch) var(--radius-arch) var(--radius-card) var(--radius-card);
+  /* Card body inside, state-coloured rim outside. Both stay sharp vector fills. */
+  background:
+    linear-gradient(180deg, var(--card-top), var(--card-bottom)) padding-box,
+    linear-gradient(160deg, var(--rim), color-mix(in srgb, var(--rim) 25%, #000)) border-box;
+  box-shadow: var(--shadow-card);
+  transition: transform 0.18s ease;
+  animation: card-in 0.36s ease both;
+  animation-delay: calc(var(--i, 0) * 30ms);
+}
+
+.card[data-state='awake'] {
+  --rim: var(--state-awake);
+}
+.card[data-state='starving'] {
+  --rim: var(--state-starving);
+}
+.card[data-state='asleep'] {
+  --rim: var(--state-asleep);
+}
+.card[data-state='protected'] {
+  --rim: var(--state-protected);
+}
+
+.card:hover,
+.card:focus-within {
+  z-index: 3;
+  transform: translateY(-4px) rotateX(1.5deg);
+}
+
+/* Soft red glow on hungry cards. Only its opacity moves. */
+.card[data-state='starving']::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow:
+    0 0 18px 2px color-mix(in srgb, var(--state-starving) 70%, transparent),
+    0 0 4px 0 var(--state-starving);
+  opacity: 0.6;
+  animation: starving-glow 2.4s ease-in-out infinite;
+}
+
+@keyframes starving-glow {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card-exiting {
+  pointer-events: none;
+  animation: card-out 0.22s ease forwards;
+}
+
+@keyframes card-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(10px) scale(0.96);
+  }
+}
+
+/* ---------- head ---------- */
+
+.card-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.card-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 16px;
+  color: var(--ink);
+}
+
+.site-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.07));
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.25) inset,
+    0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.site-icon img {
+  display: block;
+  width: 16px;
+  height: 16px;
+}
+
+.site-letter {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  font-family: var(--font-label);
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--badge-ink);
+  background: linear-gradient(180deg, var(--badge), color-mix(in srgb, var(--badge) 65%, #000));
+}
+
+.state-badge {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px 3px 7px;
+  border-radius: 999px;
+  font-family: var(--font-label);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--rim);
+  background: color-mix(in srgb, var(--rim) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--rim) 50%, transparent);
+}
+
+/* ---------- body ---------- */
+
+.card-body {
+  display: grid;
+  grid-template-columns: 96px 1fr 30px;
+  gap: 12px;
+  align-items: start;
+  min-height: 0;
+}
+
+.portrait-slot {
+  width: 96px;
+  height: 112px;
+  display: grid;
+  place-items: end center;
+  overflow: hidden;
+  border-radius: 48px 48px 12px 12px;
+  color: var(--rim);
+  background:
+    radial-gradient(circle at 50% 38%, color-mix(in srgb, var(--rim) 34%, transparent), transparent 72%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.18));
+  box-shadow:
+    0 0 0 1px var(--card-edge) inset,
+    0 6px 14px rgba(0, 0, 0, 0.5) inset;
+}
+
+.emblem {
+  display: block;
+}
+
+.card-facts {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  min-width: 0;
+  padding-top: 4px;
+}
+
+.card-idle {
+  font-weight: 500;
+  font-size: 15px;
+  color: var(--ink);
+}
+
+.card-memory {
+  font-family: var(--font-label);
+  font-weight: 600;
+  font-size: 20px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+
+.card-site {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  color: var(--ink-dim);
+}
+
+.vial {
+  display: block;
+  margin-top: -2px;
+}
+
+.vial-liquid {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  transition: transform 0.4s ease;
+}
+
+/* ---------- actions ---------- */
+
+.card-actions {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 4px;
+}
+
+.icon-slash {
+  pointer-events: none;
+}

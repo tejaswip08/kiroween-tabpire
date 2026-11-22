@@ -142,3 +142,19 @@ export function transact<T>(fn: () => Promise<T>): Promise<T> {
   );
   return next;
 }
+
+// ---------- change notifications ----------
+
+/**
+ * Calls listener with the changed Tabpire keys, for local storage only.
+ * Lets one page react to writes made by another. Returns an unsubscribe function.
+ */
+export function subscribe(listener: (changedKeys: string[]) => void): () => void {
+  const handler = (changes: Record<string, unknown>, area: string) => {
+    if (area !== 'local') return;
+    const keys = Object.keys(changes).filter((k) => k.startsWith('tabpire:'));
+    if (keys.length > 0) listener(keys);
+  };
+  browser.storage.onChanged.addListener(handler);
+  return () => browser.storage.onChanged.removeListener(handler);
+}

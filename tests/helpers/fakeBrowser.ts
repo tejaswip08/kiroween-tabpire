@@ -40,6 +40,11 @@ export const fake = {
   failCreate: false,
   failStorageSet: new Set<string>(),
   failBadge: false,
+  /** The tab that shows The Crypt. */
+  currentTabId: undefined as number | undefined,
+  searches: [] as { text: string; disposition?: string }[],
+  focusedWindows: [] as number[],
+  failQuery: false,
   /** Runs once, right after the next tabs.query. */
   afterQuery: undefined as undefined | (() => void),
 
@@ -56,7 +61,11 @@ export const fake = {
     this.failStorageSet.clear();
     this.failBadge = false;
     this.afterQuery = undefined;
-    for (const e of [onAlarm, onInstalled, onStartup]) e.listeners.length = 0;
+    this.currentTabId = undefined;
+    this.searches.length = 0;
+    this.focusedWindows.length = 0;
+    this.failQuery = false;
+    for (const e of [onAlarm, onInstalled, onStartup, onStorageChanged, ...Object.values(tabEvents)]) e.listeners.length = 0;
   },
 
   addTab(over: Partial<FakeTab> = {}): FakeTab {
@@ -80,18 +89,49 @@ export const fake = {
 const onAlarm = event();
 const onInstalled = event();
 const onStartup = event();
-export const events = { onAlarm, onInstalled, onStartup };
+const onStorageChanged = event();
+const tabEvents = {
+  onCreated: event(),
+  onRemoved: event(),
+  onUpdated: event(),
+  onActivated: event(),
+  onAttached: event(),
+  onDetached: event(),
+  onReplaced: event(),
+};
+export const events = { onAlarm, onInstalled, onStartup, onStorageChanged, ...tabEvents };
+
+/** Fires every listener of a fake event. */
+export function fire(e: { listeners: Listener[] }, ...args: unknown[]) {
+  for (const l of [...e.listeners]) l(...args);
+}
 
 const shouldFail = (set: Set<string>, id: number) => set.has('*') || set.has(String(id));
 
 export const browser = {
   tabs: {
+    ...tabEvents,
+    async getCurrent() {
+      const tab = fake.currentTabId === undefined ? undefined : fake.tabs.get(fake.currentTabId);
+      return tab ? { ...tab } : undefined;
+    },
+    async update(a: number | { url?: string; active?: boolean }, b?: { url?: string; active?: boolean }) {
+      const id = typeof a === 'number' ? a : fake.currentTabId;
+      const props = typeof a === 'number' ? b : a;
+      fake.calls.push(`update:${id}:${JSON.stringify(props)}`);
+      const tab = id === undefined ? undefined : fake.tabs.get(id);
+      if (!tab) throw new Error('No such tab');
+      if (props?.url !== undefined) tab.url = props.url;
+      if (props?.active !== undefined) tab.active = props.active;
+      return { ...tab };
+    },
     async get(id: number) {
       const tab = fake.tabs.get(id);
       if (!tab) throw new Error(`No tab with id ${id}`);
       return { ...tab };
     },
     async query(_info: object) {
+      if (fake.failQuery) throw new Error('query failed');
       const result = [...fake.tabs.values()].map((t) => ({ ...t }));
       const hook = fake.afterQuery;
       fake.afterQuery = undefined;
@@ -120,6 +160,7 @@ export const browser = {
     },
   },
   storage: {
+    onChanged: onStorageChanged,
     local: {
       async get(key: string) {
         return fake.storage.has(key) ? { [key]: fake.storage.get(key) } : {};
@@ -129,6 +170,7 @@ export const browser = {
           fake.calls.push(`set:${key}`);
           if (fake.failStorageSet.has(key)) throw new Error('storage set failed');
           fake.storage.set(key, value);
+          for (const l of [...onStorageChanged.listeners]) l({ [key]: { newValue: value } }, 'local');
         }
       },
     },
@@ -142,6 +184,17 @@ export const browser = {
       fake.badge.color = color;
     },
   },
+  windows: {
+    async update(id: number, info: { focused?: boolean }) {
+      if (info.focused) fake.focusedWindows.push(id);
+      return { id };
+    },
+  },
+  search: {
+    async query(info: { text: string; disposition?: string }) {
+      fake.searches.push(info);
+    },
+  },
   alarms: {
     create(name: string, info: unknown) {
       fake.alarms = fake.alarms.filter((a) => a.name !== name);
@@ -149,5 +202,9 @@ export const browser = {
     },
     onAlarm,
   },
-  runtime: { onInstalled, onStartup },
+  runtime: {
+    onInstalled,
+    onStartup,
+    getURL: (path: string) => `chrome-extension://fake-id/${path}`,
+  },
 };

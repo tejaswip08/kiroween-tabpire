@@ -205,13 +205,17 @@ export async function ungarlic(site: string, now: number = Date.now()): Promise<
   return { ok: true, changed: true, mb: 0 };
 }
 
-/** Resurrect: reopen a saved tab in the background, then remove it from the crypt. */
-export async function resurrect(itemId: string, now: number = Date.now()): Promise<ActionResult> {
+/** Resurrect: reopen a saved tab (background unless `activate`), then remove it from the crypt. */
+export async function resurrect(
+  itemId: string,
+  now: number = Date.now(),
+  options: { activate?: boolean } = {},
+): Promise<ActionResult> {
   const item = (await store.getCrypt()).find((i) => i.id === itemId);
   if (!item) return fail('not-found');
 
   try {
-    await browser.tabs.create({ url: item.url, active: false });
+    await browser.tabs.create({ url: item.url, active: options.activate === true });
   } catch {
     return fail('browser-error');
   }
