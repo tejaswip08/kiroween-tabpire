@@ -7,6 +7,8 @@ export default defineConfig({
     name: 'Tabpire',
     description: 'Your tabs are draining you. Stake them.',
     permissions: ['tabs', 'storage', 'alarms', 'search'],
+    // Required for the toolbar badge (browser.action). No popup yet.
+    action: { default_title: 'Tabpire' },
     browser_specific_settings: {
       gecko: {
         // Placeholder. Replace with the real add-on id before submission.

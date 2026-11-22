@@ -9,6 +9,7 @@ export interface TabInfo {
   active: boolean;
   audible: boolean;
   discarded: boolean;
+  pinned: boolean;
   /** Epoch milliseconds of last use. Absent when unknown. */
   lastAccessed?: number;
 }
@@ -48,6 +49,41 @@ export function stateOf(
   if (tab.lastAccessed === undefined) return 'awake';
   if (now - tab.lastAccessed >= DAY_MS) return 'starving';
   return 'awake';
+}
+
+/** Tabs Dawn may close: starving, not pinned, and with an http(s) URL. */
+export function isDawnTarget(
+  tab: TabInfo,
+  garlic: readonly string[],
+  now: number,
+): boolean {
+  return (
+    siteOf(tab.url) !== null &&
+    !tab.pinned &&
+    stateOf(tab, garlic, now) === 'starving'
+  );
+}
+
+export function dawnTargets<T extends TabInfo>(
+  tabs: readonly T[],
+  garlic: readonly string[],
+  now: number,
+): T[] {
+  return tabs.filter((t) => isDawnTarget(t, garlic, now));
+}
+
+export function countStarving(
+  tabs: readonly TabInfo[],
+  garlic: readonly string[],
+  now: number,
+): number {
+  return tabs.filter((t) => stateOf(t, garlic, now) === 'starving').length;
+}
+
+/** Toolbar badge text: empty for none, "999+" above 999. */
+export function badgeText(count: number): string {
+  if (count <= 0) return '';
+  return count > 999 ? '999+' : String(count);
 }
 
 /** Approximate memory in MB for known sites. */

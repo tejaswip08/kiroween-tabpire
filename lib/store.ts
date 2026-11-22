@@ -120,3 +120,25 @@ export const store = {
   getTheme: () => read(KEYS.theme, isStr, () => DEFAULT_THEME),
   setTheme: (v: ThemeId) => write(KEYS.theme, v),
 };
+
+// ---------- transactions ----------
+
+const LOCK_NAME = 'tabpire-store';
+let chain: Promise<unknown> = Promise.resolve();
+
+/**
+ * Runs fn while holding a lock, so read-modify-write sequences do not lose
+ * updates. Uses Web Locks (shared by every extension page and the background
+ * script) and falls back to a promise chain inside one context.
+ * fn must not call transact again: it would wait on its own lock.
+ */
+export function transact<T>(fn: () => Promise<T>): Promise<T> {
+  const locks = typeof navigator !== 'undefined' ? navigator.locks : undefined;
+  if (locks) return locks.request(LOCK_NAME, () => fn()) as Promise<T>;
+  const next: Promise<T> = chain.then(fn, fn);
+  chain = next.then(
+    () => undefined,
+    () => undefined,
+  );
+  return next;
+}

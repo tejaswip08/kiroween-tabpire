@@ -36,9 +36,10 @@ const tabArb: fc.Arbitrary<TabInfo> = fc.record(
     active: fc.boolean(),
     audible: fc.boolean(),
     discarded: fc.boolean(),
+    pinned: fc.boolean(),
     lastAccessed: fc.integer({ min: 0, max: 2_000_000_000_000 }),
   },
-  { requiredKeys: ['id', 'active', 'audible', 'discarded'] },
+  { requiredKeys: ['id', 'active', 'audible', 'discarded', 'pinned'] },
 );
 
 const nowArb = fc.integer({ min: 0, max: 2_000_000_000_000 });
@@ -59,6 +60,7 @@ const tab = (over: Partial<TabInfo> = {}): TabInfo => ({
   active: false,
   audible: false,
   discarded: false,
+  pinned: false,
   lastAccessed: 0,
   ...over,
 });

@@ -18,7 +18,7 @@ vi.mock('wxt/browser', () => ({
   },
 }));
 
-import { KEYS, store } from '../lib/store';
+import { KEYS, store, transact } from '../lib/store';
 
 beforeEach(() => data.clear());
 
@@ -84,6 +84,49 @@ describe('store bad data', () => {
     expect(await store.getGarlic()).toEqual([]);
     expect(await store.getPinned()).toEqual([]);
     expect(await store.getTheme()).toBe('crypt');
+  });
+});
+
+describe('transact', () => {
+  const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+  async function overlapRun() {
+    let running = 0;
+    let maxRunning = 0;
+    const order: number[] = [];
+    const job = (n: number, fail = false) =>
+      transact(async () => {
+        running++;
+        maxRunning = Math.max(maxRunning, running);
+        await sleep(5);
+        order.push(n);
+        running--;
+        if (fail) throw new Error('boom');
+      });
+    const results = await Promise.allSettled([job(1), job(2, true), job(3), job(4)]);
+    return { maxRunning, order, results };
+  }
+
+  it('runs overlapping transactions one at a time, even after one throws', async () => {
+    const { maxRunning, order, results } = await overlapRun();
+    expect(maxRunning).toBe(1);
+    expect(order).toEqual([1, 2, 3, 4]);
+    expect(results.map((r) => r.status)).toEqual(['fulfilled', 'rejected', 'fulfilled', 'fulfilled']);
+  });
+
+  it('works without Web Locks', async () => {
+    vi.stubGlobal('navigator', {});
+    try {
+      const { maxRunning, order } = await overlapRun();
+      expect(maxRunning).toBe(1);
+      expect(order).toEqual([1, 2, 3, 4]);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it('returns the value of fn', async () => {
+    expect(await transact(async () => 7)).toBe(7);
   });
 });
 
