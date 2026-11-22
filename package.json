@@ -18,8 +18,13 @@
     "@fontsource/grenze-gotisch": "^5.3.0",
     "@fontsource/outfit": "^5.3.0",
     "@fontsource/sora": "^5.3.0",
+    "@react-three/drei": "^10.7.9",
+    "@react-three/fiber": "^9.8.2",
+    "@react-three/postprocessing": "^3.2.2",
+    "postprocessing": "^6.39.6",
     "react": "^19.3.1",
-    "react-dom": "^19.3.1"
+    "react-dom": "^19.3.1",
+    "three": "^0.187.0"
   },
   "devDependencies": {
     "@testing-library/dom": "^10.4.2",
@@ -28,6 +33,7 @@
     "@types/node": "^26.6.6",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "@types/three": "^0.187.0",
     "@wxt-dev/module-react": "^1.2.2",
     "fast-check": "^4.10.3",
     "jsdom": "^31.0.1",

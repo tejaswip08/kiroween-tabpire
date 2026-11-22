@@ -1,0 +1,33 @@
+/* Containers for the two 3D canvases. Neither takes clicks. */
+.scene-host,
+.portrait-host {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+/* Behind everything, over the page gradient. */
+.scene-host {
+  z-index: -1;
+}
+/* Below the cards: each card has a hole where its vampire shows through. It comes first in the page. */
+.portrait-host {
+  z-index: 0;
+}
+
+/* While the WebGL context is lost, the page shows its gradient and 2D emblems. */
+.scene-host[data-lost='true'],
+.portrait-host[data-lost='true'] {
+  display: none;
+}
+/* The scene fades in over the page gradient by changing opacity only. */
+.scene-canvas {
+  opacity: 0;
+  transition: opacity 0.9s ease;
+}
+.scene-canvas[data-ready='true'] {
+  opacity: 1;
+}
+.portrait-canvas {
+  position: absolute;
+  inset: 0;
+}

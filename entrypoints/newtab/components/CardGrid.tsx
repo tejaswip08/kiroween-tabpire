@@ -22,12 +22,15 @@ export function CardGrid({
         Open tabs, hungriest first
       </h2>
       <ul className="card-grid" role="list">
-        {display.map(({ card, exiting }, index) => (
+        {display.map(({ card, exiting, exitKind, exitMs, exitFadeDelayMs }, index) => (
           <TabCard
             key={card.tab.id}
             card={card}
             index={index}
             exiting={exiting}
+            exitKind={exitKind}
+            exitMs={exitMs}
+            exitFadeDelayMs={exitFadeDelayMs}
             busy={allBusy || busyIds.has(card.tab.id)}
             onAction={onAction}
           />

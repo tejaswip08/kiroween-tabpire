@@ -13,7 +13,9 @@ import './styles/search.css';
 import './styles/pinned.css';
 import './styles/cards.css';
 import './styles/states.css';
+import './styles/layers.css';
 import './styles/toasts.css';
+import './styles/fps.css';
 import { App } from './App';
 
 document.title = 'Tabpire';

@@ -1,0 +1,77 @@
+import { useFrame } from '@react-three/fiber';
+import { useMemo, useRef } from 'react';
+import { BackSide, type Mesh, Vector3 } from 'three';
+import { C } from './colors';
+import { useDisplay } from './display';
+
+const vertex = /* glsl */ `
+varying vec3 vDir;
+void main() {
+  vDir = position;
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}`;
+
+const fragment = /* glsl */ `
+varying vec3 vDir;
+uniform vec3 uTop; uniform vec3 uMid; uniform vec3 uHorizon; uniform vec3 uHaze; uniform vec3 uMoonGlow;
+uniform vec3 uMoonDir; uniform float uTime;
+float hash(vec3 p) { p = fract(p * 0.3183099 + 0.1); p *= 17.0; return fract(p.x * p.y * p.z * (p.x + p.y + p.z)); }
+void main() {
+  vec3 d = normalize(vDir);
+  float h = clamp(d.y, 0.0, 1.0);
+  // Deep indigo at the top, warm violet-crimson near the horizon.
+  vec3 col = mix(uHorizon, uMid, smoothstep(0.0, 0.3, h));
+  col = mix(col, uTop, smoothstep(0.12, 0.7, h));
+  col = mix(col, uHorizon * 0.3, smoothstep(0.0, -0.25, d.y));
+  // Third fog layer: a band of haze at the horizon, strongest around the moon.
+  vec2 az = normalize(d.xz + 1e-4);
+  vec2 maz = normalize(uMoonDir.xz + 1e-4);
+  float aligned = max(dot(az, maz), 0.0);
+  col += uHaze * exp(-abs(d.y) * 8.0) * (0.3 + 0.7 * pow(aligned, 3.0));
+  // Scatter of the moon.
+  float md = max(dot(d, uMoonDir), 0.0);
+  col += uMoonGlow * (pow(md, 400.0) * 0.35 + pow(md, 14.0) * 0.07);
+  // A few faint stars, kept away from the moon.
+  vec3 cell = floor(d * 240.0);
+  float r = hash(cell);
+  float star = step(0.9975, r) * smoothstep(0.12, 0.4, h) * (1.0 - smoothstep(0.96, 0.995, md));
+  col += vec3(0.7, 0.78, 1.0) * star * (0.45 + 0.25 * sin(uTime * 1.5 + r * 80.0));
+  gl_FragColor = vec4(col, 1.0);
+}`;
+
+/** The sky: a dome that follows the camera's position, so the moon and stars sit at infinity. */
+export function Sky() {
+  const display = useDisplay();
+  const mesh = useRef<Mesh>(null);
+  const uniforms = useMemo(
+    () => ({
+      uTop: { value: C.skyTop },
+      uMid: { value: C.mid },
+      uHorizon: { value: C.horizon },
+      uHaze: { value: C.haze.clone().multiplyScalar(0.45) },
+      uMoonGlow: { value: C.moon.clone().multiplyScalar(0.8) },
+      uMoonDir: { value: new Vector3() },
+      uTime: { value: 0 },
+    }),
+    [],
+  );
+  useFrame(({ camera }) => {
+    mesh.current?.position.copy(camera.position);
+    uniforms.uMoonDir.value.copy(display.moon);
+    uniforms.uTime.value = display.time;
+  });
+  return (
+    <mesh ref={mesh} frustumCulled={false} renderOrder={-100}>
+      <sphereGeometry args={[500, 32, 16]} />
+      <shaderMaterial
+        vertexShader={vertex}
+        fragmentShader={fragment}
+        uniforms={uniforms}
+        side={BackSide}
+        depthWrite={false}
+        depthTest={false}
+        fog={false}
+      />
+    </mesh>
+  );
+}

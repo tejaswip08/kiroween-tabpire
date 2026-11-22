@@ -1,0 +1,79 @@
+import { useFrame } from '@react-three/fiber';
+import { useMemo, useRef } from 'react';
+import { type DirectionalLight, Object3D, type PointLight } from 'three';
+import { BUDGET, LOOK, QUALITY } from '../../../../lib/scene/config';
+import { flicker } from '../../../../lib/scene/flicker';
+import { layout } from '../../../../lib/scene/layout';
+import { C } from './colors';
+import { useDisplay } from './display';
+
+const TARGET = { x: 0, y: 0, z: -14 };
+const colorFor = (kind: string) => (kind === 'jackOLantern' ? C.jack : kind === 'cryptDoor' ? C.door : kind === 'candle' ? C.candle : C.lantern);
+
+/**
+ * Cold light from the moon with shadows, a cold hemisphere fill and a cold rim light, against at
+ * most six warm flickering point lights at the crypt doorway, the lanterns and the jack-o'-lanterns.
+ */
+export function Lights() {
+  const display = useDisplay();
+  const sun = useRef<DirectionalLight>(null);
+  const rim = useRef<DirectionalLight>(null);
+  const points = useRef<(PointLight | null)[]>([]);
+  const target = useMemo(() => {
+    const t = new Object3D();
+    t.position.set(TARGET.x, TARGET.y, TARGET.z);
+    return t;
+  }, []);
+  const lights = useMemo(() => layout().lights.slice(0, BUDGET.maxPointLights), []);
+  const size = QUALITY.shadowMapSize;
+
+  useFrame(() => {
+    const m = display.moon;
+    sun.current?.position.set(TARGET.x + m.x * LOOK.moonlight.distance, TARGET.y + m.y * LOOK.moonlight.distance, TARGET.z + m.z * LOOK.moonlight.distance);
+    // The rim light shines from behind the props toward the camera.
+    rim.current?.position.set(TARGET.x - m.x * 30 + 10, 14, TARGET.z - 40);
+    for (let i = 0; i < lights.length; i++) {
+      const l = points.current[i];
+      if (l) l.intensity = LOOK.warmLight.intensity * flicker(display.time, i + 1, display.reduced);
+    }
+  });
+
+  return (
+    <>
+      <primitive object={target} />
+      <hemisphereLight args={[C.hemiSky, C.hemiGround, LOOK.hemisphere.intensity]} />
+      <directionalLight
+        ref={sun}
+        color={C.moonlight}
+        intensity={LOOK.moonlight.intensity}
+        target={target}
+        castShadow
+        shadow-mapSize={[size, size]}
+        shadow-camera-left={-36}
+        shadow-camera-right={36}
+        shadow-camera-top={34}
+        shadow-camera-bottom={-34}
+        shadow-camera-near={5}
+        shadow-camera-far={190}
+        shadow-bias={-0.0004}
+        shadow-normalBias={0.04}
+      />
+      {/* Purple fill from the camera's side, no shadows: lights the faces of everything toward us. */}
+      <directionalLight position={[-8, 14, 30]} color={C.hemiSky} intensity={LOOK.fill.intensity} target={target} />
+      <directionalLight ref={rim} color={C.rim} intensity={LOOK.rim.intensity} target={target} />
+      {lights.map((l, i) => (
+        <pointLight
+          key={i}
+          ref={(el) => {
+            points.current[i] = el;
+          }}
+          position={[l.x, l.y + 0.4, l.z]}
+          color={colorFor(l.kind)}
+          intensity={LOOK.warmLight.intensity}
+          distance={LOOK.warmLight.distance}
+          decay={LOOK.warmLight.decay}
+        />
+      ))}
+    </>
+  );
+}

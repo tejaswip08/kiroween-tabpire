@@ -26,9 +26,28 @@ function stripComments(text: string): string {
   return text.replace(/\/\*[\s\S]*?\*\//g, '');
 }
 
+/** Splits on `;` but not inside quotes or brackets, so data addresses stay whole. */
+function splitDecls(body: string): string[] {
+  const out: string[] = [];
+  let depth = 0;
+  let quote = '';
+  let current = '';
+  for (const ch of body) {
+    if (quote) {
+      if (ch === quote) quote = '';
+    } else if (ch === '"' || ch === "'") quote = ch;
+    else if (ch === '(' || ch === '[') depth++;
+    else if (ch === ')' || ch === ']') depth--;
+    if (ch === ';' && depth <= 0 && !quote) {
+      out.push(current);
+      current = '';
+    } else current += ch;
+  }
+  out.push(current);
+  return out;
+}
 function declsOf(body: string) {
-  return body
-    .split(';')
+  return splitDecls(body)
     .map((d) => d.trim())
     .filter(Boolean)
     .flatMap((d) => {
@@ -36,7 +55,6 @@ function declsOf(body: string) {
       return i < 0 ? [] : [{ prop: d.slice(0, i).trim().toLowerCase(), value: d.slice(i + 1).trim() }];
     });
 }
-
 function parse(css: string, inKeyframes = false): Rule[] {
   const rules: Rule[] = [];
   let i = 0;
@@ -104,6 +122,11 @@ describe('the CSS reader used by these checks', () => {
     expect(transitionProps('transform 0.2s cubic-bezier(0.2, 0, 0, 1), opacity 0.1s')).toEqual(['transform', 'opacity']);
   });
 
+  it('keeps a semicolon inside quotes and brackets', () => {
+    const rules = parse('.a { --x: url("data:image/svg+xml;utf8,%3Csvg%3E"); mask: url(a;b) 1px; color: red; }');
+    expect(rules[0]!.decls.map((d) => d.prop)).toEqual(['--x', 'mask', 'color']);
+    expect(rules[0]!.decls[0]!.value).toContain('svg+xml;utf8');
+  });
   it('finds stylesheets', () => {
     expect(sheets.length).toBeGreaterThan(0);
   });
@@ -226,5 +249,50 @@ describe('no remote assets or addresses', () => {
       if (path.endsWith(join('lib', 'google.ts'))) continue;
       expect(text, path.slice(root.length)).not.toMatch(/\bfetch\s*\(|XMLHttpRequest|WebSocket|sendBeacon/);
     }
+  });
+});
+// ---------- the portrait hole ----------
+describe('portrait hole in the card surface', () => {
+  const holeRules = allRules.filter((r) => r.sheet === 'cards.css' && r.selector.includes("[data-3d='on']::before"));
+  const decl = (rule: (typeof allRules)[number], prop: string) => rule.decls.find((d) => d.prop === prop)?.value ?? '';
+  it('is cut with an excluded mask, only when the browser supports it', () => {
+    expect(holeRules.length).toBe(1);
+    const rule = holeRules[0]!;
+    expect(decl(rule, 'mask-composite')).toBe('exclude');
+    expect(decl(rule, 'mask')).toMatch(/linear-gradient\(#000 0 0\)/);
+    const css = readFileSync(join(stylesDir, 'cards.css'), 'utf8');
+    expect(css).toMatch(/@supports \(mask-composite: exclude\)\s*\{[^@]*\.card\[data-3d='on'\]::before/);
+  });
+  it('uses a data address with no host name and a 96 x 112 arch', () => {
+    const shape = decl(holeRules[0]!, '--hole-shape');
+    expect(shape).toMatch(/^url\("data:image\/svg\+xml,/);
+    expect(shape).not.toMatch(/https?:|\/\/[a-z]/i);
+    expect(decodeURIComponent(shape)).toContain("width='96' height='112'");
+  });
+  it('places the hole from the card own border, padding and header height', () => {
+    const card = allRules.find((r) => r.sheet === 'cards.css' && r.selector === '.card')!;
+    expect(decl(card, '--hole-x')).toBe('calc(var(--card-border) + var(--card-pad-x))');
+    expect(decl(card, '--hole-y')).toBe('calc(var(--card-border) + var(--card-pad-top) + var(--head-h) + var(--card-gap))');
+    expect(decl(card, 'padding')).toContain('var(--card-pad-x)');
+    expect(decl(card, 'border')).toContain('var(--card-border)');
+    expect(decl(card, 'gap')).toBe('var(--card-gap)');
+    const head = allRules.find((r) => r.sheet === 'cards.css' && r.selector === '.card-head')!;
+    expect(decl(head, 'height')).toBe('var(--head-h)');
+  });
+  it('keeps the outer shadows on the card and the surface on ::before', () => {
+    const card = allRules.find((r) => r.sheet === 'cards.css' && r.selector === '.card')!;
+    const before = allRules.find((r) => r.sheet === 'cards.css' && r.selector === '.card::before')!;
+    expect(decl(card, 'box-shadow')).toBe('var(--shadow-card-outer)');
+    expect(decl(card, 'background')).toBe('');
+    expect(decl(before, 'box-shadow')).toContain('var(--shadow-card-inset)');
+    expect(decl(before, 'box-shadow')).toContain('var(--rim)');
+    expect(decl(before, 'background')).toContain('var(--card-top)');
+    expect(decl(before, 'z-index')).toBe('-1');
+  });
+  it('fades the 2D emblem with opacity only', () => {
+    const fade = allRules.find((r) => r.sheet === 'cards.css' && r.selector === ".card[data-3d='on'] .portrait-slot .emblem")!;
+    expect(decl(fade, 'opacity')).toBe('0');
+    const emblem = allRules.find((r) => r.sheet === 'cards.css' && r.selector === '.portrait-slot .emblem')!;
+    expect(decl(emblem, 'transition')).toMatch(/^opacity /);
   });
 });

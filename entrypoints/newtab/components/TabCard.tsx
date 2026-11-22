@@ -1,5 +1,8 @@
+import type { CSSProperties } from 'react';
 import type { VampireState } from '../../../lib/hunger';
+import type { ExitKind } from '../../../lib/scene/exitKinds';
 import { formatMemory, idleLabel, vialFill, type Card } from '../../../lib/view';
+import { usePortraitReady } from '../layers/portraitReady';
 import { ActionButton } from './ActionButton';
 import { CoffinIcon, CryptIcon, GarlicIcon, RemoveGarlicIcon, StakeIcon, StateShape } from './icons';
 import { PortraitSlot } from './PortraitSlot';
@@ -71,6 +74,9 @@ export function TabCard({
   busy,
   index,
   exiting = false,
+  exitKind,
+  exitMs,
+  exitFadeDelayMs,
   onAction,
 }: {
   card: Card;
@@ -79,22 +85,37 @@ export function TabCard({
   /** Position in the list, used only to stagger the entry animation. */
   index: number;
   exiting?: boolean;
+  /** Which action the card is leaving by (for the portrait). */
+  exitKind?: ExitKind;
+  /** How long the card stays while it leaves, in milliseconds. */
+  exitMs?: number;
+  /** How long the card body waits before it starts to fade. */
+  exitFadeDelayMs?: number;
   onAction: (card: Card, action: CardAction) => void;
 }) {
   const title = cardTitle(card);
   const idle = idleLabel(card);
   const specs = actionSpecs(card, busy);
   const isProtected = card.state === 'protected';
+  const portrait3d = usePortraitReady(card.tab.id);
 
   return (
     <li
       className={`card${exiting ? ' card-exiting' : ''}`}
       data-state={card.state}
       data-tab-id={card.tab.id}
-      style={{ ['--i' as string]: Math.min(index, 11) }}
+      data-3d={portrait3d ? 'on' : undefined}
+      data-exit={exiting ? exitKind : undefined}
+      style={
+        {
+          '--i': Math.min(index, 11),
+          ...(exiting && exitMs !== undefined ? { '--exit-ms': `${exitMs}ms`, '--exit-fade-delay': `${exitFadeDelayMs ?? 0}ms` } : {}),
+        } as CSSProperties
+      }
       aria-hidden={exiting || undefined}
       inert={exiting || undefined}
     >
+      <span className="card-frame" aria-hidden="true" />
       <div className="card-head">
         <SiteIcon faviconUrl={card.tab.favIconUrl} site={card.site} />
         <h3 className="card-title" title={title}>
@@ -122,7 +143,7 @@ export function TabCard({
           tip={specs.stake.tip}
           note={title}
           disabled={specs.stake.disabled}
-          icon={<StakeIcon size={28} />}
+          icon={<StakeIcon size={32} />}
           onClick={() => onAction(card, 'stake')}
         />
         <ActionButton
@@ -130,7 +151,7 @@ export function TabCard({
           tip={specs.coffin.tip}
           note={title}
           disabled={specs.coffin.disabled}
-          icon={<CoffinIcon size={28} />}
+          icon={<CoffinIcon size={32} />}
           onClick={() => onAction(card, 'coffin')}
         />
         <ActionButton
@@ -138,7 +159,7 @@ export function TabCard({
           tip={specs.crypt.tip}
           note={title}
           disabled={specs.crypt.disabled}
-          icon={<CryptIcon size={28} />}
+          icon={<CryptIcon size={32} />}
           onClick={() => onAction(card, 'crypt')}
         />
         <ActionButton
@@ -146,7 +167,7 @@ export function TabCard({
           tip={specs.garlic.tip}
           note={title}
           disabled={specs.garlic.disabled}
-          icon={isProtected ? <RemoveGarlicIcon size={28} /> : <GarlicIcon size={28} />}
+          icon={isProtected ? <RemoveGarlicIcon size={32} /> : <GarlicIcon size={32} />}
           onClick={() => onAction(card, isProtected ? 'ungarlic' : 'garlic')}
         />
       </div>

@@ -53,8 +53,12 @@
   --badge-ink: #1b0e26;
 
   /* Depth */
-  --shadow-card: 0 1px 0 var(--card-highlight) inset, 0 -14px 24px rgba(0, 0, 0, 0.28) inset,
-    0 2px 2px rgba(0, 0, 0, 0.35), 0 10px 18px rgba(0, 0, 0, 0.4), 0 22px 40px rgba(6, 2, 12, 0.5);
+  /* The card's shadow in two parts: the inner light stays on the card surface, the outer
+     drop shadows stay on the card itself, so a hole cut in the surface leaves them alone. */
+  --shadow-card-inset: 0 1px 0 var(--card-highlight) inset, 0 -14px 24px rgba(0, 0, 0, 0.28) inset;
+  --shadow-card-outer: 0 2px 2px rgba(0, 0, 0, 0.35), 0 10px 18px rgba(0, 0, 0, 0.4),
+    0 22px 40px rgba(6, 2, 12, 0.5);
+  --shadow-card: var(--shadow-card-inset), var(--shadow-card-outer);
   --shadow-panel: 0 1px 0 rgba(255, 255, 255, 0.18) inset, 0 8px 24px rgba(0, 0, 0, 0.4);
   --shadow-button: 0 1px 0 rgba(255, 255, 255, 0.2) inset, 0 -3px 6px rgba(0, 0, 0, 0.3) inset,
     0 3px 8px rgba(0, 0, 0, 0.45);

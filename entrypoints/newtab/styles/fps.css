@@ -1,0 +1,18 @@
+/* Diagnostics box for the address ending in #fps. Hidden otherwise. */
+.fps-readout {
+  position: fixed;
+  left: 12px;
+  bottom: 12px;
+  z-index: 60;
+  display: grid;
+  gap: 2px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  pointer-events: none;
+  font-family: var(--font-label);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  background: var(--panel-solid);
+  box-shadow: var(--shadow-panel);
+}

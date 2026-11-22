@@ -1,19 +1,30 @@
 import { useEffect, useRef, useState } from 'react';
+import { peekExit, takeExit, type ExitKind } from '../../../lib/scene/exitKinds';
+import { CARD_FADE_MS, exitDurationMs } from '../../../lib/vampire/exits';
 import type { Card } from '../../../lib/view';
 
-export const EXIT_MS = 220;
+/** How long a card leaves when no Tabpire action closed it (fade and sink). */
+export const EXIT_MS = exitDurationMs('none');
 
 export interface DisplayCard {
   card: Card;
   exiting: boolean;
+  /** Which action the card is leaving by, when it is exiting. */
+  exitKind?: ExitKind;
+  /** How long the ghost stays on screen, in milliseconds. */
+  exitMs?: number;
+  /** Wait before the card body starts to fade, so the portrait animation can play. */
+  exitFadeDelayMs?: number;
 }
 
 interface Ghost {
   card: Card;
   index: number;
+  kind: ExitKind;
+  ms: number;
 }
 
-function prefersReducedMotion(): boolean {
+export function prefersReducedMotion(): boolean {
   return typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true;
 }
 
@@ -29,9 +40,15 @@ export function useExitingCards(cards: Card[]): DisplayCard[] {
   if (cards !== previous) {
     setPrevious(cards);
     const nowIds = new Set(cards.map((c) => c.tab.id));
-    const removed: Ghost[] = prefersReducedMotion()
-      ? []
-      : previous.flatMap((card, index) => (nowIds.has(card.tab.id) ? [] : [{ card, index }]));
+    const reduced = prefersReducedMotion();
+    const removed: Ghost[] = previous.flatMap((card, index) => {
+      if (nowIds.has(card.tab.id)) return [];
+      // Only look at the mark here. Rendering must not change anything. The effect below uses it up.
+      if (reduced) return [];
+      const mark = peekExit(card.tab.id);
+      const kind: ExitKind = mark?.kind ?? 'none';
+      return [{ card, index, kind, ms: exitDurationMs(kind, mark?.order ?? 0) }];
+    });
     setGhosts((current) => [
       ...current.filter((g) => !nowIds.has(g.card.tab.id)),
       ...removed.filter((g) => !current.some((c) => c.card.tab.id === g.card.tab.id)),
@@ -45,11 +62,12 @@ export function useExitingCards(cards: Card[]): DisplayCard[] {
       const id = ghost.card.tab.id;
       if (scheduled.current.has(id)) continue;
       scheduled.current.add(id);
+      takeExit(id);
       timers.push(
         setTimeout(() => {
           scheduled.current.delete(id);
           setGhosts((current) => current.filter((g) => g.card.tab.id !== id));
-        }, EXIT_MS),
+        }, ghost.ms),
       );
     }
     // Timers are left running on re-render on purpose. They end by themselves.
@@ -58,7 +76,13 @@ export function useExitingCards(cards: Card[]): DisplayCard[] {
 
   const display: DisplayCard[] = cards.map((card) => ({ card, exiting: false }));
   for (const ghost of [...ghosts].sort((a, b) => a.index - b.index)) {
-    display.splice(Math.min(ghost.index, display.length), 0, { card: ghost.card, exiting: true });
+    display.splice(Math.min(ghost.index, display.length), 0, {
+      card: ghost.card,
+      exiting: true,
+      exitKind: ghost.kind,
+      exitMs: ghost.ms,
+      exitFadeDelayMs: Math.max(0, ghost.ms - CARD_FADE_MS),
+    });
   }
   return display;
 }

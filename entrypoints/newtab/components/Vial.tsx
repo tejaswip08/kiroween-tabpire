@@ -45,6 +45,8 @@ export function Vial({ fill, label }: { fill: number; label: string }) {
       <path d="M7 12h16v94a8 8 0 0 1-8 8h0a8 8 0 0 1-8-8z" fill="rgba(10, 4, 16, 0.55)" />
       {/* liquid */}
       <g clipPath={`url(#${id}clip)`}>
+        {/* A little blood always sits in the bottom, so a fresh tab's vial does not look empty. */}
+        <path className="vial-pool" d={`M6 ${TOP + HEIGHT - 11}q3 -2.600 6 0t6 0V${TOP + HEIGHT}H6z`} fill={`url(#${id}blood)`} opacity="0.9" />
         <rect
           className="vial-liquid"
           x="6"

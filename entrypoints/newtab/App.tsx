@@ -1,9 +1,11 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { dawnTargets } from '../../lib/hunger';
+import { emitSceneEvent } from '../../lib/scene/bus';
 import { actionNotice, dawnNotice, resurrectNotice } from '../../lib/messages';
 import { openInThisTab, searchWithDefaultEngine, showTab } from '../../lib/nav';
 import type { Suggestion } from '../../lib/suggest';
 import { coffin, crypt, dawn, garlic, resurrect, stake, ungarlic, type ActionResult } from '../../lib/tabs';
+import type { SceneInputs } from '../../lib/scene/meaning';
 import { sumMb, type Card } from '../../lib/view';
 import { CardGrid } from './components/CardGrid';
 import { CardSkeleton } from './components/CardSkeleton';
@@ -14,8 +16,12 @@ import { PinnedRow } from './components/PinnedRow';
 import { SearchBox } from './components/SearchBox';
 import { cardTitle, type CardAction } from './components/TabCard';
 import { Toasts } from './components/Toasts';
+import { announceAction, markActionExit, markDawnExits } from './hooks/exitMarks';
 import { useCryptData } from './hooks/useCryptData';
+import { prefersReducedMotion } from './hooks/useExitingCards';
 import { useToasts } from './hooks/useToasts';
+import { FpsReadout } from './layers/FpsReadout';
+import { PortraitLayerHost, SceneLayerHost } from './layers/hosts';
 
 async function runCardAction(card: Card, action: CardAction): Promise<ActionResult> {
   const id = card.tab.id;
@@ -48,10 +54,15 @@ export function App() {
       if (running.current.has(id) || dawnRunning.current) return;
       running.current.add(id);
       setBusyIds(new Set(running.current));
+      const undoMark = markActionExit(action, id, prefersReducedMotion());
+      let ok = false;
       try {
         const result = await runCardAction(card, action);
+        ok = result.ok;
+        if (ok) announceAction(action);
         push(actionNotice(action, result, { title: cardTitle(card), site: card.site }));
       } finally {
+        if (!ok) undoMark();
         running.current.delete(id);
         setBusyIds(new Set(running.current));
         reload();
@@ -107,42 +118,68 @@ export function App() {
     if (dawnRunning.current) return;
     dawnRunning.current = true;
     setDawnBusy(true);
+    const marks = markDawnExits(data.cards, data.garlic, Date.now(), prefersReducedMotion());
+    let ok = false;
     try {
-      push(dawnNotice(await dawn()));
+      const result = await dawn();
+      ok = result.ok;
+      if (result.ok) emitSceneEvent({ type: 'dawn', closed: result.closed });
+      push(dawnNotice(result));
     } finally {
+      if (!ok) marks.undo();
       dawnRunning.current = false;
       setDawnBusy(false);
       reload();
     }
-  }, [push, reload]);
+  }, [push, reload, data.cards, data.garlic]);
+
+  const sceneInputs = useMemo<SceneInputs>(
+    () => ({
+      cardCount: data.cards.length,
+      starvingCount: data.cards.filter((c) => c.state === 'starving').length,
+      estimatedMb: sumMb(data.cards),
+      cryptCount: data.crypt.length,
+      crypted: data.stats.crypted,
+      garlicCount: data.garlic.length,
+      staked: data.stats.staked,
+      coffined: data.stats.coffined,
+      dawnReady: dawnCount > 0,
+    }),
+    [data.cards, data.crypt.length, data.stats, data.garlic.length, dawnCount],
+  );
 
   return (
-    <div className="page">
-      <Header
-        openTabs={data.cards.length}
-        estimatedMb={sumMb(data.cards)}
-        reclaimedMb={data.stats.mbFreed}
-        dawnCount={dawnCount}
-        dawnBusy={dawnBusy}
-        onDawn={onDawn}
-      />
-      <main className="main">
-        <SearchBox
-          sources={{ tabs: data.cards.map((c) => c.tab), pinned: data.pinned, crypt: data.crypt }}
-          onSearch={onSearch}
-          onChoose={onChoose}
+    <>
+      <PortraitLayerHost />
+      <SceneLayerHost inputs={sceneInputs} />
+      <div className="page">
+        <Header
+          openTabs={data.cards.length}
+          estimatedMb={sumMb(data.cards)}
+          reclaimedMb={data.stats.mbFreed}
+          dawnCount={dawnCount}
+          dawnBusy={dawnBusy}
+          onDawn={onDawn}
         />
-        <PinnedRow pages={data.pinned} />
-        {data.status === 'loading' && <CardSkeleton />}
-        {data.status === 'error' && <ErrorState onRetry={reload} />}
-        {data.status === 'ready' &&
-          (data.cards.length === 0 ? (
-            <EmptyState />
-          ) : (
-            <CardGrid cards={data.cards} busyIds={busyIds} allBusy={dawnBusy} onAction={onAction} />
-          ))}
-      </main>
-      <Toasts toasts={toasts} onDismiss={dismiss} />
-    </div>
+        <main className="main">
+          <SearchBox
+            sources={{ tabs: data.cards.map((c) => c.tab), pinned: data.pinned, crypt: data.crypt }}
+            onSearch={onSearch}
+            onChoose={onChoose}
+          />
+          <PinnedRow pages={data.pinned} />
+          {data.status === 'loading' && <CardSkeleton />}
+          {data.status === 'error' && <ErrorState onRetry={reload} />}
+          {data.status === 'ready' &&
+            (data.cards.length === 0 ? (
+              <EmptyState />
+            ) : (
+              <CardGrid cards={data.cards} busyIds={busyIds} allBusy={dawnBusy} onAction={onAction} />
+            ))}
+        </main>
+        <Toasts toasts={toasts} onDismiss={dismiss} />
+      </div>
+      <FpsReadout />
+    </>
   );
 }

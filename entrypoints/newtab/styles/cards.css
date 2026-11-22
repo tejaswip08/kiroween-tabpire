@@ -12,24 +12,70 @@
 
 .card {
   --rim: var(--state-awake);
+  /* Sizes the portrait hole is built from, so the hole and the slot cannot drift apart. */
+  --card-border: 3px;
+  --card-pad-x: 14px;
+  --card-pad-top: 14px;
+  --card-pad-bottom: 12px;
+  --card-gap: 10px;
+  --head-h: 28px;
+  --hole-x: calc(var(--card-border) + var(--card-pad-x));
+  --hole-y: calc(var(--card-border) + var(--card-pad-top) + var(--head-h) + var(--card-gap));
   position: relative;
+  isolation: isolate;
   display: grid;
   grid-template-rows: auto 1fr auto;
-  gap: 10px;
+  gap: var(--card-gap);
   height: var(--card-height);
-  padding: 14px 14px 12px;
-  border: 3px solid transparent;
+  padding: var(--card-pad-top) var(--card-pad-x) var(--card-pad-bottom);
+  border: var(--card-border) solid transparent;
   border-radius: var(--radius-arch) var(--radius-arch) var(--radius-card) var(--radius-card);
-  /* Card body inside, state-coloured rim outside. Both stay sharp vector fills. */
-  background:
-    linear-gradient(180deg, var(--card-top), var(--card-bottom)) padding-box,
-    linear-gradient(160deg, var(--rim), color-mix(in srgb, var(--rim) 25%, #000)) border-box;
-  box-shadow: var(--shadow-card);
+  /* Outer drop shadows stay here. The card surface is drawn by ::before, so a hole can be cut in it. */
+  box-shadow: var(--shadow-card-outer);
   transition: transform 0.18s ease;
   animation: card-in 0.36s ease both;
   animation-delay: calc(var(--i, 0) * 30ms);
 }
-
+/* The card surface: body inside, state-coloured rim outside. Both stay sharp vector fills. */
+.card::before {
+  content: '';
+  position: absolute;
+  inset: calc(-1 * var(--card-border));
+  z-index: -1;
+  pointer-events: none;
+  border: var(--card-border) solid transparent;
+  border-radius: inherit;
+  background:
+    linear-gradient(180deg, var(--card-top), var(--card-bottom)) padding-box,
+    linear-gradient(160deg, var(--rim), color-mix(in srgb, var(--rim) 25%, #000)) border-box;
+  /* A slight inner glow in the state colour. */
+  box-shadow: var(--shadow-card-inset), inset 0 0 26px color-mix(in srgb, var(--rim) 13%, transparent);
+}
+/*
+ * When a card's 3D vampire is ready, an arch-shaped hole is cut in the card surface at the
+ * portrait slot, so the portrait canvas behind the card shows through. The shape is a
+ * percent-encoded SVG, so it holds no web address.
+ */
+@supports (mask-composite: exclude) {
+  .card[data-3d='on']::before {
+    --hole-shape: url("data:image/svg+xml,%3Csvg xmlns='http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg' width='96' height='112'%3E%3Cpath d='M0 100V48A48 48 0 0 1 96 48V100A12 12 0 0 1 84 112H12A12 12 0 0 1 0 100Z'/%3E%3C/svg%3E");
+    mask:
+      var(--hole-shape) var(--hole-x) var(--hole-y) / 96px 112px no-repeat,
+      linear-gradient(#000 0 0);
+    mask-composite: exclude;
+  }
+}
+/* The 2D emblem fades out as the 3D vampire takes its place. */
+.card[data-3d='on'] .portrait-slot {
+  background: none;
+  box-shadow: none;
+}
+.portrait-slot .emblem {
+  transition: opacity 0.3s ease;
+}
+.card[data-3d='on'] .portrait-slot .emblem {
+  opacity: 0;
+}
 .card[data-state='awake'] {
   --rim: var(--state-awake);
 }
@@ -86,7 +132,8 @@
 
 .card-exiting {
   pointer-events: none;
-  animation: card-out 0.22s ease forwards;
+  /* The card stays whole until the last 260 ms of its exit, then fades and sinks. */
+  animation: card-out 260ms ease var(--exit-fade-delay, 0ms) both;
 }
 
 @keyframes card-out {
@@ -103,6 +150,7 @@
 /* ---------- head ---------- */
 
 .card-head {
+  height: var(--head-h);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -180,6 +228,7 @@
 }
 
 .portrait-slot {
+  position: relative;
   width: 96px;
   height: 112px;
   display: grid;
@@ -197,6 +246,43 @@
 
 .emblem {
   display: block;
+}
+/* The arched window's frame: a thin line and a soft glow in the state colour, over the vampire's edge. */
+.portrait-slot::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow:
+    0 0 0 1.5px color-mix(in srgb, var(--rim) 62%, transparent) inset,
+    0 0 16px color-mix(in srgb, var(--rim) 30%, transparent) inset;
+}
+/* A thin ornate frame inside the card edge: a fine line with a small diamond at the top and bottom. */
+.card-frame {
+  position: absolute;
+  inset: 5px;
+  z-index: 0;
+  pointer-events: none;
+  border: 1px solid color-mix(in srgb, var(--rim) 34%, transparent);
+  border-radius: calc(var(--radius-arch) - 4px) calc(var(--radius-arch) - 4px) calc(var(--radius-card) - 3px) calc(var(--radius-card) - 3px);
+}
+.card-frame::before,
+.card-frame::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  width: 7px;
+  height: 7px;
+  background: color-mix(in srgb, var(--rim) 70%, #000);
+  border: 1px solid color-mix(in srgb, var(--rim) 80%, transparent);
+  transform: translateX(-50%) rotate(45deg);
+}
+.card-frame::before {
+  top: -4px;
+}
+.card-frame::after {
+  bottom: -4px;
 }
 
 .card-facts {
