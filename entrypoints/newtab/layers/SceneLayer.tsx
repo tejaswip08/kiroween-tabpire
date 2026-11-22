@@ -4,6 +4,7 @@ import { BASE_FOV, CAMERA_REST } from '../../../lib/scene/camera';
 import { QUALITY } from '../../../lib/scene/config';
 import { sceneState, type SceneInputs } from '../../../lib/scene/meaning';
 import { usePageVisible, useReducedMotion } from './motion';
+import { usePointerTracker } from './pointer';
 import { CameraRig } from './scene/CameraRig';
 import { createDisplay, DisplayContext } from './scene/display';
 import { SceneDriver } from './scene/Driver';
@@ -38,6 +39,7 @@ export default function SceneLayer({ inputs }: { inputs: SceneInputs }) {
   const reduced = useReducedMotion();
   const visible = usePageVisible();
   const { lost } = useWebgl();
+  usePointerTracker();
   const [ready, setReady] = useState(false);
   const display = useMemo(() => createDisplay(sceneState(inputs), reduced), []); // eslint-disable-line react-hooks/exhaustive-deps
   display.reduced = reduced;

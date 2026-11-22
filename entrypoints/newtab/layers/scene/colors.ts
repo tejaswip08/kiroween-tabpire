@@ -19,5 +19,8 @@ export const C = {
   horizon: new Color('#5c1a5c'),
   mid: new Color('#2a0e58'),
   haze: new Color('#74205c'),
+  mushroom: new Color('#35e8d0'),
+  cauldron: new Color('#5cff58'),
+  wisp: new Color('#58f0c8'),
   ghost: new Color('#a8f0d0'),
 };

@@ -40,3 +40,14 @@ I could not look at the pictures, so these are the things only your eyes can con
 3. Turn on "reduce motion" in the system settings: nothing drifts or moves, and cards leave at once.
 4. Switch to another tab and back: drawing stops and resumes.
 5. Firefox: the vampire model is compressed with meshopt, which uses WebAssembly. If Firefox blocks it under the extension's policy, the cards keep the flat emblem and the scene still shows. Tell me if so.
+
+## 5. Depth and life (added later)
+
+1. **Far village:** left of the moon, on dark hills in the fog: a church with a steeple and one lit window, a barn, a windmill whose sails turn slowly, a fortress, houses with orange windows. Ruins on the right. Number to tune: `FAR_ITEMS` and `FAR_HILLS` in `lib/scene/depth.ts`.
+2. **Clouds:** low clouds at three depths drifting slowly, some in front of the hills, none over the moon.
+3. **Midground:** many trees (orange pines, bare trees, twisted trees), graves of different kinds and sizes with a slight lean, glowing mushrooms, a bubbling green cauldron on the right of the path, a half-open coffin on the left.
+4. **Skeletons:** three dirt mounds near the path. A skull, ribcage and two bony hands push up slowly, hold, then sink (about 14 seconds a loop).
+5. **Cat, crows, owl, spiders:** a black cat with yellow eyes on the gravestone left of the path, its tail swishing. Crows on the fence posts and two bare trees (they turn their heads and hop now and then). An owl with glowing eyes on a branch of the left tree, blinking. Spiders on threads beside it, bobbing. Cobwebs between some gravestones. Blue-green wisps drifting between graves.
+6. **Parallax:** move the mouse: the view glides a few degrees with it, near things more than far ones. Leave the window or stop moving: it drifts back. With reduce motion on: no parallax.
+7. **If something is wrong:** the critter spots are in `scenery` (layout.ts). The owl and crow trees, the cat's stone, the mounds, the cauldron and the coffin spot are `perchTree(...)` and `fixedNear(...)` calls near the top of the "richer yard" section.
+8. **Speed:** with `#fps`, expect about 120 draw calls and up to about 165,000 triangles (the limit is 175,000). If frames drop, remove trees from `backRow` first.

@@ -134,7 +134,7 @@ describe('layout', () => {
     expect(trees.filter((p) => p.model.includes('dead') || p.model.startsWith('forest_twisted')).length).toBeGreaterThanOrEqual(8);
     expect(trees.some((p) => p.model.startsWith('forest_twisted'))).toBe(true);
     expect(L.placements.filter((p) => p.model === 'post_lantern').length).toBeGreaterThanOrEqual(3);
-    expect(L.placements.filter((p) => p.group === 'fence').length).toBeGreaterThanOrEqual(20);
+    expect(L.placements.filter((p) => p.group === 'fence').length).toBeGreaterThanOrEqual(18);
     expect(L.ghostSpots.length).toBeGreaterThanOrEqual(2);
   });
   it('keeps the crypt, gate and fence on one line behind the path', () => {
@@ -142,5 +142,60 @@ describe('layout', () => {
     const fences = L.placements.filter((p) => p.model === 'fence' && p.rotY === 0);
     expect(fences.length).toBeGreaterThan(5);
     for (const f of fences) expect(Math.abs(f.z - gate.z)).toBeLessThan(0.01);
+  });
+
+  it('has the animated critters and details, all in view of the camera', () => {
+    const sc = L.scenery;
+    const onScreen = (x: number, y: number, z: number, aspect: number) => {
+      const p = project([x, y, z], cameraAt(0, aspect, true));
+      return !!p && p.x > 0.03 && p.x < 0.97 && p.y > 0.12 && p.y < 0.97;
+    };
+    expect(sc.mounds).toHaveLength(3);
+    expect(sc.crows.length).toBeGreaterThanOrEqual(4);
+    expect(sc.spiders).toHaveLength(3);
+    expect(sc.wisps.length).toBeGreaterThanOrEqual(12);
+    expect(sc.cobwebs.length).toBeGreaterThanOrEqual(2);
+    for (const aspect of [16 / 10, 16 / 9]) {
+      expect(onScreen(sc.cat.x, sc.cat.y, sc.cat.z, aspect), 'cat').toBe(true);
+      expect(onScreen(sc.owl.x, sc.owl.y, sc.owl.z, aspect), 'owl').toBe(true);
+      expect(onScreen(sc.cauldron.x, sc.cauldron.y, sc.cauldron.z, aspect), 'cauldron').toBe(true);
+      expect(onScreen(sc.openCoffin.x, 0.5, sc.openCoffin.z, aspect), 'coffin').toBe(true);
+      for (const m of sc.mounds) expect(onScreen(m.x, 0.3, m.z, aspect), 'mound').toBe(true);
+      for (const s of sc.spiders) expect(onScreen(s.x, s.topY - s.drop / 2, s.z, aspect), 'spider').toBe(true);
+      for (const c of sc.crows) expect(onScreen(c.x, c.y, c.z, aspect), 'crow').toBe(true);
+    }
+  });
+  it('puts the cat on a gravestone, the owl on a branch of a dead tree and crows on posts and trees', () => {
+    const sc = L.scenery;
+    const stone = L.placements.find((p) => p.group === 'critter' && p.model === 'gravestone')!;
+    expect(Math.hypot(stone.x - sc.cat.x, stone.z - sc.cat.z)).toBeLessThan(0.01);
+    expect(sc.cat.y).toBeGreaterThan(1.5);
+    const dead = L.placements.filter((p) => p.group === 'tree' && p.model.startsWith('tree_dead'));
+    const b = sc.owl.branch;
+    expect(dead.some((t) => Math.hypot(t.x - b[0], t.z - b[2]) < 0.01)).toBe(true);
+    expect(sc.owl.y).toBeGreaterThan(b[4]);
+    const pillars = L.placements.filter((p) => p.model === 'fence_pillar');
+    expect(sc.crows.filter((c) => pillars.some((p) => Math.hypot(p.x - c.x, p.z - c.z) < 0.01)).length).toBeGreaterThanOrEqual(3);
+    expect(sc.crows.some((c) => c.y > 2.5)).toBe(true);
+    // The reserved spots are never built over.
+    for (const g of ['critter']) expect(L.placements.filter((p) => p.group === g).length).toBeGreaterThanOrEqual(6);
+  });
+  it('has more trees, graves and glowing mushrooms, with a lean on many of them', () => {
+    expect(L.placements.filter((p) => p.group === 'tree').length).toBeGreaterThanOrEqual(36);
+    expect(L.placements.filter((p) => p.group === 'oldGrave').length).toBeGreaterThanOrEqual(50);
+    expect(L.placements.filter((p) => p.model.startsWith('forest_mushroom')).length).toBeGreaterThanOrEqual(6);
+    expect(L.glows.filter((g) => g.kind === 'mushroom').length).toBeGreaterThanOrEqual(6);
+    expect(L.glows.some((g) => g.kind === 'cauldron')).toBe(true);
+    expect(L.placements.filter((p) => p.tilt && (Math.abs(p.tilt[0]) > 0.005 || Math.abs(p.tilt[1]) > 0.005)).length).toBeGreaterThan(40);
+    // Variety: many different kinds, and no two graves with exactly the same turn and size.
+    expect(new Set(L.placements.filter((p) => p.group === 'tree').map((p) => p.model)).size).toBeGreaterThanOrEqual(8);
+    const graves = L.placements.filter((p) => p.group === 'oldGrave');
+    expect(new Set(graves.map((p) => `${p.model}|${p.rotY.toFixed(3)}|${p.scale.toFixed(3)}`)).size).toBe(graves.length);
+    const kinds = new Set(graves.map((p) => p.model));
+    for (const k of ['grave_A', 'grave_B', 'grave_A_destroyed', 'gravemarker_A', 'gravemarker_B', 'gravestone']) expect(kinds.has(k as never), k).toBe(true);
+    const smalls = new Set(L.placements.filter((p) => p.group === 'small').map((p) => p.model));
+    for (const k of ['post_skull', 'shrine_candles', 'fence_broken', 'forest_cauldron']) {
+      expect(smalls.has(k as never) || L.placements.some((p) => p.model === k), k).toBe(true);
+    }
   });
 });

@@ -2,14 +2,14 @@ import { useFrame } from '@react-three/fiber';
 import { useGLTF } from '@react-three/drei';
 import { useMemo } from 'react';
 import {
-  type BufferGeometry, DoubleSide, InstancedMesh, Matrix4, type Material, Mesh, type MeshStandardMaterial, type Object3D, Quaternion, Texture, Vector3,
+  type BufferGeometry, DoubleSide, Euler, InstancedMesh, Matrix4, type Material, Mesh, type MeshStandardMaterial, type Object3D, Quaternion, Texture, Vector3,
 } from 'three';
 import { LOOK } from '../../../../lib/scene/config';
-import { layout, MODELS, modelFile, type Group, type ModelId, type Placement } from '../../../../lib/scene/layout';
+import { layout, MODELS, modelFile, modelInfo, type Group, type ModelId, type Placement } from '../../../../lib/scene/layout';
 import { useDisplay, type SceneDisplay } from './display';
 
 
-interface Part {
+export interface Part {
   geometry: BufferGeometry;
   material: Material;
   local: Matrix4;
@@ -37,12 +37,14 @@ const tmpM = new Matrix4();
 const tmpQ = new Quaternion();
 const tmpP = new Vector3();
 const tmpS = new Vector3();
-const UP = new Vector3(0, 1, 0);
+const tmpE = new Euler();
 
 /** Placement matrix. `k` is how much of the prop is shown (1 whole, 0 gone): it rises and grows in. */
 function compose(p: Placement, k: number, out: Matrix4): Matrix4 {
   const h = MODELS[p.model].h * p.scale;
-  tmpQ.setFromAxisAngle(UP, p.rotY);
+  // The prop turns about the vertical axis, then leans a little (tilt).
+  tmpE.set(p.tilt?.[0] ?? 0, p.rotY, p.tilt?.[1] ?? 0, 'YXZ');
+  tmpQ.setFromEuler(tmpE);
   tmpP.set(p.x, p.y - (1 - k) * h * 0.6, p.z);
   const s = p.scale * Math.max(k, 0.0001);
   tmpS.set(s, s, s);
@@ -66,14 +68,30 @@ function darkStone(mat: Material): Material {
   return dark;
 }
 
-function collectParts(root: Object3D, tint = false): Part[] {
+/** Mushrooms glow softly: a copy of the material with a cyan emissive colour. */
+const glowCache = new WeakMap<Material, Material>();
+function glowing(mat: Material): Material {
+  let g = glowCache.get(mat);
+  if (!g) {
+    g = mat.clone();
+    const std = g as MeshStandardMaterial;
+    std.emissive?.set('#2fe6cc');
+    if ('emissiveIntensity' in std) std.emissiveIntensity = 0.5;
+    glowCache.set(mat, g);
+  }
+  return g;
+}
+
+export function collectParts(root: Object3D, tint = false, glow = false, only?: readonly string[]): Part[] {
   root.updateMatrixWorld(true);
   const parts: Part[] = [];
   root.traverse((o) => {
     const m = o as Mesh;
     if (!m.isMesh) return;
+    if (only && !only.includes(m.name)) return;
     let mat = Array.isArray(m.material) ? m.material[0]! : m.material;
     if (tint) mat = darkStone(mat);
+    if (glow) mat = glowing(mat);
     const map = (mat as { map?: Texture | null }).map;
     if (map) map.anisotropy = 4;
     parts.push({ geometry: m.geometry, material: mat, local: m.matrixWorld.clone() });
@@ -89,7 +107,8 @@ function collectParts(root: Object3D, tint = false): Part[] {
 export function Props() {
   const display = useDisplay();
   const lay = useMemo(() => layout(), []);
-  const ids = useMemo(() => [...new Set(lay.placements.map((p) => p.model))], [lay]);
+  // Models the scene draws itself (dirt mounds, the coffin spot) have no file.
+  const ids = useMemo(() => [...new Set(lay.placements.map((p) => p.model))].filter((id) => MODELS[id].source !== 'procedural'), [lay]);
   const urls = useMemo(() => ids.map(modelFile), [ids]);
   // Quaternius models are meshopt-compressed; Kaykit models are plain. Draco is never used.
   const gltfs = useGLTF(urls, false, true);
@@ -100,7 +119,7 @@ export function Props() {
     ids.forEach((id, i) => {
       const placements = lay.placements.filter((p) => p.model === id);
       const gltf = list[i]!;
-      for (const part of collectParts(gltf.scene, id.startsWith('path_'))) {
+      for (const part of collectParts(gltf.scene, id.startsWith('path_'), id.startsWith('forest_mushroom'), modelInfo(id).parts)) {
         const mesh = new InstancedMesh(part.geometry, part.material, placements.length);
         mesh.frustumCulled = false;
         mesh.castShadow = MODELS[id].shadow;

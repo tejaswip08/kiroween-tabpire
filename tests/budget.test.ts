@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { BUDGET } from '../lib/scene/config';
-import { MODELS, buildLayout, modelFile, type ModelId } from '../lib/scene/layout';
+import { MODELS, buildLayout, modelFile, modelInfo, type ModelId } from '../lib/scene/layout';
+import { EXTRAS } from '../lib/scene/depth';
 
 const ROOT = join(__dirname, '..', 'public', 'models');
 
@@ -40,26 +41,35 @@ function measure(j: Gltf): { triangles: number; parts: number } {
   return { triangles, parts };
 }
 
-const kaykit = (id: ModelId): Gltf =>
-  MODELS[id].source === 'quaternius'
-    ? readGlb(join(ROOT, 'quaternius', `${id}.glb`))
-    : (JSON.parse(readFileSync(join(ROOT, 'kaykit', `${id}.gltf`), 'utf8')) as Gltf);
+const fileOf = (id: ModelId): Gltf => {
+  const src = MODELS[id].source;
+  if (src === 'custom') return readGlb(join(ROOT, 'coffin.glb'));
+  if (src === 'quaternius') return readGlb(join(ROOT, 'quaternius', `${id}.glb`));
+  return JSON.parse(readFileSync(join(ROOT, 'kaykit', `${id}.gltf`), 'utf8')) as Gltf;
+};
+/** Models the scene draws itself have no file. */
+const hasFile = (id: ModelId) => MODELS[id].source !== 'procedural';
 
 const L = buildLayout();
 const measured = new Map<ModelId, { triangles: number; parts: number }>();
-for (const id of Object.keys(MODELS) as ModelId[]) measured.set(id, measure(kaykit(id)));
+for (const id of Object.keys(MODELS) as ModelId[]) {
+  measured.set(id, hasFile(id) ? measure(fileOf(id)) : { triangles: MODELS[id].tris, parts: 1 });
+}
 
 /** Draw calls for everything that is not a prop (see the design's performance plan). */
 const OTHER_DRAWS = {
-  skyDome: 1, moon: 3, mist: 4, clouds: 1, witch: 2, bats: 1, ghosts: 1, embers: 1, glowPools: 1, flameGlows: 1,
+  skyDome: 1, moon: 3, mist: 5, clouds: 1, witch: 2, bats: 1, ghosts: 1, embers: 1, glowPools: 1, flameGlows: 1,
   /** Bloom mip chain, Vignette, tone mapping and copies. */
   postPasses: 12,
 };
 
 describe('model catalogue', () => {
-  it('matches the triangle counts in the Kaykit files', () => {
+  it('matches the triangle counts in the model files (a model that draws only some of its parts uses at most the file total)', () => {
     for (const id of Object.keys(MODELS) as ModelId[]) {
-      expect(MODELS[id].tris, id).toBe(measured.get(id)!.triangles);
+      if (!hasFile(id)) continue;
+      const info = modelInfo(id);
+      if (info.parts) expect(info.tris, id).toBeLessThanOrEqual(measured.get(id)!.triangles);
+      else expect(info.tris, id).toBe(measured.get(id)!.triangles);
     }
   });
 });
@@ -71,19 +81,21 @@ describe('scene budget', () => {
   it('stays within the triangle budget with every instance at full capacity, shadow pass included', () => {
     let total = 0;
     for (const [id, n] of counts) {
-      const t = measured.get(id)!.triangles * n;
+      const t = MODELS[id].tris * n;
       total += t + (MODELS[id].shadow ? t : 0);
     }
+    // Everything the scene draws itself (the far village, the critters and the details).
+    total += Object.values(EXTRAS).reduce((sum, e) => sum + e.tris, 0);
     expect(total).toBeGreaterThan(0);
     expect(total).toBeLessThanOrEqual(BUDGET.sceneTriangles);
   });
   it('stays within the draw call plan', () => {
     let propDraws = 0;
     for (const id of counts.keys()) {
-      const parts = measured.get(id)!.parts;
+      const parts = modelInfo(id).parts?.length ?? measured.get(id)!.parts;
       propDraws += parts + (MODELS[id].shadow ? parts : 0);
     }
-    const other = Object.values(OTHER_DRAWS).reduce((a, b) => a + b, 0);
+    const other = Object.values(OTHER_DRAWS).reduce((a, b) => a + b, 0) + Object.values(EXTRAS).reduce((a, e) => a + e.calls, 0);
     expect(propDraws + other).toBeLessThanOrEqual(BUDGET.sceneDrawCalls);
   });
   it('shares draw calls between repeated models', () => {
@@ -95,7 +107,7 @@ describe('scene budget', () => {
     expect(L.lights.length).toBeLessThanOrEqual(BUDGET.maxPointLights);
   });
   it('only uses models that exist as files', () => {
-    for (const id of counts.keys()) expect(() => readFileSync(join(__dirname, '..', 'public', modelFile(id)))).not.toThrow();
+    for (const id of counts.keys()) if (hasFile(id)) expect(() => readFileSync(join(__dirname, '..', 'public', modelFile(id)))).not.toThrow();
   });
 });
 

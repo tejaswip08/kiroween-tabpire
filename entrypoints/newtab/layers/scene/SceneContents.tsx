@@ -4,6 +4,16 @@ import { FogExp2 } from 'three';
 import { LOOK } from '../../../../lib/scene/config';
 import { C } from './colors';
 import { useDisplay } from './display';
+import { Cat } from './Cat';
+import { CauldronFx } from './CauldronFx';
+import { Crows } from './Crows';
+import { FarVillage } from './FarVillage';
+import { LowClouds } from './LowClouds';
+import { OpenCoffin } from './OpenCoffin';
+import { Owl } from './Owl';
+import { Skeletons } from './Skeletons';
+import { Cobwebs, Spiders } from './Spiders';
+import { Wisps } from './Wisps';
 import { Bats } from './Bats';
 import { Clouds } from './Clouds';
 import { Effects } from './Effects';
@@ -48,7 +58,18 @@ export function SceneContents() {
       <Fog />
       <Lights />
       <Ground />
+      <FarVillage />
+      <LowClouds />
       <Props />
+      <Cat />
+      <Crows />
+      <Owl />
+      <Spiders />
+      <Cobwebs />
+      <Wisps />
+      <Skeletons />
+      <CauldronFx />
+      <OpenCoffin />
       <Glows />
       <Mist />
       <Embers />

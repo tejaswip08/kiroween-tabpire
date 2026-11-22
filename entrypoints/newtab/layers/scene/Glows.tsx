@@ -7,8 +7,8 @@ import { layout, type WarmSource } from '../../../../lib/scene/layout';
 import { C } from './colors';
 import { useDisplay } from './display';
 
-const FLAME_SIZE: Record<WarmSource['kind'], number> = { candle: 0.5, lantern: 1.3, jackOLantern: 1.3, postLantern: 1.4, cryptDoor: 0 };
-const POOL_RADIUS: Record<WarmSource['kind'], number> = { candle: 1.6, lantern: 3.4, jackOLantern: 3.2, postLantern: 3.8, cryptDoor: 5.5 };
+const FLAME_SIZE: Record<WarmSource['kind'], number> = { candle: 0.5, lantern: 1.3, jackOLantern: 1.3, postLantern: 1.4, cryptDoor: 0, mushroom: 0.7, cauldron: 2.4 };
+const POOL_RADIUS: Record<WarmSource['kind'], number> = { candle: 1.6, lantern: 3.4, jackOLantern: 3.2, postLantern: 3.8, cryptDoor: 5.5, mushroom: 1.5, cauldron: 3.6 };
 
 const vertex = /* glsl */ `
 attribute vec3 aColor;
@@ -47,7 +47,8 @@ function makeMesh(sources: WarmSource[], billboard: boolean, power: number, leve
   mesh.renderOrder = billboard ? 5 : 3;
   const colors = new Float32Array(sources.length * 3);
   sources.forEach((s, i) => {
-    const base = s.kind === 'jackOLantern' ? C.jack : s.kind === 'candle' ? C.candle : s.kind === 'cryptDoor' ? C.door : C.lantern;
+    const base =
+      s.kind === 'jackOLantern' ? C.jack : s.kind === 'candle' ? C.candle : s.kind === 'cryptDoor' ? C.door : s.kind === 'mushroom' ? C.mushroom : s.kind === 'cauldron' ? C.cauldron : C.lantern;
     const k = level(s);
     colors.set([base.r * k, base.g * k, base.b * k], i * 3);
   });
@@ -69,11 +70,11 @@ export function Glows() {
   const sources = useMemo(() => layout().glows, []);
   const flames = useMemo(() => sources.filter((s) => FLAME_SIZE[s.kind] > 0), [sources]);
   const pools = useMemo(
-    () => makeMesh(sources, false, 2.2, (s) => (s.kind === 'candle' ? 0.22 : s.kind === 'cryptDoor' ? 0.5 : 0.38)),
+    () => makeMesh(sources, false, 2.2, (s) => (s.kind === 'candle' ? 0.22 : s.kind === 'cryptDoor' ? 0.5 : s.kind === 'mushroom' ? 0.3 : s.kind === 'cauldron' ? 0.55 : 0.38)),
     [sources],
   );
   const flameMesh = useMemo(
-    () => makeMesh(flames, true, 2.6, (s) => (s.kind === 'candle' ? LOOK.glow.flame : s.kind === 'jackOLantern' ? LOOK.glow.jack : LOOK.glow.glass)),
+    () => makeMesh(flames, true, 2.6, (s) => (s.kind === 'candle' ? LOOK.glow.flame : s.kind === 'jackOLantern' ? LOOK.glow.jack : s.kind === 'mushroom' ? 2.4 : s.kind === 'cauldron' ? 3.2 : LOOK.glow.glass)),
     [flames],
   );
 

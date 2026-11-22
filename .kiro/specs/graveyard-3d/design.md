@@ -91,7 +91,7 @@ export const QUALITY = {
   portraitDprMax: 1.25, portraitAntialias: true,
 };
 export const BUDGET = {
-  sceneDrawCalls: 150, sceneTriangles: 150_000,
+  sceneDrawCalls: 150, sceneTriangles: 175_000, // raised for the richer yard: see depth-and-life.md
   vampireTriangles: 15_000, maxPointLights: 6,
   maxExitMs: 1600, maxBundleBytes: 12 * 1024 * 1024,
 };
