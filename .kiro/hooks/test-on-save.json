@@ -1,0 +1,15 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Test on save",
+      "trigger": "PostFileSave",
+      "description": "Run the tests when a hunger file or a file under tests/ is saved.",
+      "matcher": "(hunger|tests/)",
+      "action": {
+        "type": "command",
+        "command": "npm test"
+      }
+    }
+  ]
+}

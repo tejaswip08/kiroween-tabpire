@@ -1,0 +1,3 @@
+Models by Quaternius (https://quaternius.com), downloaded from Poly Pizza (https://poly.pizza).
+License: CC0 1.0 Universal (public domain) - https://creativecommons.org/publicdomain/zero/1.0/
+Files were compressed (meshopt, webp textures) for the web; otherwise unchanged.
