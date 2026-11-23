@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { capabilities } from '../../../lib/capabilities';
 import { fetchGoogleSuggestions } from '../../../lib/google';
 import type { CryptEntry, Haunt } from '../../../lib/store';
 import { localSuggestions, withWeb, type Suggestion } from '../../../lib/suggest';
@@ -28,7 +29,7 @@ export function useSuggestions(query: string, sources: SuggestionSources): Sugge
   const [web, setWeb] = useState<{ text: string; items: string[] } | null>(null);
 
   useEffect(() => {
-    if (text.length < WEB_MIN_CHARS) return undefined;
+    if (!capabilities.remoteSuggestions || text.length < WEB_MIN_CHARS) return undefined;
     const controller = new AbortController();
     const timer = setTimeout(() => {
       void fetchGoogleSuggestions(text, controller.signal).then((items) => {
@@ -42,6 +43,6 @@ export function useSuggestions(query: string, sources: SuggestionSources): Sugge
   }, [text]);
 
   // Show web results only for the text they were asked for.
-  const items = web && web.text === text && text.length >= WEB_MIN_CHARS ? web.items : [];
+  const items = capabilities.remoteSuggestions && web && web.text === text && text.length >= WEB_MIN_CHARS ? web.items : [];
   return useMemo(() => withWeb(local, items, query), [local, items, query]);
 }

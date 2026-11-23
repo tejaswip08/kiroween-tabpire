@@ -1,0 +1,421 @@
+{
+  "pbtResults": {
+    "8. Sample data and reset": {
+      "status": "passed",
+      "lastRunTimestamp": 1795417203268
+    }
+  },
+  "executionHistory": {
+    "1.1 Move `tests/helpers/fakeBrowser.ts` to `lib/fakeBrowser.ts` and make the old path `export * from '../../lib/fakeBrowser'`. Keep every current export (`fake`, `browser`, `events`, `fire`, `FakeTab`), the failure switches and the call log. Add: `favIconUrl` on `FakeTab`, `fake.autoEvents` (tab events fire after `remove`, `discard`, `create`, `update` when on), `fake.intercept` (called before `tabs.update` and `tabs.create`; `true` skips the change, the call log is still written), `fake.onSearch` and `search.query` (records, no network), `fake.extensionBase` with `runtime.getURL` using it, `oldValue` in `storage.onChanged`, per-listener error isolation, `tabs.getCurrent` returning `fake.currentTabId`, and `fake.clearData()` (clears tabs, storage, log, searches, alarms, badge and ids but keeps listeners and switches; `reset()` keeps its current meaning). No use of `localStorage`, `sessionStorage`, IndexedDB or cookies.": [
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795415565583
+      },
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795415582376
+      },
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795415701023
+      }
+    ],
+    "1.2 Create `tests/fakeBrowser.test.ts`. Unit tests: `tabs` (get, getCurrent, query, update, remove, discard, create), `alarms.create` replaces by name, `search.query` records and never calls `fetch`, `runtime.getURL`, `clearData` keeps listeners while `reset` removes them, a throwing listener does not stop the others, and spies on `Storage.prototype`, `indexedDB` and `document.cookie` show no use. Property tests with fast-check (100 runs or more, tagged `Feature: web-demo, Property N`): **Property 3** (storage events and round trip) and **Property 4** (tab events match tab changes against a simple model).": [
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795415565631
+      },
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795415709110
+      },
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795415840649
+      }
+    ],
+    "2.1 Create `lib/assetUrl.ts` with `assetUrl(path)`: reads `import.meta.env.BASE_URL` at call time (falls back to `/`), strips leading slashes from `path`, and never calls `browser.runtime.getURL`. Create `tests/assetUrl.test.ts` with **Property 2** over the bases `/`, `./` and `/repo/` and paths with or without a leading slash (starts with the base, no doubled slash, resolves under `<base>models/`), using `vi.stubEnv`.": [
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795415565734
+      },
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795415841778
+      },
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795415939189
+      }
+    ],
+    "2.2 Replace every hard-coded `'/models/...'` string with `assetUrl('models/...')`: `lib/scene/layout.ts` (`modelUrl`), and the `VAMPIRE_URL`, `COFFIN_URL`, `useGLTF.preload` calls, `OpenCoffin`, `FarVillage`, `Skeletons` and `Props` in `entrypoints/newtab/layers/`. Add a test that, with the default base, the produced addresses equal the old strings. `tests/layout.test.ts` and `tests/network.test.ts` must pass unchanged.": [
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795415565766
+      },
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795415939387
+      },
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795416054694
+      }
+    ],
+    "3. Network capability flags": [
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795415565799
+      },
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795416071931
+      },
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795416166558
+      }
+    ],
+    "4.1 Create `entrypoints/bloodbank/BloodBank.tsx` with the exported `BloodBank` component (the page body moved from `main.tsx`, rendered as `<div className=\"bb-scroll\"><main className=\"bb\">...</main></div>`; it imports `bloodbank.css`). Reduce `entrypoints/bloodbank/main.tsx` to fonts, `tokens.css`, `base.css`, the mount code and the `BloodBank` import. Add `tests/ui/bloodbank.test.tsx`: renders the same headings as before, \"Back to The Crypt\" calls `openCrypt({ sameTab: true })`, and a text check that `main.tsx` imports `BloodBank`.": [
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795415565832
+      },
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795416168112
+      },
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795416443589
+      }
+    ],
+    "4.2 Create `entrypoints/newtab/styles.ts` (side-effect imports of the fonts and every CSS file that `entrypoints/newtab/main.tsx` imports today) and make `main.tsx` import it. Add a test that `main.tsx` imports `./styles` and no longer lists the CSS files.": [
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795415565866
+      },
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795416444631
+      },
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795416501383
+      }
+    ],
+    "4.3 Fix the page frame layout in CSS. In `entrypoints/newtab/styles/base.css`: keep `html, body, #root { height: 100vh; overflow: hidden }`, add `#root { display: flex; flex-direction: column }`, and change `.page` from `height: 100vh` to `flex: 1 1 0; min-height: 0` (keep `display: flex; flex-direction: column; overflow: hidden`). In `entrypoints/bloodbank/bloodbank.css`: remove the `html, body, #root` override and add `.bb-scroll { flex: 1 1 0; min-height: 0; overflow: auto }`, so Blood Bank scrolls inside its own container and the two stylesheets can share a document. Update `tests/css.test.ts`: keep the `html, body, #root` assertion (`100vh`, `hidden`), and add that `#root` is a flex column, `.page` has `flex: 1 1 0`, `min-height: 0` and no `height: 100vh`, and no rule in the extension styles other than `html, body, #root` uses `100vh`. Add a test on `bloodbank.css`: no `html`, `body` or `#root` selector, and `.bb-scroll` has `overflow: auto` and `min-height: 0`.": [
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795415565941
+      },
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795416500288
+      },
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795416605843
+      }
+    ],
+    "5. Checkpoint - Ensure all tests pass": [
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795415565966
+      },
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795416612821
+      },
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795416758702
+      }
+    ],
+    "6. Dawn safety and action invariants on the fake": [
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795415565998
+      },
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795416764032
+      },
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795416877101
+      }
+    ],
+    "7.1 Move the `noRemoteDraco` plugin from `wxt.config.ts` to `build/noRemoteDraco.ts` and import it in `wxt.config.ts`. Confirm the extension build output is unchanged (`npm run build`, same manifest and no Draco decoder address in the bundle).": [
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795415566024
+      },
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795416877377
+      },
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795416960812
+      }
+    ],
+    "7.2 Create the demo project: `demo/vite.config.ts` (`root: 'demo'`, `base: './'`, `publicDir: '../public'`, `@vitejs/plugin-react`, `noRemoteDraco`, alias `wxt/browser` to `lib/fakeBrowser.ts`, `outDir: 'dist'`), `demo/index.html`, `demo/env.d.ts` (`vite/client`) and a minimal `demo/src/main.tsx` that renders a placeholder line. Add `@vitejs/plugin-react` as a dev dependency (pin the version), the scripts `demo:dev` (`vite --config demo/vite.config.ts`) and `demo:build` (`vite build --config demo/vite.config.ts`), and make `tsconfig.json` cover `demo/`. Add `demo/dist` to `.gitignore`. Add `tests/demo/config.test.ts` (text checks: relative base, alias, `noRemoteDraco` listed, scripts present). Confirm `npm run demo:build` writes `demo/dist` with `models/` copied.": [
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795415566057
+      },
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795416962956
+      },
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795417035338
+      }
+    ],
+    "8. Sample data and reset": [
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795415566085
+      },
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795417036100
+      },
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795417218733
+      }
+    ],
+    "9. Notices and interceptors": [
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795415566117
+      },
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795417219445
+      },
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795417293474
+      }
+    ],
+    "10.1 Create `demo/src/route.ts` with `resolveRoute(hash)` and `useRoute()` (hash listener, `history.replaceState` redirect from unknown or empty to `#/crypt`), and `demo/src/PopupPlaceholder.tsx` (360 by 520 frame, \"The popup is not built yet.\"). Create `tests/demo/route.test.ts` with **Property 1** (the three exact hashes with an optional trailing slash resolve, every other string is `null`) and a test that an unknown hash is replaced by `#/crypt`.": [
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795415566149
+      },
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795417294887
+      },
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795417393413
+      }
+    ],
+    "10.2 Create `demo/src/DemoShell.tsx` and `demo/src/demo.css`: banner text from Requirement 7.1, \"Reset demo\" button (`resetDemo(Date.now())` then bump an epoch that remounts the page, route kept), nav links, an `aria-live=\"polite\"` notice area that hides after 4 seconds, and a page error boundary (\"This demo page failed. Reset the demo.\"). Layout: `.demo-strip { flex: 0 0 auto }` above `.demo-frame { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; position: relative; overflow: hidden }`, with no `100vh` rule. Pages: `App` from `entrypoints/newtab/App`, `BloodBank`, `PopupPlaceholder`. Create `tests/demo/routes.test.tsx` (jsdom): each route shows the banner and its landmark (`main` for Crypt and Blood Bank, the placeholder text for the popup), a hash change switches pages and keeps the fake state, Blood Bank and the placeholder never call `canvas.getContext`, a throwing page shows the error text with Reset still present, and `demo.css` has no `100vh` and a flexible `.demo-frame`.": [
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795415566183
+      },
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795417396087
+      },
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795418114482
+      }
+    ],
+    "11. Checkpoint - Ensure all tests pass": [
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795415566216
+      },
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795418115242
+      },
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795418412711
+      }
+    ],
+    "12.1 Replace the placeholder in `demo/src/main.tsx` with the real startup, in this order: set `capabilities` to false, `installInterceptors`, `seedDemo(Date.now())` (`Date.now()` read at startup; the Reset handler reads it again when pressed), import `entrypoints/newtab/styles` and the Blood Bank CSS, then render `DemoShell`. Pages must not run before the seed.": [
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795415566249
+      },
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795418414028
+      },
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795418537814
+      }
+    ],
+    "12.2 Create `tests/demo/actions.test.tsx` (jsdom, real `lib/tabs.ts` on the seeded fake). Examples: Stake, Coffin, Crypt, Garlic, Resurrect and Dawn give the results in Requirements 5.1 to 5.6; search shows the notice and calls `search.query`; Add page adds a haunt up to `MAX_HAUNTS`; Blood Bank shows earlier stats and log; a card link shows a notice and keeps the hash; the badge count and stats update without a reload; Reset after Stake and Dawn restores the seeded card count and stats and keeps the route.": [
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795415566284
+      },
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795418536909
+      },
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795418827146
+      }
+    ],
+    "13. Built-output scan": [
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795415566314
+      },
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795418827811
+      },
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795419436374
+      }
+    ],
+    "14. GitHub Pages workflow": [
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795415566340
+      },
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795419436942
+      },
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795419940090
+      }
+    ],
+    "15. Final checkpoint - Ensure all tests pass": [
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795415566392
+      },
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795419940735
+      }
+    ],
+    "1. Shared fake browser": [
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795415840750
+      }
+    ],
+    "2. Base-aware asset paths": [
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795416054754
+      }
+    ],
+    "4. Reusable pages and the page frame layout": [
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795416605894
+      }
+    ],
+    "7. Demo build": [
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795417035418
+      }
+    ],
+    "10. Router and shell": [
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795418114816
+      }
+    ],
+    "12. Startup wiring and end-to-end tests": [
+      {
+        "executionId": "fe8d316f-2da0-4ae7-861b-1bf4d9157660",
+        "chatSessionId": "sess_ece992d1-9b89-47e7-8218-f20b433550fe",
+        "timestamp": 1795418827203
+      }
+    ]
+  }
+}

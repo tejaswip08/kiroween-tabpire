@@ -11,8 +11,9 @@ import { cursor } from './cursor';
 import { makeEyelids } from './eyelids';
 import type { ExitRun, PortraitRef } from './shared';
 import { makeVampireMaterial } from './vampireMaterial';
+import { assetUrl } from '../../../../lib/assetUrl';
 
-export const VAMPIRE_URL = '/models/vampire.glb';
+export const VAMPIRE_URL = assetUrl('models/vampire.glb');
 // The vampire is loaded once and shared by every card. It needs the meshopt decoder, not Draco.
 useGLTF.preload(VAMPIRE_URL, false, true);
 

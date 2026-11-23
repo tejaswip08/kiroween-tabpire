@@ -1,0 +1,69 @@
+/* Demo shell. The root is a flex column (base.css): strip on top, page frame fills the rest. */
+.demo-strip {
+  flex: 0 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  padding: 6px 12px;
+  font-size: 13px;
+  background: #1b1320;
+  color: #f1e8f5;
+  border-bottom: 1px solid #3a2a45;
+}
+
+.demo-banner {
+  margin: 0;
+  flex: 1 1 280px;
+}
+
+.demo-reset {
+  font: inherit;
+  padding: 3px 10px;
+  border-radius: 6px;
+  border: 1px solid currentColor;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.demo-nav {
+  display: flex;
+  gap: 12px;
+}
+
+.demo-nav a {
+  color: inherit;
+}
+
+.demo-nav a[aria-current='page'] {
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.demo-notice {
+  flex: 1 1 100%;
+  min-height: 1.2em;
+}
+
+.demo-notice:empty {
+  display: none;
+}
+
+.demo-frame {
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+.demo-error {
+  flex: 1 1 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  text-align: center;
+}

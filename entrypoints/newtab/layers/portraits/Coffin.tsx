@@ -4,8 +4,9 @@ import { useMemo, useRef } from 'react';
 import { type Group, type Object3D } from 'three';
 import { COFFIN } from '../../../../lib/vampire/rig';
 import type { PortraitRef } from './shared';
+import { assetUrl } from '../../../../lib/assetUrl';
 
-export const COFFIN_URL = '/models/coffin.glb';
+export const COFFIN_URL = assetUrl('models/coffin.glb');
 useGLTF.preload(COFFIN_URL, false, false);
 
 /** The open coffin the sleeping vampire lies in. Its lid is turned up and moved to the back. */

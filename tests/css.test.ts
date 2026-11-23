@@ -312,3 +312,47 @@ describe('card popup', () => {
     expect(root.decls.find((d) => d.prop === 'overflow')?.value).toBe('hidden');
   });
 });
+
+// ---------- page frame ----------
+describe('page frame layout', () => {
+  const val = (rule: { decls: { prop: string; value: string }[] }, prop: string) =>
+    rule.decls.find((d) => d.prop === prop)?.value;
+  const bySelector = (sel: string) => allRules.filter((r) => r.sheet === 'base.css' && r.selector === sel);
+
+  it('makes #root a flex column', () => {
+    const rules = bySelector('#root');
+    expect(rules.some((r) => val(r, 'display') === 'flex' && val(r, 'flex-direction') === 'column')).toBe(true);
+  });
+
+  it('sizes .page by flex, not by 100vh', () => {
+    const page = bySelector('.page')[0]!;
+    expect(val(page, 'flex')).toBe('1 1 0');
+    expect(val(page, 'min-height')).toBe('0');
+    expect(val(page, 'height')).toBeUndefined();
+  });
+
+  it('uses 100vh only in the html, body, #root rule', () => {
+    const bbCss = join(root, 'entrypoints', 'bloodbank', 'bloodbank.css');
+    const rules = [
+      ...allRules,
+      ...parse(stripComments(readFileSync(bbCss, 'utf8'))).map((r) => ({ ...r, sheet: 'bloodbank.css' })),
+    ];
+    for (const rule of rules) {
+      if (rule.decls.some((d) => /100vh/.test(d.value))) {
+        expect(rule.selector.replace(/\s+/g, ' '), `${rule.sheet} ${rule.selector}`).toBe('html, body, #root');
+      }
+    }
+  });
+});
+
+describe('Blood Bank stylesheet', () => {
+  const rules = parse(stripComments(readFileSync(join(root, 'entrypoints', 'bloodbank', 'bloodbank.css'), 'utf8')));
+  it('does not override html, body or #root', () => {
+    for (const r of rules) expect(r.selector).not.toMatch(/(^|[\s,])(html|body|#root)(?![\w-])/);
+  });
+  it('scrolls inside .bb-scroll', () => {
+    const scroll = rules.find((r) => r.selector === '.bb-scroll')!;
+    expect(scroll.decls.find((d) => d.prop === 'overflow')?.value).toBe('auto');
+    expect(scroll.decls.find((d) => d.prop === 'min-height')?.value).toBe('0');
+  });
+});

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { browser } from 'wxt/browser';
+import { capabilities } from '../../lib/capabilities';
 import { fnv1a32, siteOf } from '../../lib/hunger';
 import { hauntLetter, removeHaunt } from '../../lib/haunts';
 import { MAX_HAUNTS, type Haunt } from '../../lib/store';
@@ -20,6 +21,7 @@ const SAFE_ICON_URL = /^(https?:|data:image\/)/i;
 export function faviconSources(pageUrl: string, opts: { tabIcon?: string; chromeBase?: string } = {}): string[] {
   const list: string[] = [];
   if (opts.tabIcon && SAFE_ICON_URL.test(opts.tabIcon)) list.push(opts.tabIcon);
+  if (!capabilities.remoteIcons) return list;
   if (opts.chromeBase?.startsWith('chrome-extension://')) {
     list.push(`${opts.chromeBase}?pageUrl=${encodeURIComponent(pageUrl)}&size=32`);
   }

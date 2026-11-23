@@ -6,12 +6,13 @@ import { FAR_ITEMS } from '../../../../lib/scene/depth';
 import { C } from './colors';
 import { useDisplay } from './display';
 import { buildFarVillage } from './farBuild';
+import { assetUrl } from '../../../../lib/assetUrl';
 
 const urls = [
-  '/models/quaternius/farm_barn.glb',
-  '/models/quaternius/farm_windmill.glb',
-  '/models/quaternius/castle_fortress.glb',
-  '/models/quaternius/blood_ruins.glb',
+  assetUrl('models/quaternius/farm_barn.glb'),
+  assetUrl('models/quaternius/farm_windmill.glb'),
+  assetUrl('models/quaternius/castle_fortress.glb'),
+  assetUrl('models/quaternius/blood_ruins.glb'),
 ];
 
 /**

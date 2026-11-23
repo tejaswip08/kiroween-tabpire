@@ -6,6 +6,7 @@ import { COFFIN } from '../../../../lib/vampire/rig';
 import { layout } from '../../../../lib/scene/layout';
 import { C } from './colors';
 import { useDisplay } from './display';
+import { assetUrl } from '../../../../lib/assetUrl';
 
 const SCALE = 2.2;
 /** How far the lid is lifted at its front edge, in radians. */
@@ -30,7 +31,7 @@ void main() {
 export function OpenCoffin() {
   const display = useDisplay();
   const spot = useMemo(() => layout().scenery.openCoffin, []);
-  const gltf = useGLTF('/models/coffin.glb', false, true);
+  const gltf = useGLTF(assetUrl('models/coffin.glb'), false, true);
   const glow = useRef<Mesh>(null);
   const scene = useMemo(() => {
     const root = gltf.scene.clone(true);

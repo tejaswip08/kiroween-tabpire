@@ -1,5 +1,6 @@
 // Model catalogue and seeded graveyard layout. Pure: no three, no browser APIs.
 // Coordinates: x to the right, y up, z toward the camera. Units match the Kaykit models.
+import { assetUrl } from '../assetUrl';
 import { BUDGET, CAPS } from './config';
 import { cameraAt, project, projectDirection } from './camera';
 import { clamp, mulberry32 } from './rng';
@@ -97,8 +98,8 @@ export const modelInfo = (id: ModelId): ModelInfo => MODELS[id];
 /** Where a model's file is, as a path from the extension's root. */
 export function modelFile(id: ModelId): string {
   const src = MODELS[id].source;
-  if (src === 'custom') return '/models/coffin.glb';
-  return src === 'quaternius' ? `/models/quaternius/${id}.glb` : `/models/kaykit/${id}.gltf`;
+  if (src === 'custom') return assetUrl('models/coffin.glb');
+  return src === 'quaternius' ? assetUrl(`models/quaternius/${id}.glb`) : assetUrl(`models/kaykit/${id}.gltf`);
 }
 
 export interface Placement {

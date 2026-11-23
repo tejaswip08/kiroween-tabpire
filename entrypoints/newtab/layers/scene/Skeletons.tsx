@@ -5,8 +5,9 @@ import { Euler, InstancedMesh, Matrix4, MeshStandardMaterial, Quaternion, Sphere
 import { layout } from '../../../../lib/scene/layout';
 import { useDisplay } from './display';
 import { collectParts, type Part } from './Props';
+import { assetUrl } from '../../../../lib/assetUrl';
 
-const urls = ['/models/kaykit/skull.gltf', '/models/kaykit/ribcage.gltf', '/models/kaykit/bone_B.gltf', '/models/kaykit/bone_C.gltf'];
+const urls = [assetUrl('models/kaykit/skull.gltf'), assetUrl('models/kaykit/ribcage.gltf'), assetUrl('models/kaykit/bone_B.gltf'), assetUrl('models/kaykit/bone_C.gltf')];
 /** At most this many mounds are drawn. */
 const MAX_MOUNDS = 3;
 /** How far the skull rises and sinks, in metres (2.5 cm). */
