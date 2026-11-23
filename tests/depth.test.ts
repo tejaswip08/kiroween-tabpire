@@ -3,7 +3,7 @@ import type { Mesh } from 'three';
 import { cornerIndices, worldPositions } from '../entrypoints/newtab/layers/scene/geometryTools';
 import { BUDGET } from '../lib/scene/config';
 import {
-  CHURCH, EXTRAS, FAR_HILLS, FAR_ITEMS, FAR_MODELS, FAR_WINDOW_COUNT, LOW_CLOUD_LAYERS, LOW_CLOUD_MOON_FADE_DEG, farTriangles,
+  CHURCH, EXTRAS, FAR_HILLS, farGroundY, FAR_ITEMS, FAR_MODELS, FAR_WINDOW_COUNT, LOW_CLOUD_LAYERS, LOW_CLOUD_MOON_FADE_DEG, farTriangles,
   lowCloudEdgeFade, lowCloudMoonVisibility, lowCloudPuffs, lowCloudX,
 } from '../lib/scene/depth';
 import { MOON_KEEP_OUT_DEG } from '../lib/scene/sky';
@@ -22,14 +22,10 @@ describe('the far village', () => {
     expect(FAR_ITEMS.find((i) => i.kind === 'church')!.windows).toHaveLength(1);
     for (const i of FAR_ITEMS) for (const w of i.windows) expect(w.every(Number.isFinite)).toBe(true);
   });
-  it('sits on the hills: every building is above the hill surface under it', () => {
+  it('sits on the hills: every building starts at the hill surface under it, on a hill and never on flat ground', () => {
     for (const item of FAR_ITEMS) {
-      if (item.kind === 'ruins' || item.kind === 'fortress') continue;
-      const hill = FAR_HILLS.filter((h) => Math.abs(item.x - h.x) < h.rx).sort((a, b) => b.y + b.ry - (a.y + a.ry))[0];
-      expect(hill, item.id).toBeDefined();
-      const surface = hill!.y + hill!.ry * Math.sqrt(1 - ((item.x - hill!.x) / hill!.rx) ** 2);
-      expect(item.y, item.id).toBeGreaterThan(surface - 1.5);
-      expect(item.y, item.id).toBeLessThan(surface + 2.5);
+      expect(item.y, item.id).toBeCloseTo(farGroundY(item.x, item.z), 6);
+      expect(item.y, item.id).toBeGreaterThan(3);
     }
   });
   it('is a crooked church: leaning, with a tower taller than the nave and a steeple on top', () => {

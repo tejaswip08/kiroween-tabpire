@@ -1,11 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import fc from 'fast-check';
-import { DAY_MS } from '../lib/hunger';
+import { DAY_MS, formatMb } from '../lib/hunger';
 import {
   VIAL_FULL_MS,
   VIAL_TICK,
   buildCards,
-  formatMemory,
   idleLabel,
   isCardTab,
   sumMb,
@@ -184,19 +183,19 @@ describe('idleLabel', () => {
   });
 });
 
-describe('formatMemory', () => {
+describe('formatMb', () => {
   it('always starts with ~', () => {
     fc.assert(
       fc.property(fc.nat(100_000), (mb) => {
-        expect(formatMemory(mb).startsWith('~')).toBe(true);
+        expect(formatMb(mb).startsWith('~')).toBe(true);
       }),
     );
   });
   it('switches to GB at 1000 MB', () => {
-    expect(formatMemory(995)).toBe('~995 MB');
-    expect(formatMemory(1000)).toBe('~1.0 GB');
-    expect(formatMemory(1460)).toBe('~1.5 GB');
-    expect(formatMemory(0)).toBe('~0 MB');
+    expect(formatMb(995)).toBe('~995 MB');
+    expect(formatMb(1000)).toBe('~1.0 GB');
+    expect(formatMb(1460)).toBe('~1.5 GB');
+    expect(formatMb(0)).toBe('~0 MB');
   });
 });
 

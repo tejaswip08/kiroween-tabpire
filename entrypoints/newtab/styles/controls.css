@@ -69,7 +69,7 @@
 
 .card-actions > .tip-wrap:last-child .tip,
 .header-actions > .tip-wrap:last-child .tip,
-.pinned-add .tip-wrap .tip {
+.haunts-add .tip-wrap .tip {
   --tip-x: 0;
   left: auto;
   right: 0;

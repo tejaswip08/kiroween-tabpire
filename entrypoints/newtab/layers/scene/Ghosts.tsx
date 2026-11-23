@@ -62,7 +62,10 @@ void main() {
     float hole = max(eyes, mouth);
     col = mix(col, vec3(0.02, 0.07, 0.07), hole);
   }
-  gl_FragColor = vec4(col, 0.92 * vShown);
+  // Slightly see-through, more at the middle of the front and solid-ish at the edge, with a soft glow.
+  float alpha = (0.55 + 0.3 * fres) * vShown;
+  col += uRim * 0.35 * (0.4 + fres);
+  gl_FragColor = vec4(col, alpha);
 }`;
 
 /**
@@ -82,7 +85,7 @@ export function Ghosts() {
         uRim: { value: C.ghost.clone().multiplyScalar(LOOK.glow.ghostRim) },
       },
       transparent: true,
-      depthWrite: true,
+      depthWrite: false,
       side: FrontSide,
       fog: false,
     });

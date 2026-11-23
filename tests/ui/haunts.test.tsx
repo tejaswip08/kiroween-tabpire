@@ -10,7 +10,7 @@ vi.mock('wxt/browser', async () => {
 
 import { fake } from '../helpers/fakeBrowser';
 import { App } from '../../entrypoints/newtab/App';
-import { MAX_PINNED } from '../../lib/pinned';
+import { MAX_HAUNTS } from '../../lib/store';
 import { store } from '../../lib/store';
 
 beforeEach(() => {
@@ -28,8 +28,8 @@ const openForm = async () => {
 };
 
 describe('pinned pages row', () => {
-  it('shows each page as a link that opens in this tab, with a letter badge and no icon image', async () => {
-    await store.setPinned([
+  it('shows each page as a link that opens in this tab, with an icon that falls back to a letter badge', async () => {
+    await store.setHaunts([
       { url: 'https://github.com/', title: 'GitHub' },
       { url: 'https://example.com/docs', title: 'Docs' },
     ]);
@@ -38,13 +38,26 @@ describe('pinned pages row', () => {
     expect(link.getAttribute('href')).toBe('https://github.com/');
     expect(link.getAttribute('target')).toBeNull();
     expect(link.getAttribute('referrerpolicy')).toBe('no-referrer');
+    // The icon sources are tried in order; when every one fails the letter shows.
+    const seen: string[] = [];
+    for (let i = 0; i < 4; i++) {
+      const img = link.querySelector('img');
+      if (!img) break;
+      seen.push(img.getAttribute('src')!);
+      fireEvent.error(img);
+    }
+    expect(seen).toEqual([
+      expect.stringContaining('/_favicon/?pageUrl=https%3A%2F%2Fgithub.com%2F'),
+      'https://github.com/favicon.ico',
+      'https://icons.duckduckgo.com/ip3/github.com.ico',
+    ]);
+    expect(link.querySelector('img')).toBeNull();
     expect(within(link).getByText('G')).toBeTruthy();
-    expect(row().querySelector('img')).toBeNull();
     expect(within(row()).getAllByRole('link')).toHaveLength(2);
   });
 
   it('ends with the Add page button', async () => {
-    await store.setPinned([{ url: 'https://github.com/', title: 'GitHub' }]);
+    await store.setHaunts([{ url: 'https://github.com/', title: 'GitHub' }]);
     render(<App />);
     await within(row()).findByRole('link', { name: /GitHub/ });
     const items = within(row()).getAllByRole('listitem');
@@ -64,7 +77,7 @@ describe('Add page form', () => {
 
     expect(await within(row()).findByRole('link', { name: /My docs/ })).toBeTruthy();
     expect(screen.queryByRole('dialog')).toBeNull();
-    expect(await store.getPinned()).toEqual([{ url: 'https://example.com/docs', title: 'My docs' }]);
+    expect(await store.getHaunts()).toEqual([{ url: 'https://example.com/docs', title: 'My docs' }]);
     expect(document.activeElement).toBe(addButton());
   });
 
@@ -90,7 +103,7 @@ describe('Add page form', () => {
     );
     expect(address.getAttribute('aria-invalid')).toBe('true');
     expect(screen.getByRole('dialog')).toBeTruthy();
-    expect(await store.getPinned()).toEqual([]);
+    expect(await store.getHaunts()).toEqual([]);
 
     await userEvent.clear(address);
     await userEvent.type(address, 'not an address');
@@ -99,13 +112,13 @@ describe('Add page form', () => {
   });
 
   it('rejects a duplicate', async () => {
-    await store.setPinned([{ url: 'https://example.com/', title: 'Example' }]);
+    await store.setHaunts([{ url: 'https://example.com/', title: 'Example' }]);
     render(<App />);
     await within(row()).findByRole('link', { name: /Example/ });
     const form = await openForm();
     await userEvent.type(within(form).getByLabelText('Web address'), 'example.com{Enter}');
     expect((await within(form).findByRole('alert')).textContent).toBe('That page is already in the list.');
-    expect(await store.getPinned()).toHaveLength(1);
+    expect(await store.getHaunts()).toHaveLength(1);
   });
 
   it('closes with Escape and gives focus back to the button', async () => {
@@ -139,7 +152,7 @@ describe('Add page form', () => {
 
 describe('removing and the limit', () => {
   it('removes a page with its remove button', async () => {
-    await store.setPinned([
+    await store.setHaunts([
       { url: 'https://a.com/', title: 'Alpha' },
       { url: 'https://b.com/', title: 'Beta' },
     ]);
@@ -150,11 +163,11 @@ describe('removing and the limit', () => {
     await userEvent.click(remove);
     await waitFor(() => expect(within(row()).queryByRole('link', { name: /Alpha/ })).toBeNull());
     expect(within(row()).getByRole('link', { name: /Beta/ })).toBeTruthy();
-    expect((await store.getPinned()).map((p) => p.title)).toEqual(['Beta']);
+    expect((await store.getHaunts()).map((p) => p.title)).toEqual(['Beta']);
   });
 
   it('can reach the remove button with the keyboard', async () => {
-    await store.setPinned([{ url: 'https://a.com/', title: 'Alpha' }]);
+    await store.setHaunts([{ url: 'https://a.com/', title: 'Alpha' }]);
     render(<App />);
     const link = await within(row()).findByRole('link', { name: /Alpha/ });
     link.focus();
@@ -163,13 +176,13 @@ describe('removing and the limit', () => {
   });
 
   it('disables Add page at the limit, with the reason', async () => {
-    await store.setPinned(Array.from({ length: MAX_PINNED }, (_, i) => ({ url: `https://s${i}.com/`, title: `Site ${i}` })));
+    await store.setHaunts(Array.from({ length: MAX_HAUNTS }, (_, i) => ({ url: `https://s${i}.com/`, title: `Site ${i}` })));
     render(<App />);
     await within(row()).findByRole('link', { name: /Site 0/ });
     const btn = addButton();
     expect(btn.getAttribute('aria-disabled')).toBe('true');
     expect(document.getElementById(btn.getAttribute('aria-describedby')!)!.textContent).toBe(
-      'You can add up to 12 pages. Remove one first.',
+      `You can add up to ${MAX_HAUNTS} pages. Remove one first.`,
     );
     await userEvent.click(btn);
     expect(screen.queryByRole('dialog')).toBeNull();

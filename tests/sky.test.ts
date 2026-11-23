@@ -17,15 +17,16 @@ describe('moon placement', () => {
       const p = projectDirection(dir, cameraAt(t, aspect))!;
       expect(p).not.toBeNull();
       const rx = r.disc / aspect;
-      expect(p.x - rx).toBeGreaterThan(0.68);
+      expect(p.x - rx).toBeGreaterThan(0.55);
       expect(p.x + rx).toBeLessThan(0.99);
       expect(p.y - r.disc).toBeGreaterThan(0.01);
       expect(p.y + r.disc).toBeLessThan(0.45);
     }
   });
-  it('is a large disc, as in the reference', () => {
-    expect(MOON.discDeg).toBeGreaterThanOrEqual(4);
-    expect(moonScreenRadius(16 / 9).disc).toBeGreaterThan(0.08);
+  it('is a clear disc, a little smaller than before, with a halo around it', () => {
+    expect(MOON.discDeg).toBeGreaterThanOrEqual(3);
+    expect(MOON.discDeg).toBeLessThan(4.3);
+    expect(moonScreenRadius(16 / 9).disc).toBeGreaterThan(0.07);
     expect(MOON.haloDeg).toBeGreaterThan(MOON.discDeg * 1.5);
   });
   it('keeps the moon in view in a narrow window', () => {

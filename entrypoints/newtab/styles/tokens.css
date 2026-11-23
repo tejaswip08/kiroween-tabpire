@@ -38,9 +38,9 @@
   --dawn-glow: #ffd36e;
 
   /* Tab states. Each has its own colour and always also a word and a shape. */
-  --state-awake: #66d9a0;
+  --state-awake: #b9a5ff;
   --state-starving: #ff6b6b;
-  --state-asleep: #8fa3ff;
+  --state-asleep: #6fb7e8;
   --state-protected: #f4d58a;
 
   /* Letter badges for sites without an icon */

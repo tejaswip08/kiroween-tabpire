@@ -8,11 +8,11 @@ vi.mock('wxt/browser', async () => {
 });
 
 import { browser, events, fake, fire } from '../helpers/fakeBrowser';
-import { useCryptData } from '../../entrypoints/newtab/hooks/useCryptData';
+import { useCrypt } from '../../entrypoints/newtab/components/useCrypt';
 import { store } from '../../lib/store';
 
-function Probe({ onData }: { onData?: (d: ReturnType<typeof useCryptData>) => void }) {
-  const data = useCryptData();
+function Probe({ onData }: { onData?: (d: ReturnType<typeof useCrypt>) => void }) {
+  const data = useCrypt();
   onData?.(data);
   return (
     <div>
@@ -33,7 +33,7 @@ beforeEach(() => {
 });
 afterEach(cleanup);
 
-describe('useCryptData', () => {
+describe('useCrypt', () => {
   it('starts loading, then shows a card for each other tab', async () => {
     fake.addTab({ title: 'One', url: 'https://one.com/' });
     fake.addTab({ title: 'Two', url: 'https://two.com/' });

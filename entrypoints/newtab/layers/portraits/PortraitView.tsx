@@ -7,6 +7,7 @@ import { Coffin } from './Coffin';
 import { EmberBurst } from './EmberBurst';
 import { GlowHalo } from './GlowHalo';
 import { Niche } from './Niche';
+import { Pedestal } from './Pedestal';
 import { PortraitLights } from './PortraitLights';
 import type { ExitRun, PortraitRef, PortraitState } from './shared';
 import { useExitTriggers } from './useExitTriggers';
@@ -38,6 +39,7 @@ export function PortraitView({ slot }: { slot: CardSlot }) {
       <ViewCamera state={state} />
       <Niche state={slot.state} />
       <PortraitLights />
+      <Pedestal seed={slot.id} />
       <Suspense fallback={null}>
         <Vampire slotEl={slot.el} state={slot.state} seed={slot.id} poseRef={state} exitRun={exitRun} />
         <GlowHalo state={state} />

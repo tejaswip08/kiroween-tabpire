@@ -4,15 +4,15 @@ import { clamp, lerp } from './rng';
 
 export const MOON = {
   /** Angular radius of the red disc. */
-  discDeg: 4.3,
+  discDeg: 3.6,
   /** Angular radius of the glow around it. */
-  haloDeg: 8.5,
+  haloDeg: 7.5,
 } as const;
 
 /** Where the moon should appear on screen (0 to 1, y from the top). */
 export function moonTarget(aspect: number): { x: number; y: number } {
   const k = clamp((aspect - 0.6) / 0.9, 0, 1);
-  return { x: lerp(0.72, 0.82, k), y: lerp(0.11, 0.17, k) };
+  return { x: lerp(0.62, 0.72, k), y: lerp(0.2, 0.25, k) };
 }
 
 /** Direction of the moon from the camera's rest position, for a window shape. */

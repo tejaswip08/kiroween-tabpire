@@ -7,7 +7,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ActionButton } from '../../entrypoints/newtab/components/ActionButton';
 import { StakeIcon } from '../../entrypoints/newtab/components/icons';
 import { SiteIcon, siteLetter } from '../../entrypoints/newtab/components/SiteIcon';
-import { Vial } from '../../entrypoints/newtab/components/Vial';
+import { HungerBar } from '../../entrypoints/newtab/components/HungerBar';
 
 afterEach(cleanup);
 
@@ -146,22 +146,19 @@ describe('SiteIcon', () => {
   });
 });
 
-describe('Vial', () => {
+describe('HungerBar', () => {
   it('has a text alternative', () => {
-    render(<Vial fill={0.5} label="Hunger meter: 3 days idle" />);
+    render(<HungerBar fill={0.5} label="Hunger meter: 3 days idle" />);
     expect(screen.getByRole('img', { name: 'Hunger meter: 3 days idle' })).toBeTruthy();
   });
-
-  it('scales the liquid with a transform', () => {
-    render(<Vial fill={0.4} label="x" />);
-    const liquid = document.querySelector('.vial-liquid') as SVGElement;
-    expect(liquid.style.transform).toBe('scaleY(0.4)');
+  it('scales the fill with a transform', () => {
+    render(<HungerBar fill={0.4} label="x" />);
+    expect((document.querySelector('.hunger-fill') as HTMLElement).style.transform).toBe('scaleX(0.4)');
   });
-
   it('keeps the fill between 0 and 1', () => {
-    const { rerender } = render(<Vial fill={5} label="x" />);
-    expect((document.querySelector('.vial-liquid') as SVGElement).style.transform).toBe('scaleY(1)');
-    rerender(<Vial fill={-2} label="x" />);
-    expect((document.querySelector('.vial-liquid') as SVGElement).style.transform).toBe('scaleY(0)');
+    const { rerender } = render(<HungerBar fill={5} label="x" />);
+    expect((document.querySelector('.hunger-fill') as HTMLElement).style.transform).toBe('scaleX(1)');
+    rerender(<HungerBar fill={-2} label="x" />);
+    expect((document.querySelector('.hunger-fill') as HTMLElement).style.transform).toBe('scaleX(0)');
   });
 });

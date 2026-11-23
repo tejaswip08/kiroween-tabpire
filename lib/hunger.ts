@@ -166,7 +166,43 @@ export function estimateMb(tab: TabInfo): number {
   return Math.max(0, Math.round((base * factor) / 5) * 5);
 }
 
-/** Display text. Always starts with "~" because the number is an estimate. */
+/** Memory text. Always starts with "~" because the number is an estimate. Gigabytes from 1000 MB. */
 export function formatMb(mb: number): string {
+  if (mb >= 1000) return `~${(mb / 1000).toFixed(1)} GB`;
   return `~${mb} MB`;
+}
+
+const MINUTE_MS = 60 * 1000;
+const HOUR_MS = 60 * MINUTE_MS;
+const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
+/** Idle time in words: "Just now", "5 minutes idle", "2 hours idle", "3 days idle". */
+export function formatIdle(ms: number): string {
+  if (!(ms >= MINUTE_MS)) return 'Just now';
+  if (ms < HOUR_MS) return `${plural(Math.floor(ms / MINUTE_MS), 'minute')} idle`;
+  if (ms < DAY_MS) return `${plural(Math.floor(ms / HOUR_MS), 'hour')} idle`;
+  return `${plural(Math.floor(ms / DAY_MS), 'day')} idle`;
+}
+
+export interface Rank {
+  /** The title for this many slain tabs. */
+  name: string;
+  /** How many slain it takes to reach this rank. */
+  from: number;
+  /** How many it takes to reach the next rank, or null at the top. */
+  next: number | null;
+}
+const RANKS: readonly { name: string; from: number }[] = [
+  { name: 'Fledgling', from: 0 },
+  { name: 'Stake Bearer', from: 1 },
+  { name: 'Night Stalker', from: 10 },
+  { name: 'Vampire Hunter', from: 30 },
+  { name: 'Van Helsing', from: 100 },
+  { name: "Dracula's Bane", from: 300 },
+];
+/** The Blood Bank rank for the number of tabs slain (staked). */
+export function rankFor(slain: number): Rank {
+  const n = Number.isFinite(slain) ? Math.max(0, Math.floor(slain)) : 0;
+  let i = 0;
+  while (i + 1 < RANKS.length && n >= RANKS[i + 1]!.from) i++;
+  return { name: RANKS[i]!.name, from: RANKS[i]!.from, next: RANKS[i + 1]?.from ?? null };
 }

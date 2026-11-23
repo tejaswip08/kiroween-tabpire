@@ -9,7 +9,7 @@ function makeGroundTexture(): CanvasTexture {
   canvas.width = canvas.height = SIZE;
   const g = canvas.getContext('2d')!;
   const rng = mulberry32(31);
-  g.fillStyle = '#30283a';
+  g.fillStyle = '#2d2832';
   g.fillRect(0, 0, SIZE, SIZE);
   // Soft blobs of earth and grass, drawn again at the edges so the tile repeats without a seam.
   const blob = (x: number, y: number, r: number, color: string, alpha: number) => {
@@ -48,7 +48,7 @@ function makeGroundTexture(): CanvasTexture {
  */
 export function Ground() {
   const map = useMemo(makeGroundTexture, []);
-  const tint = useMemo(() => new Color('#b8a8c8'), []);
+  const tint = useMemo(() => new Color('#b4aab4'), []);
   return (
     <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, -40]} receiveShadow>
       <planeGeometry args={[200, 200]} />

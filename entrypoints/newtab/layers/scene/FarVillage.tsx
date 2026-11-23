@@ -3,6 +3,7 @@ import { useFrame } from '@react-three/fiber';
 import { useMemo, useRef } from 'react';
 import { Color, DoubleSide, InstancedMesh, type Mesh, MeshBasicMaterial, PlaneGeometry } from 'three';
 import { FAR_ITEMS } from '../../../../lib/scene/depth';
+import { C } from './colors';
 import { useDisplay } from './display';
 import { buildFarVillage } from './farBuild';
 
@@ -29,7 +30,7 @@ export function FarVillage() {
     return buildFarVillage({ barn: barn!, windmill: windmill!, fortress: fortress!, ruins: ruins! });
   }, [gltfs]);
 
-  const silhouette = useMemo(() => new MeshBasicMaterial({ color: '#190c36', fog: true }), []);
+  const silhouette = useMemo(() => new MeshBasicMaterial({ color: new Color('#190c36').lerp(C.fog, 0.22), fog: true }), []);
   const windowMesh = useMemo(() => {
     const mat = new MeshBasicMaterial({ color: new Color(3.6, 1.5, 0.35), toneMapped: false, fog: true, side: DoubleSide });
     const m = new InstancedMesh(new PlaneGeometry(1, 1), mat, Math.max(1, built.wins.length));

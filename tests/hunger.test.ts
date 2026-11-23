@@ -6,8 +6,10 @@ import {
   KNOWN_SITE_MB,
   baseMb,
   estimateMb,
+  formatIdle,
   formatMb,
   hungerMs,
+  rankFor,
   siteOf,
   stateOf,
   type TabInfo,
@@ -265,6 +267,9 @@ describe('formatMb', () => {
       }),
     );
     expect(formatMb(520)).toBe('~520 MB');
+    expect(formatMb(995)).toBe('~995 MB');
+    expect(formatMb(1000)).toBe('~1.0 GB');
+    expect(formatMb(1460)).toBe('~1.5 GB');
   });
 });
 
@@ -301,4 +306,42 @@ describe('lib/hunger.ts purity', () => {
       expect(code).not.toContain(banned);
     },
   );
+});
+
+describe('formatIdle', () => {
+  it.each([
+    [0, 'Just now'],
+    [59_000, 'Just now'],
+    [60_000, '1 minute idle'],
+    [5 * 60_000, '5 minutes idle'],
+    [60 * 60_000, '1 hour idle'],
+    [23 * 60 * 60_000, '23 hours idle'],
+    [DAY_MS, '1 day idle'],
+    [3 * DAY_MS + 5, '3 days idle'],
+  ])('%d ms reads %s', (ms, text) => {
+    expect(formatIdle(ms)).toBe(text);
+  });
+  it('treats bad numbers as just now', () => {
+    expect(formatIdle(Number.NaN)).toBe('Just now');
+    expect(formatIdle(-5)).toBe('Just now');
+  });
+});
+
+describe('rankFor', () => {
+  it('starts at Fledgling and goes up with the number slain', () => {
+    expect(rankFor(0).name).toBe('Fledgling');
+    expect(rankFor(1).name).toBe('Stake Bearer');
+    expect(rankFor(9).name).toBe('Stake Bearer');
+    expect(rankFor(10).name).toBe('Night Stalker');
+    expect(rankFor(1000).name).toBe("Dracula's Bane");
+  });
+  it('says how many it takes to reach the next rank, and null at the top', () => {
+    expect(rankFor(0)).toMatchObject({ from: 0, next: 1 });
+    expect(rankFor(12)).toMatchObject({ from: 10, next: 30 });
+    expect(rankFor(1000).next).toBeNull();
+  });
+  it('never goes below the first rank', () => {
+    expect(rankFor(-4).name).toBe('Fledgling');
+    expect(rankFor(Number.NaN).name).toBe('Fledgling');
+  });
 });

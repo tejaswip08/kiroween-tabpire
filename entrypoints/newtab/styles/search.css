@@ -2,7 +2,8 @@
 
 .search {
   position: relative;
-  justify-self: center;
+  align-self: center;
+  flex: none;
   width: min(640px, 100%);
 }
 
@@ -102,7 +103,7 @@
 .suggestion[data-kind='tab'] .suggestion-kind {
   color: var(--state-awake);
 }
-.suggestion[data-kind='pinned'] .suggestion-kind {
+.suggestion[data-kind='haunt'] .suggestion-kind {
   color: var(--state-protected);
 }
 .suggestion[data-kind='crypt'] .suggestion-kind {

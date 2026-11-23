@@ -10,7 +10,7 @@ import './styles/base.css';
 import './styles/controls.css';
 import './styles/header.css';
 import './styles/search.css';
-import './styles/pinned.css';
+import './styles/haunts.css';
 import './styles/cards.css';
 import './styles/states.css';
 import './styles/layers.css';

@@ -2,6 +2,8 @@
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+vi.mock('../../lib/tabs', () => ({ openBloodBank: vi.fn(async () => {}) }));
+import { openBloodBank } from '../../lib/tabs';
 import { Header } from '../../entrypoints/newtab/components/Header';
 
 afterEach(cleanup);
@@ -9,25 +11,37 @@ afterEach(cleanup);
 const setup = (over: Partial<Parameters<typeof Header>[0]> = {}) => {
   const onDawn = vi.fn();
   render(
-    <Header openTabs={12} estimatedMb={1460} reclaimedMb={245} dawnCount={3} dawnBusy={false} onDawn={onDawn} {...over} />,
+    <Header vampires={12} starving={0} staked={1} coffined={2} estimatedMb={1460} reclaimedMb={245} dawnCount={3} dawnBusy={false} onDawn={onDawn} {...over} />,
   );
   return { onDawn };
 };
 
 describe('header stats panel', () => {
-  it('shows the three figures with an "est." tag on each', () => {
+  it('shows three columns, with an "est." tag on the two memory figures', () => {
     setup();
     const panel = screen.getByRole('region', { name: 'Browser stats' });
-    expect(within(panel).getByText('Open tabs').closest('div')?.textContent).toContain('12');
-    expect(within(panel).getByText('Memory in use').closest('div')?.textContent).toContain('~1.5 GB');
-    expect(within(panel).getByText('Memory reclaimed').closest('div')?.textContent).toContain('~245 MB');
+    expect(within(panel).getByText('Vampires').closest('div')?.textContent).toContain('12');
+    expect(within(panel).getByText('Draining now').closest('div')?.textContent).toContain('~1.5 GB');
+    expect(within(panel).getByText('Blood reclaimed').closest('div')?.textContent).toContain('~245 MB');
     const tags = within(panel).getAllByText('est.');
-    expect(tags).toHaveLength(3);
+    expect(tags).toHaveLength(2);
     expect(tags[0]?.getAttribute('title')).toBe('Estimated');
+    expect(within(panel).getByText('none starving')).toBeTruthy();
+    expect(within(panel).getByText('by your open tabs')).toBeTruthy();
+    expect(within(panel).getByText('1 slain · 2 coffined')).toBeTruthy();
+  });
+  it('says how many are starving, and fills the bar against 4 GB', () => {
+    setup({ starving: 3, estimatedMb: 1000 });
+    const panel = screen.getByRole('region', { name: 'Browser stats' });
+    expect(within(panel).getByText('3 starving')).toBeTruthy();
+    expect((panel.querySelector('.stat-bar-fill') as HTMLElement).style.transform).toBe('scaleX(0.25)');
+    cleanup();
+    setup({ estimatedMb: 9000 });
+    expect((document.querySelector('.stat-bar-fill') as HTMLElement).style.transform).toBe('scaleX(1)');
   });
 
   it('shows memory with "~" even at zero', () => {
-    setup({ estimatedMb: 0, reclaimedMb: 0, openTabs: 0 });
+    setup({ estimatedMb: 0, reclaimedMb: 0, vampires: 0 });
     expect(screen.getAllByText('~0 MB')).toHaveLength(2);
   });
 
@@ -38,15 +52,20 @@ describe('header stats panel', () => {
 });
 
 describe('header buttons', () => {
-  it('disables Themes and Blood Bank with "Coming soon"', async () => {
+  it('disables Themes with "Coming soon"', async () => {
     setup();
-    for (const name of ['Themes', 'Blood Bank']) {
-      const btn = screen.getByRole('button', { name });
-      expect(btn.getAttribute('aria-disabled')).toBe('true');
-      const tip = document.getElementById(btn.getAttribute('aria-describedby')!)!;
-      expect(tip.textContent).toBe('Coming soon');
-      await userEvent.click(btn); // does nothing, and does not throw
-    }
+    const btn = screen.getByRole('button', { name: 'Themes' });
+    expect(btn.getAttribute('aria-disabled')).toBe('true');
+    const tip = document.getElementById(btn.getAttribute('aria-describedby')!)!;
+    expect(tip.textContent).toBe('Coming soon');
+    await userEvent.click(btn); // does nothing, and does not throw
+  });
+  it('opens the Blood Bank page in a new tab', async () => {
+    setup();
+    const btn = screen.getByRole('button', { name: 'Blood Bank' });
+    expect(btn.getAttribute('aria-disabled')).toBeNull();
+    await userEvent.click(btn);
+    expect(openBloodBank).toHaveBeenCalledTimes(1);
   });
 
   it('shows the Dawn count and runs Dawn when clicked', async () => {

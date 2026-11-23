@@ -10,24 +10,30 @@ export interface Stats {
   mbFreed: number;
 }
 
-export interface ActionLogEntry {
+/** What the log records. Removing garlic is logged as 'garlic' too. */
+export type LogAction = 'stake' | 'coffin' | 'crypt' | 'dawn' | 'resurrect' | 'garlic';
+export const LOG_ACTIONS: readonly LogAction[] = ['stake', 'coffin', 'crypt', 'dawn', 'resurrect', 'garlic'];
+export interface LogEntry {
   at: number;
-  action: string;
+  action: LogAction;
   site: string | null;
   title?: string;
 }
 
-export interface CryptItem {
+export interface CryptEntry {
   id: string;
   url: string;
   title: string;
   savedAt: number;
 }
 
-export interface PinnedPage {
+/** A page in the row under the search box (a "haunt"). */
+export interface Haunt {
   url: string;
   title: string;
 }
+/** The most haunts the row can hold. */
+export const MAX_HAUNTS = 10;
 
 export type ThemeId = string;
 
@@ -36,7 +42,9 @@ export const KEYS = {
   log: 'tabpire:log',
   crypt: 'tabpire:crypt',
   garlic: 'tabpire:garlic',
-  pinned: 'tabpire:pinned',
+  haunts: 'tabpire:haunts',
+  /** The key haunts were saved under before they were renamed. Read once as a fallback. */
+  legacyPinned: 'tabpire:pinned',
   theme: 'tabpire:theme',
 } as const;
 
@@ -66,17 +74,18 @@ const isStats = (v: unknown): v is Stats =>
   isNum(v.dawns) &&
   isNum(v.mbFreed);
 
-const isLogEntry = (v: unknown): v is ActionLogEntry =>
+const isLogAction = (v: unknown): v is LogAction => LOG_ACTIONS.includes(v as LogAction);
+const isLogEntry = (v: unknown): v is LogEntry =>
   isRecord(v) &&
   isNum(v.at) &&
-  isStr(v.action) &&
+  isLogAction(v.action) &&
   (v.site === null || isStr(v.site)) &&
   (v.title === undefined || isStr(v.title));
 
-const isCryptItem = (v: unknown): v is CryptItem =>
+const isCryptItem = (v: unknown): v is CryptEntry =>
   isRecord(v) && isStr(v.id) && isStr(v.url) && isStr(v.title) && isNum(v.savedAt);
 
-const isPinned = (v: unknown): v is PinnedPage =>
+const isHaunt = (v: unknown): v is Haunt =>
   isRecord(v) && isStr(v.url) && isStr(v.title);
 
 const arrayOf =
@@ -105,17 +114,29 @@ export const store = {
   getStats: () => read(KEYS.stats, isStats, defaultStats),
   setStats: (v: Stats) => write(KEYS.stats, v),
 
-  getLog: () => read(KEYS.log, arrayOf(isLogEntry), () => []),
-  setLog: (v: ActionLogEntry[]) => write(KEYS.log, v),
+  /** Entries saved by older versions with action 'ungarlic' are read as 'garlic'. */
+  getLog: async (): Promise<LogEntry[]> => {
+    const result = await browser.storage.local.get(KEYS.log);
+    const value: unknown = result[KEYS.log];
+    if (!Array.isArray(value)) return [];
+    const fixed = value.map((e) => (isRecord(e) && e.action === 'ungarlic' ? { ...e, action: 'garlic' } : e));
+    return arrayOf(isLogEntry)(fixed) ? fixed : [];
+  },
+  setLog: (v: LogEntry[]) => write(KEYS.log, v),
 
   getCrypt: () => read(KEYS.crypt, arrayOf(isCryptItem), () => []),
-  setCrypt: (v: CryptItem[]) => write(KEYS.crypt, v),
+  setCrypt: (v: CryptEntry[]) => write(KEYS.crypt, v),
 
   getGarlic: () => read(KEYS.garlic, arrayOf(isStr), () => []),
   setGarlic: (v: string[]) => write(KEYS.garlic, v),
 
-  getPinned: () => read(KEYS.pinned, arrayOf(isPinned), () => []),
-  setPinned: (v: PinnedPage[]) => write(KEYS.pinned, v),
+  getHaunts: async (): Promise<Haunt[]> => {
+    const now = (await browser.storage.local.get(KEYS.haunts))[KEYS.haunts];
+    if (arrayOf(isHaunt)(now)) return now;
+    const old = (await browser.storage.local.get(KEYS.legacyPinned))[KEYS.legacyPinned];
+    return arrayOf(isHaunt)(old) ? old : [];
+  },
+  setHaunts: (v: Haunt[]) => write(KEYS.haunts, v),
 
   getTheme: () => read(KEYS.theme, isStr, () => DEFAULT_THEME),
   setTheme: (v: ThemeId) => write(KEYS.theme, v),
@@ -149,7 +170,7 @@ export function transact<T>(fn: () => Promise<T>): Promise<T> {
  * Calls listener with the changed Tabpire keys, for local storage only.
  * Lets one page react to writes made by another. Returns an unsubscribe function.
  */
-export function subscribe(listener: (changedKeys: string[]) => void): () => void {
+export function onStoreChange(listener: (changedKeys: string[]) => void): () => void {
   const handler = (changes: Record<string, unknown>, area: string) => {
     if (area !== 'local') return;
     const keys = Object.keys(changes).filter((k) => k.startsWith('tabpire:'));

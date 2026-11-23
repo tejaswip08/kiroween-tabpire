@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { browser } from 'wxt/browser';
-import { store, subscribe, type CryptItem, type PinnedPage, type Stats } from '../../../lib/store';
+import { store, onStoreChange, type CryptEntry, type Haunt, type Stats } from '../../../lib/store';
 import { buildCards, toRawTab, type Card, type RawTab } from '../../../lib/view';
 
 export const REFRESH_DEBOUNCE_MS = 150;
@@ -9,8 +9,8 @@ export const TICK_MS = 60_000;
 interface Stored {
   garlic: string[];
   stats: Stats;
-  crypt: CryptItem[];
-  pinned: PinnedPage[];
+  crypt: CryptEntry[];
+  haunts: Haunt[];
 }
 
 interface TabsView {
@@ -29,18 +29,18 @@ const EMPTY_STORED: Stored = {
   garlic: [],
   stats: { staked: 0, coffined: 0, crypted: 0, dawns: 0, mbFreed: 0 },
   crypt: [],
-  pinned: [],
+  haunts: [],
 };
 const EMPTY_TABS: TabsView = { cards: [], rawTabs: [], now: 0 };
 
 async function loadStored(): Promise<Stored> {
-  const [garlic, stats, crypt, pinned] = await Promise.all([
+  const [garlic, stats, crypt, haunts] = await Promise.all([
     store.getGarlic(),
     store.getStats(),
     store.getCrypt(),
-    store.getPinned(),
+    store.getHaunts(),
   ]);
-  return { garlic, stats, crypt, pinned };
+  return { garlic, stats, crypt, haunts };
 }
 
 async function loadTabs(): Promise<{ rawTabs: RawTab[]; currentId: number | undefined }> {
@@ -57,7 +57,7 @@ async function loadTabs(): Promise<{ rawTabs: RawTab[]; currentId: number | unde
  * Refreshes when tabs change, when other Tabpire pages write data, once a minute,
  * and when the page becomes visible. Bursts of events cause one refresh.
  */
-export function useCryptData(): CryptData {
+export function useCrypt(): CryptData {
   const [stored, setStored] = useState<Stored | null>(null);
   const [tabsView, setTabsView] = useState<TabsView | null>(null);
   const [failed, setFailed] = useState(false);
@@ -69,7 +69,7 @@ export function useCryptData(): CryptData {
 
   const refresh = useCallback(async () => {
     const mine = ++started.current;
-    // Stored data and tabs load separately, so the pinned pages and search
+    // Stored data and tabs load separately, so the haunts and search
     // can still work when the tab list cannot be read.
     const [storedResult, tabsResult] = await Promise.allSettled([loadStored(), loadTabs()]);
     if (mine < applied.current) return; // an older result must not replace a newer one
@@ -109,7 +109,7 @@ export function useCryptData(): CryptData {
       tabs.onReplaced,
     ];
     for (const e of tabEvents) e.addListener(schedule);
-    const unsubscribe = subscribe(schedule);
+    const unsubscribe = onStoreChange(schedule);
     const interval = setInterval(schedule, TICK_MS);
     const onVisible = () => {
       if (document.visibilityState === 'visible') schedule();

@@ -181,7 +181,7 @@ describe('layout', () => {
     for (const g of ['critter']) expect(L.placements.filter((p) => p.group === g).length).toBeGreaterThanOrEqual(6);
   });
   it('has more trees, graves and glowing mushrooms, with a lean on many of them', () => {
-    expect(L.placements.filter((p) => p.group === 'tree').length).toBeGreaterThanOrEqual(36);
+    expect(L.placements.filter((p) => p.group === 'tree').length).toBeGreaterThanOrEqual(33);
     expect(L.placements.filter((p) => p.group === 'oldGrave').length).toBeGreaterThanOrEqual(50);
     expect(L.placements.filter((p) => p.model.startsWith('forest_mushroom')).length).toBeGreaterThanOrEqual(6);
     expect(L.glows.filter((g) => g.kind === 'mushroom').length).toBeGreaterThanOrEqual(6);

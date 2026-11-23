@@ -53,15 +53,15 @@ export function coffinFit(): { scale: number; x: number; y: number; z: number; r
   };
 }
 
-/** Portrait slot size, and how the standing vampire is framed in it: chest up, filling about 80% of the arch. */
-export const SLOT = { width: 96, height: 112 } as const;
+/** Portrait slot size, and how the standing vampire is framed in it: the whole body on its tomb, in an arch. */
+export const SLOT = { width: 190, height: 170 } as const;
 export const FRAME = {
-  /** World height shown in the slot. The head and chest fill most of it. */
-  worldHeight: 0.62,
-  /** Height of the middle of the frame above the feet (the head top is at 1.0). */
-  centreY: 0.73,
+  /** World height shown in the slot. The whole vampire and the top of its stone tomb. */
+  worldHeight: 1.35,
+  /** Height of the middle of the frame above the feet (the head top is at 1.0, the tomb is below 0). */
+  centreY: 0.395,
   /** Camera distance and vertical field of view that give `worldHeight` at that distance. */
-  distance: 1.6,
+  distance: 3.47,
   fov: 22,
 } as const;
 

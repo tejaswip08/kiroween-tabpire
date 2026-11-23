@@ -210,7 +210,7 @@ describe('garlic and un-garlic', () => {
     expect(await store.getGarlic()).toEqual([]);
     expect(await stateOfTab(a.id)).toBe('starving');
     const log = await store.getLog();
-    expect(log[1]).toEqual({ at: NOW + 1, action: 'ungarlic', site: 'example.com' });
+    expect(log[1]).toEqual({ at: NOW + 1, action: 'garlic', site: 'example.com' });
     expect((await store.getStats()).mbFreed).toBe(0);
   });
 
@@ -305,7 +305,7 @@ describe('stats and log', () => {
       'coffin',
       'crypt',
       'garlic',
-      'ungarlic',
+      'garlic',
       'resurrect',
     ]);
   });

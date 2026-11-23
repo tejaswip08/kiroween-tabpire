@@ -1,6 +1,6 @@
 import { useFrame } from '@react-three/fiber';
 import { useEffect, useMemo, useRef } from 'react';
-import { AdditiveBlending, DoubleSide, type Group, type ShapeGeometry, Vector3 } from 'three';
+import { DoubleSide, type Group, type ShapeGeometry, Vector3 } from 'three';
 import { onSceneEvent } from '../../../../lib/scene/bus';
 import { WITCH_FLIGHT_S, witchAtInto } from '../../../../lib/scene/sky';
 import { useDisplay } from './display';
@@ -8,12 +8,12 @@ import { makeBodyGeometry, makeBroomGeometry, makeCloakGeometry, rippleCloak } f
 
 const R = 340;
 /** One unit of the silhouette, as an angle on the sky. The whole witch is about 8 units long. */
-const UNIT = R * Math.tan((1.15 * Math.PI) / 180);
+const UNIT = R * Math.tan((1.45 * Math.PI) / 180);
 
 type Mode = 'hidden' | 'flying' | 'leaving';
 
 /**
- * The witch on her broomstick: a clear dark side-on silhouette with a faint warm rim. She sits on the broom
+ * The witch on her broomstick: a clear near-black side-on silhouette (#120818, unlit). She sits on the broom
  * with a pointed crooked hat, her ragged cloak streaming and rippling behind her, and bristles at the tail.
  * She glides across the sky in front of the moon with a slight bob, again and again with a short pause, and
  * sweeps off the top when Dawn runs. With reduced motion she holds still.
@@ -91,17 +91,10 @@ export function Witch() {
     rippleCloak(geo.cloak as ShapeGeometry, geo.cloakBase, t, display.reduced ? 0 : 1);
   });
 
-  const dark = <meshBasicMaterial color="#07030f" side={DoubleSide} depthWrite={false} fog={false} />;
+  // A flat near-black silhouette: a basic material, so no light or tone mapping can turn her pale.
+  const dark = <meshBasicMaterial color="#120818" side={DoubleSide} depthWrite={false} toneMapped={false} fog={false} />;
   return (
     <group ref={group} visible={false} renderOrder={-70}>
-      {/* A slightly larger warm copy behind: the faint rim of light. */}
-      <group scale={1.07} position={[-0.02, -0.03, -0.01]} renderOrder={-71}>
-        {[geo.broom, geo.body, geo.cloak].map((g, i) => (
-          <mesh key={i} geometry={g} renderOrder={-71}>
-            <meshBasicMaterial color={[1.3, 0.55, 0.22]} toneMapped={false} blending={AdditiveBlending} transparent opacity={0.4} depthWrite={false} side={DoubleSide} fog={false} />
-          </mesh>
-        ))}
-      </group>
       {[geo.broom, geo.body, geo.cloak].map((g, i) => (
         <mesh key={i} geometry={g} renderOrder={-70}>
           {dark}

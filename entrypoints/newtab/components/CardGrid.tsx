@@ -1,7 +1,9 @@
+import type { CSSProperties } from 'react';
+import { fitCards } from '../../../lib/cardFit';
 import type { Card } from '../../../lib/view';
+import { useAreaSize } from '../hooks/useAreaSize';
 import { useExitingCards } from '../hooks/useExitingCards';
 import { TabCard, type CardAction } from './TabCard';
-
 export function CardGrid({
   cards,
   busyIds,
@@ -15,14 +17,17 @@ export function CardGrid({
   onAction: (card: Card, action: CardAction) => void;
 }) {
   const display = useExitingCards(cards);
-
+  const [area, size] = useAreaSize<HTMLDivElement>();
+  // The cards never scroll: they shrink to fit, and if there are too many the hungriest are shown plus "+N more".
+  const fit = fitCards(size.w, size.h, display.length);
+  const shown = display.slice(0, fit.shown);
   return (
-    <section aria-labelledby="open-tabs-heading">
+    <section className="cards-area" ref={area} aria-labelledby="open-tabs-heading">
       <h2 id="open-tabs-heading" className="sr-only">
         Open tabs, hungriest first
       </h2>
-      <ul className="card-grid" role="list">
-        {display.map(({ card, exiting, exitKind, exitMs, exitFadeDelayMs }, index) => (
+      <ul className="card-grid" role="list" style={{ '--card-scale': fit.scale } as CSSProperties}>
+        {shown.map(({ card, exiting, exitKind, exitMs, exitFadeDelayMs }, index) => (
           <TabCard
             key={card.tab.id}
             card={card}
@@ -35,6 +40,12 @@ export function CardGrid({
             onAction={onAction}
           />
         ))}
+        {fit.more > 0 && (
+          <li className="card-more" title={`${fit.more} more tabs are open. The hungriest are shown.`}>
+            <span className="card-more-count">+{fit.more} more</span>
+            <span className="card-more-note">tabs not shown</span>
+          </li>
+        )}
       </ul>
     </section>
   );

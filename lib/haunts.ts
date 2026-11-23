@@ -1,8 +1,6 @@
-// Pinned pages: the row under the search box.
+// Haunts: the row of pages under the search box (the page says "Add page").
 import { siteOf } from './hunger';
-import { store, transact, type PinnedPage } from './store';
-
-export const MAX_PINNED = 12;
+import { MAX_HAUNTS, store, transact, type Haunt } from './store';
 
 export type AddressCheck =
   | { ok: true; url: string }
@@ -34,40 +32,40 @@ export function checkAddress(input: string): AddressCheck {
 }
 
 /** First letter or digit, upper case, for the letter badge. */
-export function pinnedLetter(page: { title: string; url: string }): string {
+export function hauntLetter(page: { title: string; url: string }): string {
   const source = page.title.trim() || siteOf(page.url) || '?';
   const match = source.match(/[\p{L}\p{N}]/u);
   return match ? match[0].toUpperCase() : '?';
 }
 
-export type PinResult =
+export type HauntResult =
   | { ok: true }
   | { ok: false; reason: 'empty' | 'invalid' | 'not-web' | 'full' | 'duplicate' };
 
-export async function pinPage(input: string, name?: string): Promise<PinResult> {
+export async function addHaunt(input: string, name?: string): Promise<HauntResult> {
   const check = checkAddress(input);
   if (!check.ok) return check;
   const title = name?.trim() || siteOf(check.url) || check.url;
 
-  return transact(async (): Promise<PinResult> => {
-    const pages = await store.getPinned();
-    if (pages.length >= MAX_PINNED) return { ok: false, reason: 'full' };
+  return transact(async (): Promise<HauntResult> => {
+    const pages = await store.getHaunts();
+    if (pages.length >= MAX_HAUNTS) return { ok: false, reason: 'full' };
     if (pages.some((p) => p.url === check.url)) return { ok: false, reason: 'duplicate' };
-    const page: PinnedPage = { url: check.url, title };
-    await store.setPinned([...pages, page]);
+    const page: Haunt = { url: check.url, title };
+    await store.setHaunts([...pages, page]);
     return { ok: true };
   });
 }
 
-export async function unpinPage(url: string): Promise<void> {
+export async function removeHaunt(url: string): Promise<void> {
   await transact(async () => {
-    const pages = await store.getPinned();
-    await store.setPinned(pages.filter((p) => p.url !== url));
+    const pages = await store.getHaunts();
+    await store.setHaunts(pages.filter((p) => p.url !== url));
   });
 }
 
 /** Plain-word text for a failed attempt to add a page. */
-export function pinProblemText(reason: Exclude<PinResult, { ok: true }>['reason']): string {
+export function hauntProblemText(reason: Exclude<HauntResult, { ok: true }>['reason']): string {
   switch (reason) {
     case 'empty':
       return 'Type a web address, like example.com.';
@@ -76,7 +74,7 @@ export function pinProblemText(reason: Exclude<PinResult, { ok: true }>['reason'
     case 'not-web':
       return 'Only web addresses that start with http or https can be added.';
     case 'full':
-      return `You can add up to ${MAX_PINNED} pages. Remove one first.`;
+      return `You can add up to ${MAX_HAUNTS} pages. Remove one first.`;
     case 'duplicate':
       return 'That page is already in the list.';
   }

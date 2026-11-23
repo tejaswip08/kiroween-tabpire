@@ -250,6 +250,23 @@ export function blocksMoon(p: Placement): boolean {
   return false;
 }
 
+/** True when a near-foreground prop would be cut by the left, right or bottom edge of the screen at any usual window shape. */
+export function cutByScreenEdge(p: Placement): boolean {
+  const info = MODELS[p.model];
+  const pad = Math.max(info.hx, info.hz) * p.scale;
+  for (const aspect of MOON_ASPECTS) {
+    const cam = cameraAt(0, aspect, true);
+    const mid = project([p.x, 0, p.z], cam);
+    // Only the near foreground matters: farther props are small and well inside the frame.
+    if (mid && mid.depth > 13) continue;
+    for (const pt of [[p.x - pad, 0, p.z], [p.x + pad, 0, p.z], [p.x - pad, info.h * p.scale, p.z], [p.x + pad, info.h * p.scale, p.z]] as const) {
+      const q = project(pt, cam);
+      if (!q) return true;
+      if (q.depth < 13 && (q.x < 0.05 || q.x > 0.95 || q.y > 0.95)) return true;
+    }
+  }
+  return false;
+}
 // ---------- building the layout ----------
 const slug = (s: string) => s.replace(/[^a-z0-9]+/gi, '-');
 
@@ -563,7 +580,7 @@ export function buildLayout(seed: number = LAYOUT_SEED): Layout {
   };
   const owlTree = perchTree('tree_dead_large', -9.8, -6.2, 1.1);
   const crowTreeA = perchTree('tree_dead_medium', -15.5, -12.8, 1.2);
-  const crowTreeB = perchTree('tree_dead_large', 11.5, -18.6, 1.1);
+  const crowTreeB = perchTree('tree_dead_large', 7.3, -18.2, 1.1);
   // Glowing mushrooms near the graves, and a few big ones.
   for (let i = 0; i < 14; i++) {
     const sc = between(1.7, 2.6);
@@ -637,7 +654,7 @@ export function buildLayout(seed: number = LAYOUT_SEED): Layout {
   // Spiders drop on threads from the branches of the owl's tree, on the other side of the trunk from the owl.
   const st = owlTree;
   const sTop = MODELS[st.model].h * st.scale * 0.72;
-  const spiders = [0, 1, 2].map((i) => ({ x: st.x - 2.0 + i * 0.85, topY: sTop - i * 0.1, z: st.z + 1.7 + i * 0.3, drop: [1.5, 2.1, 1.1][i]!, seed: i + 1 }));
+  const spiders = [0, 1, 2].map((i) => ({ x: st.x - 1.3 + i * 0.85, topY: sTop - i * 0.1, z: st.z + 1.7 + i * 0.3, drop: [1.5, 2.1, 1.1][i]!, seed: i + 1 }));
   // Cobwebs hang between neighbouring gravestones, in view of the camera.
   const inView = (x: number, z: number) => 16 - z > 8 && Math.abs(x - 0.5) < 0.5 * (16 - z);
   const rowGraves = placements.filter((p) => p.group === 'oldGrave' && inView(p.x, p.z)).sort((a, b) => a.z - b.z || a.x - b.x);
@@ -663,6 +680,18 @@ export function buildLayout(seed: number = LAYOUT_SEED): Layout {
     { x: -2.2, y: 1.5, z: -13.5 },
   ];
 
+  // Nothing in the near foreground is cut off by the screen edge: scattered props that would be are dropped (the
+  // trees that carry the owl and the crows stay). Lit candles and mushroom glows that stood beside them go too.
+  const keep = new Set<string>([owlTree.id, crowTreeA.id, crowTreeB.id]);
+  const dropped = placements.filter((p) => (p.group === 'small' || p.group === 'oldGrave' || p.group === 'tree') && !keep.has(p.id) && cutByScreenEdge(p));
+  if (dropped.length) {
+    const gone = new Set(dropped.map((p) => p.id));
+    for (let i = placements.length - 1; i >= 0; i--) if (gone.has(placements[i]!.id)) placements.splice(i, 1);
+    for (let i = glows.length - 1; i >= 0; i--) {
+      const g = glows[i]!;
+      if ((g.kind === 'mushroom' || (g.kind === 'candle' && g.slot === undefined)) && dropped.some((q) => Math.hypot(q.x - g.x, q.z - g.z) < Math.max(MODELS[q.model].hx, MODELS[q.model].hz) * q.scale + 0.8)) glows.splice(i, 1);
+    }
+  }
   return { placements, lights: lights.slice(0, BUDGET.maxPointLights), glows, pathCentres, scenery, ghostSpots, cryptDoor };
 }
 

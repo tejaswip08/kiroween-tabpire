@@ -34,7 +34,7 @@ describe('store defaults', () => {
     expect(await store.getLog()).toEqual([]);
     expect(await store.getCrypt()).toEqual([]);
     expect(await store.getGarlic()).toEqual([]);
-    expect(await store.getPinned()).toEqual([]);
+    expect(await store.getHaunts()).toEqual([]);
     expect(await store.getTheme()).toBe('crypt');
   });
 });
@@ -46,7 +46,7 @@ describe('store round trips', () => {
     expect(await store.getStats()).toEqual(v);
   });
   it('log', async () => {
-    const v = [{ at: 1, action: 'stake', site: 'example.com', title: 'Hi' }];
+    const v = [{ at: 1, action: 'stake' as const, site: 'example.com', title: 'Hi' }];
     await store.setLog(v);
     expect(await store.getLog()).toEqual(v);
   });
@@ -61,8 +61,8 @@ describe('store round trips', () => {
   });
   it('pinned', async () => {
     const v = [{ url: 'https://example.com', title: 'Ex' }];
-    await store.setPinned(v);
-    expect(await store.getPinned()).toEqual(v);
+    await store.setHaunts(v);
+    expect(await store.getHaunts()).toEqual(v);
   });
   it('theme', async () => {
     await store.setTheme('moon');
@@ -76,13 +76,13 @@ describe('store bad data', () => {
     data.set(KEYS.log, 'nope');
     data.set(KEYS.crypt, [{ id: 1 }]);
     data.set(KEYS.garlic, 42);
-    data.set(KEYS.pinned, [null]);
+    data.set(KEYS.haunts, [null]);
     data.set(KEYS.theme, 7);
     expect((await store.getStats()).staked).toBe(0);
     expect(await store.getLog()).toEqual([]);
     expect(await store.getCrypt()).toEqual([]);
     expect(await store.getGarlic()).toEqual([]);
-    expect(await store.getPinned()).toEqual([]);
+    expect(await store.getHaunts()).toEqual([]);
     expect(await store.getTheme()).toBe('crypt');
   });
 });
@@ -154,5 +154,22 @@ describe('storage and network boundaries', () => {
   it.each(['storage.sync', 'fetch(', 'XMLHttpRequest'])('store.ts does not use %s', (banned) => {
     const text = readFileSync(join(root, 'lib', 'store.ts'), 'utf8');
     expect(text).not.toContain(banned);
+  });
+});
+
+describe('haunts and the log keep working with data from before the rename', () => {
+  it('reads haunts saved under the old key, and prefers the new key', async () => {
+    data.set(KEYS.legacyPinned, [{ url: 'https://old.com/', title: 'Old' }]);
+    expect(await store.getHaunts()).toEqual([{ url: 'https://old.com/', title: 'Old' }]);
+    await store.setHaunts([{ url: 'https://new.com/', title: 'New' }]);
+    expect(await store.getHaunts()).toEqual([{ url: 'https://new.com/', title: 'New' }]);
+  });
+  it("reads an old 'ungarlic' log entry as 'garlic'", async () => {
+    data.set(KEYS.log, [{ at: 1, action: 'ungarlic', site: 'a.com' }]);
+    expect(await store.getLog()).toEqual([{ at: 1, action: 'garlic', site: 'a.com' }]);
+  });
+  it('drops a log with an unknown action', async () => {
+    data.set(KEYS.log, [{ at: 1, action: 'explode', site: null }]);
+    expect(await store.getLog()).toEqual([]);
   });
 });

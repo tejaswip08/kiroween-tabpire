@@ -23,7 +23,7 @@ const src = {
     tab(5, 'Catalog', 'https://shop.example/'),
     tab(6, 'Another cat', 'https://a.example/'),
   ],
-  pinned: [{ url: 'https://catpics.example/', title: 'Cat pics' }],
+  haunts: [{ url: 'https://catpics.example/', title: 'Cat pics' }],
   crypt: [{ id: 'c1', url: 'https://old.example/cat', title: 'Old cat story', savedAt: 1 }],
 };
 
@@ -35,7 +35,7 @@ describe('localSuggestions', () => {
 
   it('puts tabs, then pinned pages, then crypt items', () => {
     const kinds = localSuggestions('cat', src).map((s) => s.kind);
-    expect(kinds).toEqual(['tab', 'tab', 'tab', 'pinned', 'crypt']);
+    expect(kinds).toEqual(['tab', 'tab', 'tab', 'haunt', 'crypt']);
   });
 
   it('keeps at most three per group and ranks title matches first', () => {
@@ -57,7 +57,7 @@ describe('localSuggestions', () => {
   it('carries what is needed to act on each suggestion', () => {
     const all = localSuggestions('cat', src);
     expect(all.find((s) => s.kind === 'tab')).toMatchObject({ tabId: 1, windowId: 7, label: 'Cat videos' });
-    expect(all.find((s) => s.kind === 'pinned')).toMatchObject({ url: 'https://catpics.example/' });
+    expect(all.find((s) => s.kind === 'haunt')).toMatchObject({ url: 'https://catpics.example/' });
     expect(all.find((s) => s.kind === 'crypt')).toMatchObject({ cryptId: 'c1', url: 'https://old.example/cat' });
   });
 
@@ -70,7 +70,7 @@ describe('localSuggestions', () => {
   });
 
   it('has a plain label for every kind', () => {
-    expect(KIND_LABEL).toEqual({ tab: 'Open tab', pinned: 'Pinned page', crypt: 'Crypt', search: 'Search' });
+    expect(KIND_LABEL).toEqual({ tab: 'Open tab', haunt: 'Pinned page', crypt: 'Crypt', search: 'Search' });
   });
 });
 

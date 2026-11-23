@@ -4,7 +4,7 @@ import { browser } from 'wxt/browser';
 import type { Browser } from 'wxt/browser';
 import { refreshBadge } from './badge';
 import { estimateMb, isDawnTarget, siteOf, dawnTargets } from './hunger';
-import { store, transact, type Stats } from './store';
+import { store, transact, type LogAction, type Stats } from './store';
 import { toTabInfo } from './tabinfo';
 
 export { toTabInfo } from './tabinfo';
@@ -28,7 +28,7 @@ export type DawnResult =
   | { ok: false; reason: FailReason };
 
 export interface ActionRow {
-  action: string;
+  action: LogAction;
   site: string | null;
   title?: string;
   mb: number;
@@ -94,7 +94,7 @@ async function finish(
   await refreshBadgeQuietly();
 }
 
-const rowFor = (action: string, tab: Browser.tabs.Tab, mb: number): ActionRow => ({
+const rowFor = (action: LogAction, tab: Browser.tabs.Tab, mb: number): ActionRow => ({
   action,
   site: siteOf(tab.url),
   ...(tab.title !== undefined ? { title: tab.title } : {}),
@@ -201,7 +201,7 @@ export async function ungarlic(site: string, now: number = Date.now()): Promise<
     return fail('browser-error');
   }
   if (!removed) return fail('not-found');
-  await finish([{ action: 'ungarlic', site, mb: 0 }], {}, now);
+  await finish([{ action: 'garlic', site, mb: 0 }], {}, now);
   return { ok: true, changed: true, mb: 0 };
 }
 
@@ -322,4 +322,23 @@ export async function dawn(now: number = Date.now()): Promise<DawnResult> {
     await refreshBadgeQuietly();
   }
   return { ok: true, closed: closed.length, mb };
+}
+
+// ---------- Tabpire's own pages ----------
+interface OpenOptions {
+  /** Open in the current tab instead of a new one. */
+  sameTab?: boolean;
+}
+async function openOwnPage(path: string, sameTab: boolean): Promise<void> {
+  const url = browser.runtime.getURL(path as never);
+  if (sameTab) await browser.tabs.update({ url });
+  else await browser.tabs.create({ url });
+}
+/** Opens The Crypt (the new tab page). */
+export function openCrypt({ sameTab = false }: OpenOptions = {}): Promise<void> {
+  return openOwnPage('/newtab.html', sameTab);
+}
+/** Opens the Blood Bank page (totals and the action log). */
+export function openBloodBank({ sameTab = false }: OpenOptions = {}): Promise<void> {
+  return openOwnPage('/bloodbank.html', sameTab);
 }

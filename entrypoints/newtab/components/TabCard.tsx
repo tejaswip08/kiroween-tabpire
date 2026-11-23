@@ -1,13 +1,16 @@
-import type { CSSProperties } from 'react';
+import { useEffect, useId, useRef, useState, type CSSProperties, type FocusEvent } from 'react';
 import type { VampireState } from '../../../lib/hunger';
 import type { ExitKind } from '../../../lib/scene/exitKinds';
-import { formatMemory, idleLabel, vialFill, type Card } from '../../../lib/view';
+import { formatMb } from '../../../lib/hunger';
+import { idleLabel, type Card } from '../../../lib/view';
+import { hungerShare, shortAge } from '../../../lib/vampireVoice';
 import { usePortraitReady } from '../layers/portraitReady';
 import { ActionButton } from './ActionButton';
 import { CoffinIcon, CryptIcon, GarlicIcon, RemoveGarlicIcon, StakeIcon, StateShape } from './icons';
 import { PortraitSlot } from './PortraitSlot';
 import { SiteIcon } from './SiteIcon';
-import { Vial } from './Vial';
+import { CardPopup } from './CardPopup';
+import { HungerBar } from './HungerBar';
 
 export type CardAction = 'stake' | 'coffin' | 'crypt' | 'garlic' | 'ungarlic';
 
@@ -98,6 +101,8 @@ export function TabCard({
   const specs = actionSpecs(card, busy);
   const isProtected = card.state === 'protected';
   const portrait3d = usePortraitReady(card.tab.id);
+  const popup = useCardPopup(!exiting);
+  const popupId = useId();
 
   return (
     <li
@@ -114,29 +119,31 @@ export function TabCard({
       }
       aria-hidden={exiting || undefined}
       inert={exiting || undefined}
+      aria-describedby={popup.open ? popupId : undefined}
+      ref={popup.ref}
+      {...popup.handlers}
     >
       <span className="card-frame" aria-hidden="true" />
-      <div className="card-head">
+      <PortraitSlot state={card.state} />
+      <span className="card-badge">
         <SiteIcon faviconUrl={card.tab.favIconUrl} site={card.site} />
-        <h3 className="card-title" title={title}>
-          {title}
-        </h3>
+      </span>
+      <h3 className="card-title" title={title}>
+        {title}
+      </h3>
+      <p className="card-site">{card.site ?? 'Not a web page'}</p>
+      <p className="card-meta">
         <span className="state-badge">
           <StateShape state={card.state} />
           {STATE_WORD[card.state]}
         </span>
-      </div>
-
-      <div className="card-body">
-        <PortraitSlot state={card.state} />
-        <div className="card-facts">
-          <p className="card-idle">{idle}</p>
-          <p className="card-memory">{formatMemory(card.mb)}</p>
-          <p className="card-site">{card.site ?? 'Not a web page'}</p>
-        </div>
-        <Vial fill={vialFill(card.hungerMs)} label={`Hunger meter: ${idle}`} />
-      </div>
-
+        <span className="card-age">{shortAge(card.hungerMs, card.info)}</span>
+        <span className="card-sep" aria-hidden="true">
+          ·
+        </span>
+        <span className="card-memory">{formatMb(card.mb)}</span>
+      </p>
+      <HungerBar fill={hungerShare(card.hungerMs)} label={`Hunger meter: ${idle}`} />
       <div className="card-actions">
         <ActionButton
           label={specs.stake.label}
@@ -171,6 +178,58 @@ export function TabCard({
           onClick={() => onAction(card, isProtected ? 'ungarlic' : 'garlic')}
         />
       </div>
+      {popup.open && <CardPopup card={card} title={title} anchor={popup.anchor} id={popupId} />}
     </li>
   );
+}
+
+/** How long the pointer must rest on a card before its popup opens. */
+export const POPUP_DELAY_MS = 300;
+/** Opens a card's popup after a short hover, or at once on keyboard focus. Escape and leaving close it. */
+function useCardPopup(enabled: boolean) {
+  const ref = useRef<HTMLLIElement>(null);
+  const timer = useRef(0);
+  const [open, setOpen] = useState(false);
+  const [anchor, setAnchor] = useState<HTMLElement | null>(null);
+  const close = () => {
+    window.clearTimeout(timer.current);
+    setOpen(false);
+  };
+  const show = (delay: number) => {
+    if (!enabled) return;
+    window.clearTimeout(timer.current);
+    timer.current = window.setTimeout(() => {
+      setAnchor(ref.current);
+      setOpen(true);
+    }, delay);
+  };
+  useEffect(() => () => window.clearTimeout(timer.current), []);
+  useEffect(() => {
+    if (!enabled) close();
+  }, [enabled]);
+  const keyboardFocus = (e: FocusEvent) => {
+    try {
+      return (e.target as HTMLElement).matches(':focus-visible');
+    } catch {
+      return false;
+    }
+  };
+  return {
+    ref,
+    open,
+    anchor,
+    handlers: {
+      onMouseEnter: () => show(POPUP_DELAY_MS),
+      onMouseLeave: close,
+      onFocus: (e: FocusEvent) => {
+        if (keyboardFocus(e)) show(0);
+      },
+      onBlur: (e: FocusEvent) => {
+        if (!ref.current?.contains(e.relatedTarget as Node | null)) close();
+      },
+      onKeyDown: (e: { key: string }) => {
+        if (e.key === 'Escape') close();
+      },
+    },
+  };
 }

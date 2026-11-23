@@ -1,6 +1,6 @@
 // Plain-word messages for action results. No browser APIs.
 import type { ActionResult, DawnResult, FailReason } from './tabs';
-import { formatMemory } from './view';
+import { formatMb } from './hunger';
 
 export type Notice = { kind: 'ok' | 'error'; text: string };
 export type ActionName = 'stake' | 'coffin' | 'crypt' | 'garlic' | 'ungarlic';
@@ -30,7 +30,7 @@ export function actionNotice(
 
   const name = shortTitle(ctx.title) || ctx.site || 'this tab';
   const site = ctx.site ?? 'This site';
-  const freed = `About ${formatMemory(result.mb)} freed.`;
+  const freed = `About ${formatMb(result.mb)} freed.`;
 
   switch (action) {
     case 'stake':
@@ -64,7 +64,7 @@ export function dawnNotice(result: DawnResult): Notice {
     result.closed === 1 ? '1 tab and saved it' : `${result.closed} tabs and saved them`;
   return {
     kind: 'ok',
-    text: `Dawn closed ${what} to the Crypt. About ${formatMemory(result.mb)} freed.`,
+    text: `Dawn closed ${what} to the Crypt. About ${formatMb(result.mb)} freed.`,
   };
 }
 

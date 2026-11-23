@@ -53,13 +53,12 @@ uniform vec3 uMoon;
 void main() {
   vec3 n = normalize(vN);
   if (!gl_FrontFacing) n = -n;
-  // Dark purple-brown fur and membrane, lit from the moon (red) on the side that faces it, with a faint violet fill.
+  // Near-black fur and membrane, so they read as silhouettes against the sky and the moon.
   float lit = max(dot(n, normalize(uMoon)), 0.0);
   float rim = pow(1.0 - abs(n.y), 2.0) * 0.5;
-  vec3 base = vec3(0.075, 0.045, 0.105) + vec3(0.03, 0.02, 0.04) * vShade;
-  vec3 col = base + vec3(0.55, 0.1, 0.16) * lit * 0.8 + vec3(0.18, 0.1, 0.3) * rim;
-  // The wing membrane is a little lighter toward its edge, so the scalloped outline reads.
-  col += vec3(0.1, 0.05, 0.12) * step(0.5, abs(vKind)) * smoothstep(0.5, 1.0, vReach);
+  vec3 base = vec3(0.012, 0.006, 0.022) + vec3(0.008, 0.004, 0.01) * vShade;
+  // Nearly black silhouettes: only a faint red edge where the moon catches them.
+  vec3 col = base + vec3(0.3, 0.035, 0.06) * pow(lit, 2.0) * 0.5 + vec3(0.05, 0.03, 0.09) * rim;
   gl_FragColor = vec4(col, 1.0);
 }`;
 
@@ -101,9 +100,9 @@ export function Bats() {
     (u.uMoon!.value as Vector3).copy(display.moon);
     if (lastShape.v !== display.shapeVersion) {
       lastShape.v = display.shapeVersion;
-      // The flock circles in the sky left of the moon, whatever the window shape.
+      // The flock circles around the moon's side of the sky, so some bats cross in front of it, whatever the window shape.
       const cam = cameraAt(0, display.aspect, true);
-      const d = directionAt(0.42, 0.14, cam);
+      const d = directionAt(0.5, 0.2, cam);
       (u.uCenter!.value as Vector3).set(cam.position[0] + d[0] * 85, cam.position[1] + d[1] * 85, cam.position[2] + d[2] * 85);
     }
   });

@@ -21,7 +21,8 @@ export default defineConfig({
   manifest: {
     name: 'Tabpire',
     description: 'Your tabs are draining you. Stake them.',
-    permissions: ['tabs', 'storage', 'alarms', 'search'],
+    // 'favicon' lets Chrome's own icon cache (the _favicon address) be used for the haunts. Firefox ignores it.
+    permissions: ['tabs', 'storage', 'alarms', 'search', 'favicon'],
     // Only the text typed in the search box is ever sent here (search suggestions).
     host_permissions: ['https://suggestqueries.google.com/*'],
     // The compressed vampire model needs the meshopt WebAssembly decoder.

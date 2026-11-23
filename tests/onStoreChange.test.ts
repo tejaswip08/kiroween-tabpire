@@ -6,14 +6,14 @@ vi.mock('wxt/browser', async () => {
 });
 
 import { events, fake } from './helpers/fakeBrowser';
-import { store, subscribe } from '../lib/store';
+import { store, onStoreChange } from '../lib/store';
 
 beforeEach(() => fake.reset());
 
-describe('subscribe', () => {
+describe('onStoreChange', () => {
   it('reports changed Tabpire keys from local storage', async () => {
     const seen: string[][] = [];
-    subscribe((keys) => seen.push(keys));
+    onStoreChange((keys) => seen.push(keys));
     await store.setGarlic(['a.com']);
     await store.setTheme('crypt');
     expect(seen).toEqual([['tabpire:garlic'], ['tabpire:theme']]);
@@ -21,7 +21,7 @@ describe('subscribe', () => {
 
   it('ignores other keys and other storage areas', () => {
     const seen: string[][] = [];
-    subscribe((keys) => seen.push(keys));
+    onStoreChange((keys) => seen.push(keys));
     const [handler] = events.onStorageChanged.listeners;
     handler?.({ 'other:key': {} }, 'local');
     handler?.({ 'tabpire:stats': {} }, 'sync');
@@ -31,7 +31,7 @@ describe('subscribe', () => {
 
   it('stops after unsubscribe', async () => {
     const seen: string[][] = [];
-    const off = subscribe((keys) => seen.push(keys));
+    const off = onStoreChange((keys) => seen.push(keys));
     off();
     await store.setGarlic(['a.com']);
     expect(seen).toEqual([]);

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { fetchGoogleSuggestions } from '../../../lib/google';
-import type { CryptItem, PinnedPage } from '../../../lib/store';
+import type { CryptEntry, Haunt } from '../../../lib/store';
 import { localSuggestions, withWeb, type Suggestion } from '../../../lib/suggest';
 import type { RawTab } from '../../../lib/view';
 
@@ -9,8 +9,8 @@ export const WEB_MIN_CHARS = 2;
 
 export interface SuggestionSources {
   tabs: readonly RawTab[];
-  pinned: readonly PinnedPage[];
-  crypt: readonly CryptItem[];
+  haunts: readonly Haunt[];
+  crypt: readonly CryptEntry[];
 }
 
 /**
@@ -23,7 +23,7 @@ export function useSuggestions(query: string, sources: SuggestionSources): Sugge
   const local = useMemo(
     () => localSuggestions(query, sources),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [query, sources.tabs, sources.pinned, sources.crypt],
+    [query, sources.tabs, sources.haunts, sources.crypt],
   );
   const [web, setWeb] = useState<{ text: string; items: string[] } | null>(null);
 

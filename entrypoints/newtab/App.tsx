@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { dawnTargets } from '../../lib/hunger';
+import { dawnTargets, type VampireState } from '../../lib/hunger';
+import { filterByState, toggleFilter } from '../../lib/legend';
 import { emitSceneEvent } from '../../lib/scene/bus';
 import { actionNotice, dawnNotice, resurrectNotice } from '../../lib/messages';
 import { openInThisTab, searchWithDefaultEngine, showTab } from '../../lib/nav';
@@ -12,12 +13,13 @@ import { CardSkeleton } from './components/CardSkeleton';
 import { EmptyState } from './components/EmptyState';
 import { ErrorState } from './components/ErrorState';
 import { Header } from './components/Header';
-import { PinnedRow } from './components/PinnedRow';
+import { Haunts, originOf } from './Haunts';
 import { SearchBox } from './components/SearchBox';
+import { StateLegend } from './components/StateLegend';
 import { cardTitle, type CardAction } from './components/TabCard';
 import { Toasts } from './components/Toasts';
 import { announceAction, markActionExit, markDawnExits } from './hooks/exitMarks';
-import { useCryptData } from './hooks/useCryptData';
+import { useCrypt } from './components/useCrypt';
 import { prefersReducedMotion } from './hooks/useExitingCards';
 import { useToasts } from './hooks/useToasts';
 import { FpsReadout } from './layers/FpsReadout';
@@ -40,10 +42,11 @@ async function runCardAction(card: Card, action: CardAction): Promise<ActionResu
 }
 
 export function App() {
-  const data = useCryptData();
+  const data = useCrypt();
   const { toasts, push, dismiss } = useToasts();
   const [busyIds, setBusyIds] = useState<ReadonlySet<number>>(new Set());
   const [dawnBusy, setDawnBusy] = useState(false);
+  const [filter, setFilter] = useState<VampireState | null>(null);
   const running = useRef(new Set<number>());
   const dawnRunning = useRef(false);
   const { reload } = data;
@@ -87,7 +90,7 @@ export function App() {
           case 'tab':
             if (s.tabId !== undefined) await showTab({ id: s.tabId, windowId: s.windowId ?? -1 });
             break;
-          case 'pinned':
+          case 'haunt':
             if (s.url) await openInThisTab(s.url);
             break;
           case 'crypt': {
@@ -108,6 +111,13 @@ export function App() {
     [push, reload],
   );
 
+  // The icon of an open tab on each site, so a haunt can use it first.
+  const tabIcons = useMemo(() => {
+    const icons: Record<string, string> = {};
+    for (const t of data.rawTabs) if (t.url && t.favIconUrl && !(originOf(t.url) in icons)) icons[originOf(t.url)] = t.favIconUrl;
+    return icons;
+  }, [data.rawTabs]);
+  const shownCards = useMemo(() => filterByState(data.cards, filter), [data.cards, filter]);
   const dawnCount = dawnTargets(
     data.cards.map((c) => c.info),
     data.garlic,
@@ -154,27 +164,35 @@ export function App() {
       <SceneLayerHost inputs={sceneInputs} />
       <div className="page">
         <Header
-          openTabs={data.cards.length}
+          vampires={data.cards.length}
+          starving={data.cards.filter((c) => c.state === 'starving').length}
           estimatedMb={sumMb(data.cards)}
           reclaimedMb={data.stats.mbFreed}
+          staked={data.stats.staked}
+          coffined={data.stats.coffined}
           dawnCount={dawnCount}
           dawnBusy={dawnBusy}
           onDawn={onDawn}
         />
         <main className="main">
           <SearchBox
-            sources={{ tabs: data.cards.map((c) => c.tab), pinned: data.pinned, crypt: data.crypt }}
+            sources={{ tabs: data.cards.map((c) => c.tab), haunts: data.haunts, crypt: data.crypt }}
             onSearch={onSearch}
             onChoose={onChoose}
           />
-          <PinnedRow pages={data.pinned} />
+          <Haunts pages={data.haunts} tabIcons={tabIcons} />
+          {data.status === 'ready' && data.cards.length > 0 && (
+            <StateLegend cards={data.cards} filter={filter} onToggle={(s) => setFilter((f) => toggleFilter(f, s))} />
+          )}
           {data.status === 'loading' && <CardSkeleton />}
           {data.status === 'error' && <ErrorState onRetry={reload} />}
           {data.status === 'ready' &&
             (data.cards.length === 0 ? (
               <EmptyState />
+            ) : shownCards.length === 0 ? (
+              <p className="legend-empty">No vampires are {filter} right now.</p>
             ) : (
-              <CardGrid cards={data.cards} busyIds={busyIds} allBusy={dawnBusy} onAction={onAction} />
+              <CardGrid cards={shownCards} busyIds={busyIds} allBusy={dawnBusy} onAction={onAction} />
             ))}
         </main>
         <Toasts toasts={toasts} onDismiss={dismiss} />

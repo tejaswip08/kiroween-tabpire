@@ -51,10 +51,22 @@ export const FAR_HILLS: readonly FarHill[] = [
   { id: 'hill-a', x: -22, y: -2, z: -92, rx: 46, ry: 11, rz: 16 },
   { id: 'hill-b', x: 34, y: -1, z: -100, rx: 36, ry: 7, rz: 14 },
   { id: 'hill-c', x: -64, y: -1, z: -86, rx: 26, ry: 8, rz: 12 },
+  // The fortress's own hill, and a long low ridge behind everything that closes the gaps between the hills.
+  { id: 'hill-d', x: -54, y: -1, z: -106, rx: 36, ry: 11, rz: 12 },
+  { id: 'ridge', x: 0, y: -2, z: -112, rx: 130, ry: 11, rz: 10 },
 ];
+/** Height of the hills at (x, z): the highest hill surface there, or 0 on flat ground. */
+export function farGroundY(x: number, z: number): number {
+  let best = 0;
+  for (const h of FAR_HILLS) {
+    const q = 1 - ((x - h.x) / h.rx) ** 2 - ((z - h.z) / h.rz) ** 2;
+    if (q > 0) best = Math.max(best, h.y + h.ry * Math.sqrt(q));
+  }
+  return best;
+}
 
 /** The village on hill A (left of the moon), the fortress beyond it and ruins on hill B. */
-export const FAR_ITEMS: readonly FarItem[] = [
+const FAR_ITEMS_RAW: readonly FarItem[] = [
   { id: 'church', kind: 'church', x: -30, y: 8.4, z: -90, rotY: 0.12, scale: 1, windows: [[0, 4.8, 1.05, 0.5, 0.95]] },
   { id: 'barn', kind: 'barn', x: -12, y: 8.3, z: -93, rotY: -0.15, scale: 0.6, windows: [[-1.6, 3.4, 4.15, 0.8, 1.0], [1.6, 3.4, 4.15, 0.8, 1.0]] },
   { id: 'windmill', kind: 'windmill', x: -2, y: 7.9, z: -96, rotY: 0.1, scale: 4, windows: [[0, 0.62, 0.31, 0.12, 0.18]] },
@@ -65,6 +77,10 @@ export const FAR_ITEMS: readonly FarItem[] = [
   { id: 'ruins', kind: 'ruins', x: 26, y: 4.6, z: -98, rotY: 0, scale: 0.55, windows: [] },
 ];
 
+/** Every building's y is the hill surface under it. The builder then sinks each model so its lowest point is just inside the hill. */
+export const FAR_ITEMS: readonly FarItem[] = FAR_ITEMS_RAW.map((i) => ({ ...i, y: farGroundY(i.x, i.z) }));
+/** How far a building's lowest point sits below the hill surface, so no gap can show. */
+export const FAR_EMBED = 0.4;
 export const FAR_WINDOW_COUNT = FAR_ITEMS.reduce((n, i) => n + i.windows.length, 0);
 
 /** Triangles the far village adds (every model, the church, the houses and the hills). */
@@ -78,7 +94,7 @@ export function farTriangles(): number {
     else if (item.kind === 'church') t += CHURCH.tris;
     else t += HOUSE.tris;
   }
-  return t + FAR_HILLS.length * 380 + FAR_WINDOW_COUNT * 2;
+  return t + FAR_HILLS.length * 540 + FAR_WINDOW_COUNT * 2;
 }
 
 /** Everything that is drawn by the scene's own code, with an upper bound for its triangles and draw calls. */
@@ -91,7 +107,7 @@ export const EXTRAS = {
   spiders: { calls: 2, tris: 3 * 260 + 12 },
   cobwebs: { calls: 1, tris: 14 },
   wisps: { calls: 1, tris: 28 },
-  skeletons: { calls: 5, tris: 3 * (60 + 344 + 620) + 6 * 220 + 12 * 204 },
+  skeletons: { calls: 5, tris: 3 * (360 + 344 + 1240 + 220 + 204) },
   cauldron: { calls: 3, tris: 400 },
   openCoffin: { calls: 3, tris: 300 + 60 },
 } as const;

@@ -1,42 +1,96 @@
 /* Shrine cards. All colours come from tokens.css. */
 
+/* The space under the pinned row. The cards sit at its bottom, centred, so the path and the gate stay visible above. */
+.cards-area {
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+/*
+ * The cards shrink to fit (--card-scale is set from the free height and the number of tabs, between 0.55 and 1).
+ * Each column is one scaled card wide. The cards are drawn full size and scaled from their top left corner,
+ * so the hole for the 3D portrait scales with them.
+ */
 .card-grid {
+  --card-scale: 1;
+  --cell-w: calc(var(--card-width) * var(--card-scale));
+  --cell-h: calc(var(--card-height) * var(--card-scale));
   list-style: none;
   margin: 0;
   padding: 0;
+  max-width: 100%;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(var(--card-width), 1fr));
-  gap: 24px 22px;
+  grid-template-columns: repeat(auto-fit, var(--cell-w));
+  grid-auto-rows: var(--cell-h);
+  justify-content: center;
+  gap: 16px;
   perspective: 1200px;
+}
+
+.card-grid > .card {
+  width: var(--card-width);
+  scale: var(--card-scale);
+  transform-origin: 0 0;
+}
+
+/* The last slot when there are more tabs than fit: the hungriest are shown. */
+.card-more {
+  display: grid;
+  place-content: center;
+  gap: 4px;
+  text-align: center;
+  border: 2px dashed var(--card-edge);
+  border-radius: 110px 110px 18px 18px;
+  background: linear-gradient(180deg, var(--card-top), var(--card-bottom));
+  opacity: 0.9;
+}
+
+.card-more-count {
+  font-family: var(--font-title);
+  font-weight: 800;
+  font-size: calc(34px * var(--card-scale));
+  color: var(--ink);
+}
+
+.card-more-note {
+  font-size: calc(14px * var(--card-scale));
+  color: var(--ink-dim);
 }
 
 .card {
   --rim: var(--state-awake);
   /* Sizes the portrait hole is built from, so the hole and the slot cannot drift apart. */
   --card-border: 3px;
-  --card-pad-x: 14px;
-  --card-pad-top: 14px;
+  --card-pad-x: 12px;
+  --card-pad-top: 12px;
   --card-pad-bottom: 12px;
-  --card-gap: 10px;
-  --head-h: 28px;
+  --card-gap: 7px;
+  --slot-w: 190px;
+  --slot-h: 170px;
   --hole-x: calc(var(--card-border) + var(--card-pad-x));
-  --hole-y: calc(var(--card-border) + var(--card-pad-top) + var(--head-h) + var(--card-gap));
+  --hole-y: calc(var(--card-border) + var(--card-pad-top));
   position: relative;
   isolation: isolate;
-  display: grid;
-  grid-template-rows: auto 1fr auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   gap: var(--card-gap);
   height: var(--card-height);
   padding: var(--card-pad-top) var(--card-pad-x) var(--card-pad-bottom);
   border: var(--card-border) solid transparent;
-  border-radius: var(--radius-arch) var(--radius-arch) var(--radius-card) var(--radius-card);
+  /* An arched shrine: a round top and small corners at the bottom. */
+  border-radius: 110px 110px 18px 18px;
   /* Outer drop shadows stay here. The card surface is drawn by ::before, so a hole can be cut in it. */
   box-shadow: var(--shadow-card-outer);
   transition: transform 0.18s ease;
   animation: card-in 0.36s ease both;
   animation-delay: calc(var(--i, 0) * 30ms);
 }
-/* The card surface: body inside, state-coloured rim outside. Both stay sharp vector fills. */
+
+/* The card surface: dark purple glass inside, a thin state-coloured rim outside. Both stay sharp vector fills. */
 .card::before {
   content: '';
   position: absolute;
@@ -47,10 +101,11 @@
   border-radius: inherit;
   background:
     linear-gradient(180deg, var(--card-top), var(--card-bottom)) padding-box,
-    linear-gradient(160deg, var(--rim), color-mix(in srgb, var(--rim) 25%, #000)) border-box;
+    linear-gradient(170deg, var(--rim), color-mix(in srgb, var(--rim) 22%, #000)) border-box;
   /* A slight inner glow in the state colour. */
   box-shadow: var(--shadow-card-inset), inset 0 0 26px color-mix(in srgb, var(--rim) 13%, transparent);
 }
+
 /*
  * When a card's 3D vampire is ready, an arch-shaped hole is cut in the card surface at the
  * portrait slot, so the portrait canvas behind the card shows through. The shape is a
@@ -58,33 +113,42 @@
  */
 @supports (mask-composite: exclude) {
   .card[data-3d='on']::before {
-    --hole-shape: url("data:image/svg+xml,%3Csvg xmlns='http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg' width='96' height='112'%3E%3Cpath d='M0 100V48A48 48 0 0 1 96 48V100A12 12 0 0 1 84 112H12A12 12 0 0 1 0 100Z'/%3E%3C/svg%3E");
+    --hole-shape: url("data:image/svg+xml,%3Csvg xmlns='http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg' width='190' height='170'%3E%3Cpath d='M0 156V95A95 95 0 0 1 190 95V156A14 14 0 0 1 176 170H14A14 14 0 0 1 0 156Z'/%3E%3C/svg%3E");
     mask:
-      var(--hole-shape) var(--hole-x) var(--hole-y) / 96px 112px no-repeat,
+      var(--hole-shape) var(--hole-x) var(--hole-y) / 190px 170px no-repeat,
       linear-gradient(#000 0 0);
     mask-composite: exclude;
   }
 }
+
 /* The 2D emblem fades out as the 3D vampire takes its place. */
 .card[data-3d='on'] .portrait-slot {
   background: none;
   box-shadow: none;
 }
+
 .portrait-slot .emblem {
+  height: 78%;
+  width: auto;
   transition: opacity 0.3s ease;
 }
+
 .card[data-3d='on'] .portrait-slot .emblem {
   opacity: 0;
 }
+
 .card[data-state='awake'] {
   --rim: var(--state-awake);
 }
+
 .card[data-state='starving'] {
   --rim: var(--state-starving);
 }
+
 .card[data-state='asleep'] {
   --rim: var(--state-asleep);
 }
+
 .card[data-state='protected'] {
   --rim: var(--state-protected);
 }
@@ -147,26 +211,115 @@
   }
 }
 
-/* ---------- head ---------- */
+/* ---------- portrait ---------- */
+.portrait-slot {
+  position: relative;
+  flex: none;
+  width: var(--slot-w);
+  height: var(--slot-h);
+  display: grid;
+  place-items: end center;
+  overflow: hidden;
+  border-radius: 95px 95px 14px 14px;
+  color: var(--rim);
+  background:
+    radial-gradient(circle at 50% 38%, color-mix(in srgb, var(--rim) 34%, transparent), transparent 72%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.18));
+  box-shadow:
+    0 0 0 1px var(--card-edge) inset,
+    0 6px 14px rgba(0, 0, 0, 0.5) inset;
+}
 
-.card-head {
-  height: var(--head-h);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
+.emblem {
+  display: block;
+}
+
+/* The arched window's frame: a thin line and a soft glow in the state colour, over the vampire's edge. */
+.portrait-slot::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow:
+    0 0 0 1.5px color-mix(in srgb, var(--rim) 62%, transparent) inset,
+    0 0 16px color-mix(in srgb, var(--rim) 30%, transparent) inset;
+}
+
+/* A thin ornate frame inside the card edge: a fine line. */
+.card-frame {
+  position: absolute;
+  inset: 5px;
+  z-index: 0;
+  pointer-events: none;
+  border: 1px solid color-mix(in srgb, var(--rim) 26%, transparent);
+  border-radius: 105px 105px 14px 14px;
+}
+
+/* ---------- text ---------- */
+/* The round site icon sits on the edge between the portrait and the text. */
+.card-badge {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  margin-top: -26px;
+  border-radius: 50%;
+  border: 2px solid var(--rim);
+  background: var(--card-bottom);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
+  z-index: 1;
+}
+
+.card-badge .site-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
 }
 
 .card-title {
-  flex: 1;
-  min-width: 0;
+  width: 100%;
+  min-height: 2.6em;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  text-align: center;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+  color: var(--ink);
+}
+
+.card-site {
+  max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-family: var(--font-body);
-  font-weight: 500;
-  font-size: 16px;
+  font-size: 12px;
+  color: var(--ink-dim);
+}
+
+.card-meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
   color: var(--ink);
+}
+
+.card-sep {
+  color: var(--ink-dim);
+}
+
+.card-memory {
+  font-weight: 500;
 }
 
 .site-icon {
@@ -206,134 +359,230 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 3px 9px 3px 7px;
+  padding: 2px 9px 2px 7px;
   border-radius: 999px;
   font-family: var(--font-label);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   color: var(--rim);
   background: color-mix(in srgb, var(--rim) 16%, transparent);
   border: 1px solid color-mix(in srgb, var(--rim) 50%, transparent);
 }
 
-/* ---------- body ---------- */
-
-.card-body {
-  display: grid;
-  grid-template-columns: 96px 1fr 30px;
-  gap: 12px;
-  align-items: start;
-  min-height: 0;
-}
-
-.portrait-slot {
-  position: relative;
-  width: 96px;
-  height: 112px;
-  display: grid;
-  place-items: end center;
+/* ---------- hunger bar ---------- */
+.hunger-bar {
+  flex: none;
+  width: 100%;
+  height: 6px;
   overflow: hidden;
-  border-radius: 48px 48px 12px 12px;
-  color: var(--rim);
-  background:
-    radial-gradient(circle at 50% 38%, color-mix(in srgb, var(--rim) 34%, transparent), transparent 72%),
-    linear-gradient(180deg, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.18));
-  box-shadow:
-    0 0 0 1px var(--card-edge) inset,
-    0 6px 14px rgba(0, 0, 0, 0.5) inset;
+  border-radius: 999px;
+  background: rgba(10, 4, 16, 0.6);
+  box-shadow: 0 0 0 1px var(--card-edge) inset;
 }
 
-.emblem {
+.hunger-fill {
   display: block;
-}
-/* The arched window's frame: a thin line and a soft glow in the state colour, over the vampire's edge. */
-.portrait-slot::after {
-  content: '';
-  position: absolute;
-  inset: 0;
+  width: 100%;
+  height: 100%;
   border-radius: inherit;
-  pointer-events: none;
-  box-shadow:
-    0 0 0 1.5px color-mix(in srgb, var(--rim) 62%, transparent) inset,
-    0 0 16px color-mix(in srgb, var(--rim) 30%, transparent) inset;
-}
-/* A thin ornate frame inside the card edge: a fine line with a small diamond at the top and bottom. */
-.card-frame {
-  position: absolute;
-  inset: 5px;
-  z-index: 0;
-  pointer-events: none;
-  border: 1px solid color-mix(in srgb, var(--rim) 34%, transparent);
-  border-radius: calc(var(--radius-arch) - 4px) calc(var(--radius-arch) - 4px) calc(var(--radius-card) - 3px) calc(var(--radius-card) - 3px);
-}
-.card-frame::before,
-.card-frame::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  width: 7px;
-  height: 7px;
-  background: color-mix(in srgb, var(--rim) 70%, #000);
-  border: 1px solid color-mix(in srgb, var(--rim) 80%, transparent);
-  transform: translateX(-50%) rotate(45deg);
-}
-.card-frame::before {
-  top: -4px;
-}
-.card-frame::after {
-  bottom: -4px;
-}
-
-.card-facts {
-  display: grid;
-  align-content: start;
-  gap: 4px;
-  min-width: 0;
-  padding-top: 4px;
-}
-
-.card-idle {
-  font-weight: 500;
-  font-size: 15px;
-  color: var(--ink);
-}
-
-.card-memory {
-  font-family: var(--font-label);
-  font-weight: 600;
-  font-size: 20px;
-  font-variant-numeric: tabular-nums;
-  color: var(--ink);
-}
-
-.card-site {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 13px;
-  color: var(--ink-dim);
-}
-
-.vial {
-  display: block;
-  margin-top: -2px;
-}
-
-.vial-liquid {
-  transform-box: fill-box;
-  transform-origin: 50% 100%;
+  background: linear-gradient(90deg, var(--blood-bottom), var(--blood-top));
+  transform-origin: 0 50%;
   transition: transform 0.4s ease;
 }
 
 /* ---------- actions ---------- */
-
 .card-actions {
+  width: 100%;
+  margin-top: auto;
   display: flex;
   justify-content: space-between;
-  padding: 0 4px;
+  padding: 0 6px;
+}
+
+.card-actions .icon-btn {
+  width: 36px;
+  height: 36px;
 }
 
 .icon-slash {
   pointer-events: none;
+}
+
+/* ---------- state legend ---------- */
+.legend {
+  flex: none;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.legend-chip {
+  --chip: var(--state-awake);
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 13px 5px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--card-edge);
+  font-family: var(--font-label);
+  font-size: 11px;
+  background: linear-gradient(180deg, var(--panel-fill-top), var(--panel-fill-bottom));
+  color: var(--ink);
+  transition: opacity 0.14s ease;
+}
+
+.legend-chip[data-state='starving'] {
+  --chip: var(--state-starving);
+}
+
+.legend-chip[data-state='asleep'] {
+  --chip: var(--state-asleep);
+}
+
+.legend-chip[data-state='protected'] {
+  --chip: var(--state-protected);
+}
+
+.legend-chip[data-empty] {
+  opacity: 0.5;
+}
+
+.legend-chip[aria-pressed='true'] {
+  border-color: var(--chip);
+  box-shadow: 0 0 0 1px var(--chip) inset;
+  opacity: 1;
+}
+
+.legend-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--chip);
+}
+
+.legend-label {
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.legend-count {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.legend-hint {
+  font-size: 10px;
+  color: var(--ink-dim);
+}
+
+.legend-empty {
+  align-self: center;
+  margin-block: auto;
+  color: var(--ink-dim);
+}
+
+/* ---------- hover popup ---------- */
+.card-popup {
+  --rim: var(--state-awake);
+  position: fixed;
+  z-index: 50;
+  padding: 14px 16px 12px;
+  border-radius: 16px;
+  color: var(--ink);
+  background: rgba(12, 7, 20, 0.96);
+  box-shadow:
+    0 0 0 1px var(--card-edge),
+    0 14px 36px rgba(0, 0, 0, 0.6);
+  /* It takes no clicks, so it never blocks a button. */
+  pointer-events: none;
+}
+
+.card-popup[data-state='starving'] {
+  --rim: var(--state-starving);
+}
+
+.card-popup[data-state='asleep'] {
+  --rim: var(--state-asleep);
+}
+
+.card-popup[data-state='protected'] {
+  --rim: var(--state-protected);
+}
+
+.popup-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.popup-title {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.popup-site {
+  margin: 2px 0 10px 38px;
+  font-size: 13px;
+  color: var(--ink-dim);
+}
+
+.popup-state {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-family: var(--font-label);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--rim);
+}
+
+.popup-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--rim);
+}
+
+.popup-quote {
+  margin-bottom: 8px;
+  font-style: italic;
+  color: #ffb3c4;
+}
+
+.popup-text {
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--ink);
+}
+
+.popup-facts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 14px;
+  margin: 12px 0 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--card-edge);
+  font-size: 14px;
+}
+
+.popup-facts dt {
+  color: var(--ink-dim);
+}
+
+.popup-facts dd {
+  margin: 0;
 }

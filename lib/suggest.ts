@@ -1,8 +1,8 @@
 // Search suggestions. Pure: matching and merging only.
-import type { CryptItem, PinnedPage } from './store';
+import type { CryptEntry, Haunt } from './store';
 import type { RawTab } from './view';
 
-export type SuggestionKind = 'tab' | 'pinned' | 'crypt' | 'search';
+export type SuggestionKind = 'tab' | 'haunt' | 'crypt' | 'search';
 
 export interface Suggestion {
   id: string;
@@ -18,7 +18,7 @@ export interface Suggestion {
 
 export const KIND_LABEL: Record<SuggestionKind, string> = {
   tab: 'Open tab',
-  pinned: 'Pinned page',
+  haunt: 'Pinned page',
   crypt: 'Crypt',
   search: 'Search',
 };
@@ -49,7 +49,7 @@ function top<T>(items: T[], scoreOf: (item: T) => number): T[] {
 
 export function localSuggestions(
   query: string,
-  src: { tabs: readonly RawTab[]; pinned: readonly PinnedPage[]; crypt: readonly CryptItem[] },
+  src: { tabs: readonly RawTab[]; haunts: readonly Haunt[]; crypt: readonly CryptEntry[] },
 ): Suggestion[] {
   const words = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
   if (words.length === 0) return [];
@@ -64,8 +64,8 @@ export function localSuggestions(
       windowId: t.windowId,
     }),
   );
-  const pinned = top([...src.pinned], (p) => score(words, p.title, p.url)).map(
-    (p): Suggestion => ({ id: `pinned:${p.url}`, kind: 'pinned', label: p.title, detail: p.url, url: p.url }),
+  const haunts = top([...src.haunts], (p) => score(words, p.title, p.url)).map(
+    (p): Suggestion => ({ id: `haunt:${p.url}`, kind: 'haunt', label: p.title, detail: p.url, url: p.url }),
   );
   const crypt = top([...src.crypt], (c) => score(words, c.title, c.url)).map(
     (c): Suggestion => ({
@@ -77,7 +77,7 @@ export function localSuggestions(
       cryptId: c.id,
     }),
   );
-  return [...tabs, ...pinned, ...crypt];
+  return [...tabs, ...haunts, ...crypt];
 }
 
 /** Adds up to five distinct web suggestions after the local ones. */

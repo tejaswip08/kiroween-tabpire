@@ -1,11 +1,12 @@
 /* Pinned pages row and the "Add page" form. */
 
-.pinned {
-  justify-self: center;
+.haunts {
+  align-self: center;
+  flex: none;
   width: min(900px, 100%);
 }
 
-.pinned-list {
+.haunts-list {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -15,12 +16,12 @@
   gap: 10px;
 }
 
-.pinned-item,
-.pinned-add {
+.haunts-item,
+.haunts-add {
   position: relative;
 }
 
-.pinned-tile {
+.haunts-tile {
   display: inline-flex;
   align-items: center;
   gap: 9px;
@@ -34,18 +35,18 @@
   transition: transform 0.14s ease;
 }
 
-.pinned-tile:hover {
+.haunts-tile:hover {
   transform: translateY(-2px);
 }
 
-.pinned-title {
+.haunts-title {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 15px;
 }
 
-.pinned-remove {
+.haunts-remove {
   position: absolute;
   top: -6px;
   right: -4px;
@@ -66,8 +67,8 @@
     transform 0.14s ease;
 }
 
-.pinned-item:hover .pinned-remove,
-.pinned-item:focus-within .pinned-remove {
+.haunts-item:hover .haunts-remove,
+.haunts-item:focus-within .haunts-remove {
   opacity: 1;
   transform: scale(1);
 }

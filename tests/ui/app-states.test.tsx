@@ -61,7 +61,7 @@ describe('no other tabs', () => {
   it('counts open tabs as 0', async () => {
     render(<App />);
     await screen.findByText('Nothing is draining memory');
-    const openTabs = screen.getByText('Open tabs').closest('div')!;
+    const openTabs = screen.getByText('Vampires').closest('div')!;
     expect(openTabs.textContent).toContain('0');
   });
 });
@@ -94,14 +94,14 @@ describe('when the tabs cannot be read', () => {
   });
 
   it('still shows the pinned pages and lets the search box work', async () => {
-    await store.setPinned([{ url: 'https://github.com/', title: 'GitHub' }]);
+    await store.setHaunts([{ url: 'https://github.com/', title: 'GitHub' }]);
     fake.failQuery = true;
     render(<App />);
     await screen.findByText('Tabpire could not read your tabs');
     expect(await within(screen.getByRole('region', { name: 'Pinned pages' })).findByRole('link', { name: /GitHub/ })).toBeTruthy();
 
     await userEvent.type(screen.getByRole('combobox'), 'github');
-    await waitFor(() => expect(screen.getAllByRole('option').some((o) => o.getAttribute('data-kind') === 'pinned')).toBe(true));
+    await waitFor(() => expect(screen.getAllByRole('option').some((o) => o.getAttribute('data-kind') === 'haunt')).toBe(true));
     await userEvent.keyboard('{Escape}');
     await userEvent.clear(screen.getByRole('combobox'));
     await userEvent.type(screen.getByRole('combobox'), 'bats{Enter}');
@@ -113,6 +113,6 @@ describe('when the tabs cannot be read', () => {
     fake.failQuery = true;
     render(<App />);
     await screen.findByText('Tabpire could not read your tabs');
-    await waitFor(() => expect(screen.getByText('Memory reclaimed').closest('div')!.textContent).toContain('~760 MB'));
+    await waitFor(() => expect(screen.getByText('Blood reclaimed').closest('div')!.textContent).toContain('~760 MB'));
   });
 });

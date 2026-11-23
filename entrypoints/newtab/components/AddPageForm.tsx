@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
-import { pinPage, pinProblemText } from '../../../lib/pinned';
+import { addHaunt, hauntProblemText } from '../../../lib/haunts';
 
 /** Small form under the "Add page" button. Escape or Cancel closes it. */
 export function AddPageForm({ onClose }: { onClose: () => void }) {
@@ -17,9 +17,9 @@ export function AddPageForm({ onClose }: { onClose: () => void }) {
     if (working) return;
     setWorking(true);
     try {
-      const result = await pinPage(address, name);
+      const result = await addHaunt(address, name);
       if (result.ok) onClose();
-      else setError(pinProblemText(result.reason));
+      else setError(hauntProblemText(result.reason));
     } catch {
       setError('Could not save that page. Please try again.');
     } finally {

@@ -46,6 +46,6 @@ describe('hundreds of tabs', () => {
     render(<App />);
     await waitFor(() => expect(document.querySelectorAll('.card:not(.card-skeleton)').length).toBe(300), { timeout: 10_000 });
     console.log('300 cards rendered in', Math.round(performance.now() - start), 'ms (jsdom)');
-    expect(screen.getByText('Open tabs').closest('div')!.textContent).toContain('300');
+    expect(screen.getByText('Vampires').closest('div')!.textContent).toContain('300');
   }, 30_000);
 });

@@ -219,7 +219,7 @@ describe('no remote assets or addresses', () => {
     }
   });
 
-  const ALLOWED_HOSTS = ['suggestqueries.google.com'];
+  const ALLOWED_HOSTS = ['suggestqueries.google.com', 'icons.duckduckgo.com'];
   const codeFiles = [
     ...files(join(root, 'lib'), (n) => /\.(ts|tsx)$/.test(n)),
     ...files(join(root, 'entrypoints'), (n) => /\.(ts|tsx|css|html)$/.test(n)),
@@ -263,21 +263,25 @@ describe('portrait hole in the card surface', () => {
     const css = readFileSync(join(stylesDir, 'cards.css'), 'utf8');
     expect(css).toMatch(/@supports \(mask-composite: exclude\)\s*\{[^@]*\.card\[data-3d='on'\]::before/);
   });
-  it('uses a data address with no host name and a 96 x 112 arch', () => {
+  it('uses a data address with no host name and a 190 x 170 arch', () => {
     const shape = decl(holeRules[0]!, '--hole-shape');
     expect(shape).toMatch(/^url\("data:image\/svg\+xml,/);
     expect(shape).not.toMatch(/https?:|\/\/[a-z]/i);
-    expect(decodeURIComponent(shape)).toContain("width='96' height='112'");
+    expect(decodeURIComponent(shape)).toContain("width='190' height='170'");
   });
-  it('places the hole from the card own border, padding and header height', () => {
+  it('places the hole from the card own border and padding', () => {
     const card = allRules.find((r) => r.sheet === 'cards.css' && r.selector === '.card')!;
     expect(decl(card, '--hole-x')).toBe('calc(var(--card-border) + var(--card-pad-x))');
-    expect(decl(card, '--hole-y')).toBe('calc(var(--card-border) + var(--card-pad-top) + var(--head-h) + var(--card-gap))');
+    expect(decl(card, '--hole-y')).toBe('calc(var(--card-border) + var(--card-pad-top))');
     expect(decl(card, 'padding')).toContain('var(--card-pad-x)');
     expect(decl(card, 'border')).toContain('var(--card-border)');
     expect(decl(card, 'gap')).toBe('var(--card-gap)');
-    const head = allRules.find((r) => r.sheet === 'cards.css' && r.selector === '.card-head')!;
-    expect(decl(head, 'height')).toBe('var(--head-h)');
+    // The portrait slot is exactly the size of the hole.
+    const slot = allRules.find((r) => r.sheet === 'cards.css' && r.selector === '.portrait-slot')!;
+    expect(decl(slot, 'width')).toBe('var(--slot-w)');
+    expect(decl(slot, 'height')).toBe('var(--slot-h)');
+    expect(decl(card, '--slot-w')).toBe('190px');
+    expect(decl(card, '--slot-h')).toBe('170px');
   });
   it('keeps the outer shadows on the card and the surface on ::before', () => {
     const card = allRules.find((r) => r.sheet === 'cards.css' && r.selector === '.card')!;
@@ -294,5 +298,17 @@ describe('portrait hole in the card surface', () => {
     expect(decl(fade, 'opacity')).toBe('0');
     const emblem = allRules.find((r) => r.sheet === 'cards.css' && r.selector === '.portrait-slot .emblem')!;
     expect(decl(emblem, 'transition')).toMatch(/^opacity /);
+  });
+});
+describe('card popup', () => {
+  it('takes no clicks, so it never blocks a card button', () => {
+    const popup = allRules.find((r) => r.sheet === 'cards.css' && r.selector === '.card-popup')!;
+    expect(popup.decls.find((d) => d.prop === 'pointer-events')?.value).toBe('none');
+    expect(popup.decls.find((d) => d.prop === 'position')?.value).toBe('fixed');
+  });
+  it('keeps the page from scrolling', () => {
+    const root = allRules.find((r) => r.sheet === 'base.css' && r.selector.replace(/\s+/g, ' ') === 'html, body, #root')!;
+    expect(root.decls.find((d) => d.prop === 'height')?.value).toBe('100vh');
+    expect(root.decls.find((d) => d.prop === 'overflow')?.value).toBe('hidden');
   });
 });

@@ -42,18 +42,18 @@ afterEach(() => {
 });
 
 describe('TabCard by state', () => {
-  const cases: [string, RawTab, string[], string, string][] = [
-    ['awake', raw(1, { lastAccessed: NOW - 2 * 60 * 60 * 1000 }), [], 'Awake', '2 hours idle'],
-    ['starving', raw(2, { lastAccessed: NOW - 2 * DAY_MS }), [], 'Starving', '2 days idle'],
-    ['asleep', raw(3, { discarded: true, lastAccessed: NOW - 2 * DAY_MS }), [], 'Asleep', '2 days idle'],
-    ['protected', raw(4, { url: 'https://safe.com/', lastAccessed: NOW - 2 * DAY_MS }), ['safe.com'], 'Protected', '2 days idle'],
+  const cases: [string, RawTab, string[], string, string, string][] = [
+    ['awake', raw(1, { lastAccessed: NOW - 2 * 60 * 60 * 1000 }), [], 'Awake', '2 h', '2 hours idle'],
+    ['starving', raw(2, { lastAccessed: NOW - 2 * DAY_MS }), [], 'Starving', '2 d', '2 days idle'],
+    ['asleep', raw(3, { discarded: true, lastAccessed: NOW - 2 * DAY_MS }), [], 'Asleep', '2 d', '2 days idle'],
+    ['protected', raw(4, { url: 'https://safe.com/', lastAccessed: NOW - 2 * DAY_MS }), ['safe.com'], 'Protected', '2 d', '2 days idle'],
   ];
 
-  it.each(cases)('%s card shows its rim, state word, idle text, memory and vial', (state, tab, garlic, word, idle) => {
+  it.each(cases)('%s card shows its rim, state word, idle text, memory and hunger bar', (state, tab, garlic, word, age, idle) => {
     const { card } = renderCard(tab, { garlic });
     expect(card.dataset.state).toBe(state);
     expect(within(card).getByText(word)).toBeTruthy();
-    expect(within(card).getByText(idle)).toBeTruthy();
+    expect(within(card).getByText(age)).toBeTruthy();
     expect(within(card).getByText(/^~\d+ MB$/)).toBeTruthy();
     expect(within(card).getByRole('img', { name: `Hunger meter: ${idle}` })).toBeTruthy();
     expect(card.querySelector('.portrait-slot')?.getAttribute('data-state')).toBe(state);
@@ -64,9 +64,9 @@ describe('TabCard by state', () => {
     expect(card.querySelector('.state-badge svg')).not.toBeNull();
   });
 
-  it('fills the vial in proportion to idle time', () => {
-    const { card } = renderCard(raw(1, { lastAccessed: NOW - 1.5 * DAY_MS }));
-    expect(card.querySelector('.vial')?.getAttribute('data-fill')).toBe('0.500');
+  it('fills the hunger bar in proportion to idle time, full at one day', () => {
+    const { card } = renderCard(raw(1, { lastAccessed: NOW - 0.5 * DAY_MS }));
+    expect(card.querySelector('.hunger-bar')?.getAttribute('data-fill')).toBe('0.500');
   });
 
   it('shows the site and a plain note for non-web pages', () => {
@@ -77,7 +77,8 @@ describe('TabCard by state', () => {
 
   it('shows In use now for the active tab', () => {
     const { card } = renderCard(raw(1, { active: true, lastAccessed: NOW - 5 * DAY_MS }));
-    expect(within(card).getByText('In use now')).toBeTruthy();
+    expect(within(card).getByText('now')).toBeTruthy();
+    expect(within(card).getByRole('img', { name: 'Hunger meter: In use now' })).toBeTruthy();
   });
 });
 

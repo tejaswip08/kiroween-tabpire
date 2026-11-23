@@ -51,16 +51,16 @@ describe('search box in the page', () => {
   });
 
   it('a pinned page suggestion opens in this tab', async () => {
-    await store.setPinned([{ url: 'https://catpics.example/', title: 'Cat pics' }]);
+    await store.setHaunts([{ url: 'https://catpics.example/', title: 'Cat pics' }]);
     render(<App />);
-    await waitFor(async () => expect((await store.getPinned()).length).toBe(1));
+    await waitFor(async () => expect((await store.getHaunts()).length).toBe(1));
     const input = screen.getByRole('combobox');
     await waitFor(async () => {
       await userEvent.clear(input);
       await userEvent.type(input, 'cat pics');
-      expect(screen.getAllByRole('option').some((o) => o.getAttribute('data-kind') === 'pinned')).toBe(true);
+      expect(screen.getAllByRole('option').some((o) => o.getAttribute('data-kind') === 'haunt')).toBe(true);
     });
-    await pick('pinned');
+    await pick('haunt');
     expect(fake.tabs.get(me)?.url).toBe('https://catpics.example/');
   });
 

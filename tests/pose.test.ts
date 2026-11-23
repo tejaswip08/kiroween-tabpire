@@ -162,23 +162,19 @@ describe('eyeRay', () => {
 });
 
 describe('portrait framing', () => {
-  it('shows the chest and head, which fill about 80 percent of the arch height', () => {
-    // The frame is centred on the upper body; the head top is at the vampire's full height (1.0).
+  it('shows the whole vampire and the top of its tomb, with a small gap above the head', () => {
     expect(visibleHeight(FRAME.distance, FRAME.fov)).toBeCloseTo(FRAME.worldHeight, 1);
     const top = FRAME.centreY + FRAME.worldHeight / 2;
     const bottom = FRAME.centreY - FRAME.worldHeight / 2;
     // The head top is inside the frame, with a small gap above it.
     expect(top).toBeGreaterThan(VAMPIRE.height);
-    expect(top - VAMPIRE.height).toBeLessThan(0.1);
-    // The part of the vampire in view (chest up) fills about 80 percent or more of the frame.
-    const shown = (VAMPIRE.height - bottom) / FRAME.worldHeight;
-    expect(shown).toBeGreaterThanOrEqual(0.8);
-    expect(shown).toBeLessThanOrEqual(1);
-    // The feet are out of view: it is a chest-up portrait.
-    expect(bottom).toBeGreaterThan(0.3);
+    expect(top - VAMPIRE.height).toBeLessThan(0.15);
+    // The feet (y = 0) and the tomb under them are in view.
+    expect(bottom).toBeLessThan(-0.15);
+    // The vampire fills about 70 percent of the arch height or more.
+    expect(VAMPIRE.height / FRAME.worldHeight).toBeGreaterThanOrEqual(0.7);
   });
 });
-
 describe('rig', () => {
   it('fits the lying vampire inside the coffin length', () => {
     const f = coffinFit();

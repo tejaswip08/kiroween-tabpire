@@ -24,7 +24,7 @@ const tab = (id: number, title: string, url: string): RawTab => ({
 
 const sources = {
   tabs: [tab(1, 'Cat videos', 'https://video.example/cats'), tab(2, 'Weather', 'https://weather.example/')],
-  pinned: [{ url: 'https://catpics.example/', title: 'Cat pics' }],
+  haunts: [{ url: 'https://catpics.example/', title: 'Cat pics' }],
   crypt: [{ id: 'c1', url: 'https://old.example/cat', title: 'Old cat story', savedAt: 1 }],
 };
 
@@ -84,7 +84,7 @@ describe('web suggestions', () => {
     await userEvent.type(input, 'cat');
     await waitFor(() => expect(screen.getAllByRole('option').length).toBe(5));
     const kinds = screen.getAllByRole('option').map((o) => o.getAttribute('data-kind'));
-    expect(kinds).toEqual(['tab', 'pinned', 'crypt', 'search', 'search']);
+    expect(kinds).toEqual(['tab', 'haunt', 'crypt', 'search', 'search']);
     expect(fetchGoogle.mock.calls.every((c) => c[0] === 'cat' || c[0] === 'ca')).toBe(true);
     expect(fetchGoogle.mock.calls.flat().filter((x) => typeof x === 'string').join(' ')).not.toContain('example');
   });
@@ -191,7 +191,7 @@ describe('mouse and each kind', () => {
     const { input, onChoose } = setup();
     await userEvent.type(input, 'cat');
     await waitFor(() => expect(screen.getAllByRole('option')).toHaveLength(4));
-    for (const kind of ['tab', 'pinned', 'crypt', 'search']) {
+    for (const kind of ['tab', 'haunt', 'crypt', 'search']) {
       const option = screen.getAllByRole('option').find((o) => o.getAttribute('data-kind') === kind)!;
       await userEvent.click(option);
       await userEvent.type(input, 'cat');
@@ -199,7 +199,7 @@ describe('mouse and each kind', () => {
     }
     const chosen = onChoose.mock.calls.map((c) => c[0]);
     expect(chosen[0]).toMatchObject({ kind: 'tab', tabId: 1 });
-    expect(chosen[1]).toMatchObject({ kind: 'pinned', url: 'https://catpics.example/' });
+    expect(chosen[1]).toMatchObject({ kind: 'haunt', url: 'https://catpics.example/' });
     expect(chosen[2]).toMatchObject({ kind: 'crypt', cryptId: 'c1' });
     expect(chosen[3]).toMatchObject({ kind: 'search', text: 'cat food' });
   });

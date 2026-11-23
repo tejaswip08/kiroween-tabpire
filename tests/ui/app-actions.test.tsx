@@ -74,7 +74,7 @@ describe('running actions', () => {
     expect(await screen.findByText(/^Closed "Doomed"\. About ~\d+ MB freed\.$/)).toBeTruthy();
     await waitFor(() => expect(screen.queryByRole('heading', { level: 3, name: 'Doomed' })).toBeNull());
     expect(fake.tabs.size).toBe(1); // only The Crypt itself is left
-    const reclaimed = screen.getByText('Memory reclaimed').closest('div')!;
+    const reclaimed = screen.getByText('Blood reclaimed').closest('div')!;
     await waitFor(() => expect(reclaimed.textContent).not.toContain('~0 MB'));
   });
 
