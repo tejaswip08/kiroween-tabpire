@@ -4,13 +4,15 @@
 // big jack-o'-lantern. Scarecrows stand along the path, green ghosts float among the branches, crooked crosses lean near
 // the trail, and a small cauldron glows green beside it. Pure and seeded.
 // Coordinates: x right, y up, z toward the camera (the camera is at z = 16).
+import { cameraAt, project } from '../camera';
 import { MODELS, type Placement, type WarmSource } from '../layout';
+import { moonScreenRadiusScaled } from '../sky';
 import { WEATHER } from '../weather';
 import {
   CAULDRON, FIRE, FLAME_COUNT, FLAME_TRIS, FOREST_PARTS, GHOSTS, GRAVES, MUSHROOMS, PLANT_TRIS, SCARECROWS, SOUP_LEVEL,
   SOUP_RADIUS, SPARK_COUNT, TUFT_TRIS, WISP, SCARY_TREE_TRIS, THORN_TRIS, LOG_TRIS, EXTRA_GRAVE_TRIS, flames, scaryGround, grass, graveFootprint, scarecrowFootprint, type ForestParts,
 } from './forestParts';
-import { Placer, modelsOf, sampleLine, solidFootprint, type UniqueMoon, type UniqueSceneSpec } from './types';
+import { Placer, VIEW_ASPECTS, modelsOf, sampleLine, solidFootprint, type UniqueMoon, type UniqueSceneSpec } from './types';
 export { CAULDRON, FIRE };
 /** Added to the caller's seed, so this theme has its own random stream. */
 export const FOREST_SEED = 7211;
@@ -21,11 +23,40 @@ export const FOREST_SEED = 7211;
 export const FOREST_MOON_DEPTH = 38;
 /** A big blood-red moon in the upper right, behind the branches and the green mist. */
 export const FOREST_MOON: UniqueMoon = {
-  target: () => ({ x: 0.82, y: 0.2 }),
+  target: (aspect) => ({ x: aspect > 2 ? 0.76 : 0.82, y: 0.2 }),
   scale: 1.25,
   // The branches of the dark trees cross in front of it, so it shows through the gaps.
   seeThrough: true,
 };
+/**
+ * The window of open sky the moon shows through: nothing tall may stand so that its crown (a ball of `reach` around the top
+ * part of the tree) covers the middle of the disc, at any usual window shape. Only a few branch tips at the edge cross it, so
+ * the moon reads as behind the trees and is still plainly seen. `MOON_WINDOW` is the share of the disc radius kept clear.
+ */
+export const MOON_WINDOW = 0.6;
+export function blocksMoonWindow(x: number, z: number, height: number, reach: number, aspects: readonly number[] = VIEW_ASPECTS): boolean {
+  for (const aspect of aspects) {
+    const cam = cameraAt(0, aspect, true);
+    const t = FOREST_MOON.target(aspect);
+    const r = moonScreenRadiusScaled(aspect, FOREST_MOON.scale).disc * MOON_WINDOW;
+    const tanH = Math.tan((cam.fov * Math.PI) / 360);
+    for (const k of [0.3, 0.45, 0.6, 0.75, 0.9, 1]) {
+      const q = project([x, height * k, z], cam);
+      if (!q) continue;
+      const pad = reach / (q.depth * tanH * 2);
+      if (Math.hypot((q.x - t.x) * aspect, q.y - t.y) < r + pad) return true;
+    }
+  }
+  return false;
+}
+/** Where the middle of the crown of each tree model is, sideways from its trunk in the file (x, model units): the crowns lean. */
+export const CROWN_SHIFT: Record<'forest_twisted_a' | 'forest_twisted_b' | 'forest_twisted_c', number> = {
+  forest_twisted_a: -1.4,
+  forest_twisted_b: 4.5,
+  forest_twisted_c: 1.2,
+};
+/** How far the crown of a twisted tree reaches from its trunk, per unit of scale (the bark spreads about 5 to 6 each way). */
+export const CROWN_REACH = 2.5;
 /** The dirt path winds from the bottom centre of the screen to the misty distance. */
 const TRAIL: [number, number][] = [
   [0.6, 13], [-0.4, 9], [1.3, 4.5], [2.0, 0], [0.5, -4.5], [-1.2, -9.5], [-0.9, -15], [0.6, -21], [1.0, -26],
@@ -58,6 +89,8 @@ export function cauldronFxAt(p: Pick<Placement, 'x' | 'y' | 'z' | 'scale'>): { x
 const MID_TREES: readonly [number, number, Tree][] = [
   [-11, -10, 'forest_twisted_b'], [-6.4, -15, 'forest_twisted_c'], [-14.5, -17, 'forest_twisted_c'], [-9, -22, 'forest_twisted_b'],
   [10.5, -11, 'forest_twisted_a'], [7.6, -17, 'forest_twisted_b'], [13.5, -19, 'forest_twisted_a'], [10, -24, 'forest_twisted_c'],
+  // Spare spots: they fill in where a tree above is left out to keep the moon's window of sky clear.
+  [-16.5, -8, 'forest_twisted_a'], [-3.8, -21, 'forest_twisted_c'], [16, -9, 'forest_twisted_b'], [4.6, -21, 'forest_twisted_a'],
 ];
 const FAR_TREES: readonly [number, number, Tree][] = [
   [-16, -27, 'forest_twisted_b'], [-8, -30, 'forest_twisted_a'], [-20, -32, 'forest_twisted_c'], [-4, -33, 'forest_twisted_b'],
@@ -75,7 +108,10 @@ export function buildWitchsForest(seed: number): UniqueSceneSpec {
   for (const g of GRAVES) placer.reserve(graveFootprint(g));
   placer.reserve({ x: FIRE.x, z: FIRE.z, hx: 1.5, hz: 1.1, rotY: 0 });
   // ----- layer 1: the huge trees of the foreground -----
-  const tree = (model: Tree, x: number, z: number, rotY: number, scale: number, group: 'themed' | 'centre' = 'themed', must = false) => {
+  const tree = (model: Tree, x: number, z: number, rotY: number, scale: number, group: 'themed' | 'centre' = 'themed', must = false, overMoon = false) => {
+    // The crown is checked where it is: its middle is shifted sideways from the trunk, turned with the tree.
+    const shift = CROWN_SHIFT[model] * scale;
+    if (!must && !overMoon && blocksMoonWindow(x + Math.cos(rotY) * shift, z - Math.sin(rotY) * shift, MODELS[model].h * scale, CROWN_REACH * scale)) return null;
     const p = placer.make(model, group, x, z, rotY, scale, TREE_FOOT * scale + 0.004);
     return must ? placer.fixed(p, { margin: 0.05 }, group === 'centre') : placer.tryAdd(p, { margin: 0.05 }, group === 'centre');
   };
@@ -86,7 +122,8 @@ export function buildWitchsForest(seed: number): UniqueSceneSpec {
     return (TREE_LEAN[m] * -side > 0 ? 0 : Math.PI) + between(-0.3, 0.3);
   };
   tree('forest_twisted_b', -13.5, -4, lean('forest_twisted_b', -13.5), 1.3);
-  tree('forest_twisted_c', 11.5, -3, lean('forest_twisted_c', 11.5), 1.25);
+  // The big tree on the right stands in front of the moon on purpose: its branches cross the disc.
+  const moonTree = tree('forest_twisted_c', 11.5, -3, lean('forest_twisted_c', 11.5), 1.25, 'themed', false, true);
   tree('forest_twisted_a', 5.6, -9.5, lean('forest_twisted_a', 5.6), 1.3);
   // ----- the tree that closes the tunnel at the end of the trail -----
   const end = tree(TUNNEL_END.model, TUNNEL_END.x, TUNNEL_END.z, TUNNEL_END.rotY, TUNNEL_END.scale, 'centre', true)!;
@@ -117,7 +154,7 @@ export function buildWitchsForest(seed: number): UniqueSceneSpec {
   const placements: Placement[] = placer.placements;
   const keepOut = [...placer.reserved, ...placements.map(solidFootprint)];
   const ground = grass(centre, TRAIL_HALF_WIDTH, keepOut);
-  const { scary, thorns, logs, moreGraves } = scaryGround(centre, TRAIL_HALF_WIDTH, keepOut);
+  const { scary, thorns, logs, moreGraves } = scaryGround(centre, TRAIL_HALF_WIDTH, keepOut, (x, z, height, reach) => blocksMoonWindow(x, z, height, reach));
   const parts: ForestParts = {
     hero: { id: hero.id },
     fire: { x: FIRE.x, z: FIRE.z, flames: flames(), sparks: SPARK_COUNT },

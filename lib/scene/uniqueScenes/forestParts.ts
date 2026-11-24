@@ -196,12 +196,15 @@ export const EXTRA_GRAVE_COUNT = 14;
 export const EXTRA_GRAVE_TRIS = 100;
 /** Half the width of a scary tree at scale 1 (its trunk and roots), for keeping the others clear of it. */
 export const SCARY_REACH = 0.9;
+/** Height and crown reach of a scary tree at scale 1 (the tallest variant), for keeping the moon's window of sky clear. */
+export const SCARY_HEIGHT = 7.2;
+export const SCARY_CROWN = 2.6;
 /**
  * Fills the empty ground with dead trees and thorn bushes, in both sides of the path and from the foreground back into the
  * mist. Seeded. Nothing stands on the path or inside `keepOut`, and in the foreground only at the sides, so the middle of the
  * screen over the path stays open.
  */
-export function scaryGround(path: readonly { x: number; z: number }[], halfWidth: number, keepOut: readonly Footprint[]): { scary: ScaryTree[]; thorns: Thorn[]; logs: Thorn[]; moreGraves: Grave[] } {
+export function scaryGround(path: readonly { x: number; z: number }[], halfWidth: number, keepOut: readonly Footprint[], blocksMoon: (x: number, z: number, height: number, reach: number) => boolean = () => false): { scary: ScaryTree[]; thorns: Thorn[]; logs: Thorn[]; moreGraves: Grave[] } {
   const rng = mulberry32(5521);
   const between = (lo: number, hi: number) => lo + (hi - lo) * rng();
   const dist = (x: number, z: number) => path.reduce((m, c) => Math.min(m, Math.hypot(c.x - x, c.z - z)), Infinity);
@@ -214,7 +217,7 @@ export function scaryGround(path: readonly { x: number; z: number }[], halfWidth
     const x = side * between(z > 2 ? 5.5 : 3.4, 15);
     // Small ones in the foreground, so they never rise into the middle of the screen; big ones further back.
     const scale = z > 2 ? between(0.6, 0.95) : between(0.9, 1.5) * (z < -14 ? 1.15 : 1);
-    if (!free(x, z, SCARY_REACH * scale) || scary.some((t) => Math.hypot(t.x - x, t.z - z) < (SCARY_REACH * (t.scale + scale)) + 0.8)) continue;
+    if (blocksMoon(x, z, SCARY_HEIGHT * scale, SCARY_CROWN * scale) || !free(x, z, SCARY_REACH * scale) || scary.some((t) => Math.hypot(t.x - x, t.z - z) < (SCARY_REACH * (t.scale + scale)) + 0.8)) continue;
     scary.push({ x, z, rotY: between(0, Math.PI * 2), scale, variant: scary.length % SCARY_VARIANTS });
   }
   const thorns: Thorn[] = [];
