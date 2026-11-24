@@ -2,6 +2,7 @@
 // the grass banks and the leaves. Pure and seeded: no three, no browser APIs. `themes/autumn*.ts` turn these plans into meshes.
 // Coordinates: x right, y up, z toward the camera (the camera is at z = 16).
 import { cameraAt, directionAt, dot, basis, project } from '../camera';
+import { footprintOf, footprintsOverlap, type Footprint, type Placement } from '../layout';
 import { mulberry32 } from '../rng';
 import { moonScreenRadiusScaled } from '../sky';
 
@@ -77,40 +78,35 @@ export interface TreePlan {
   base: { x: number; z: number };
   trunk: Tube;
   branches: Tube[];
-  /** The little branch that peeks in from the top-right corner, and its own leaves. */
-  corner: Tube;
   clusters: LeafCluster[];
-  cornerClusters: LeafCluster[];
   /** The knot hole on the trunk: its centre, how it faces and its size. */
   knot: { x: number; y: number; z: number; rotY: number; w: number; h: number };
 }
 
-export const TREE_BASE = { x: -4.4, z: 8 };
-/** Footprint kept clear of props, around the trunk and its roots. */
-export const TREE_FOOTPRINT = { x: TREE_BASE.x - 0.4, z: TREE_BASE.z, hx: 1.9, hz: 1.7, rotY: 0 };
+/**
+ * The tree stands in the left field, far enough back that the whole of it (roots, trunk and crown) is on screen in every
+ * window, under the brand and left of the search box and the chips.
+ */
+export const TREE_BASE = { x: -8.6, z: -2 };
+/** Footprint kept clear of props, around the trunk, the roots and under the crown. */
+export const TREE_FOOTPRINT = { x: TREE_BASE.x, z: TREE_BASE.z, hx: 1.6, hz: 1.6, rotY: 0 };
 const B = TREE_BASE;
 const at = (x: number, y: number, z: number): V3 => [B.x + x, y, B.z + z];
 
-/**
- * The trunk leans out to the left as it climbs: its upper part stays left of the brand in every window (off screen on a
- * narrow one), so the big limbs leave the screen on the left and arch back in over the top.
- */
+/** A short, thick, slightly twisted trunk with flared roots. */
 const TRUNK: Tube = {
-  points: [at(0.3, -0.4, 0), at(0.1, 1.3, 0.05), at(-0.5, 2.6, -0.1), at(-1.3, 3.8, -0.2), at(-2.0, 4.9, -0.3), at(-2.7, 6.2, -0.3), at(-3.2, 7.6, -0.3)],
-  radii: [1.15, 0.92, 0.8, 0.72, 0.64, 0.56, 0.48],
+  points: [at(0, -0.3, 0), at(0.06, 0.9, 0), at(-0.06, 1.8, 0.05), at(0.04, 2.6, 0)],
+  radii: [0.6, 0.44, 0.38, 0.33],
 };
-/**
- * The big limbs. The first rises off screen and arches over the top of the scene toward the centre, above the header; the
- * second reaches up and back to the top-left; the third and fourth hold the low canopy on the left, under the brand.
- */
+/** It splits into four limbs that curve up and out into the crown: left, right, up and back. */
 const LIMBS: Tube[] = [
-  { points: [at(-2.6, 6.0, -0.3), at(-2.0, 8.2, -2.0), at(0.4, 9.3, -4.4), at(4.0, 9.8, -7.6), at(8.0, 9.9, -11)], radii: [0.5, 0.4, 0.3, 0.19, 0.09] },
-  { points: [at(-3.0, 7.0, -0.3), at(-3.2, 8.8, -2.2), at(-2.6, 10.2, -4.6), at(-1.6, 11.2, -7.4)], radii: [0.42, 0.32, 0.2, 0.09] },
-  { points: [at(-1.0, 3.3, -0.15), at(-0.7, 4.2, -1.4), at(0.0, 4.7, -2.6), at(0.7, 5.0, -3.6)], radii: [0.4, 0.3, 0.18, 0.08] },
-  { points: [at(-1.6, 4.3, -0.25), at(-1.9, 5.0, -2.8), at(-2.0, 5.5, -5.6), at(-2.1, 5.9, -9.0)], radii: [0.34, 0.26, 0.16, 0.07] },
+  { points: [at(0, 2.3, 0), at(-0.7, 3.2, 0.2), at(-1.3, 4.0, 0.3), at(-1.6, 4.8, 0.2)], radii: [0.27, 0.2, 0.13, 0.05] },
+  { points: [at(0, 2.4, 0), at(0.75, 3.2, -0.1), at(1.3, 3.9, -0.2), at(1.6, 4.7, -0.1)], radii: [0.27, 0.2, 0.13, 0.05] },
+  { points: [at(0, 2.5, 0), at(0.1, 3.5, -0.2), at(-0.1, 4.5, -0.3), at(0.05, 5.4, -0.2)], radii: [0.29, 0.21, 0.14, 0.05] },
+  { points: [at(0, 2.2, 0), at(0.25, 3.0, -0.7), at(0.4, 3.8, -1.2), at(0.5, 4.5, -1.5)], radii: [0.22, 0.16, 0.1, 0.04] },
 ];
-/** The little branch that peeks in from the top-right corner, from off screen. */
-const CORNER: Tube = { points: [[12.6, 9.8, 4.0], [10.8, 9.0, 3.6], [9.4, 8.6, 3.3], [8.4, 8.4, 3.1]], radii: [0.34, 0.22, 0.12, 0.05] };
+/** The crown: an egg of leaves around the top of the limbs, wider than it is tall. */
+export const CROWN = { x: B.x, y: 4.55, z: B.z - 0.3, rx: 1.45, ry: 1.05, rz: 1.3 };
 
 /** A point on a Catmull-Rom curve through `points`, with t from 0 to 1. */
 export function curvePoint(points: readonly V3[], t: number): V3 {
@@ -164,6 +160,21 @@ export function uiRects(w: number, h: number): ScreenRect[] {
     r('pinned and chips', mid - 360, mid + 360, 212, 330),
   ];
 }
+/**
+ * The harvest moon: in the clear sky on the right, right of the windmill and under the header buttons, its whole disc
+ * above the horizon. Its screen x depends on the window shape, because a wider window brings the windmill toward the centre.
+ */
+export const MOON_SCALE = 1.2;
+export function moonSpot(aspect: number): { x: number; y: number } {
+  const a = Number.isFinite(aspect) && aspect > 0 ? aspect : 16 / 9;
+  const x = a <= 16 / 9 ? 0.875 + (16 / 9 - Math.max(a, 1.6)) * 0.12 : Math.max(0.79, 0.875 - (Math.min(a, 2.4) - 16 / 9) * 0.15);
+  return { x, y: 0.27 };
+}
+/** True when a point (screen fractions) is on the moon's disc, or within `pad` (window heights) of it. */
+export function onMoon(sx: number, sy: number, aspect: number, pad = 0): boolean {
+  const m = moonSpot(aspect);
+  return Math.hypot((sx - m.x) * aspect, sy - m.y) < moonScreenRadiusScaled(aspect, MOON_SCALE).disc + pad;
+}
 /** The canopy never hangs lower than the top of the cards (in CSS pixels from the top). */
 export const CANOPY_MAX_PX = 330;
 const overlaps = (a: { x0: number; x1: number; y0: number; y1: number }, r: ScreenRect) => a.x0 < r.x1 && a.x1 > r.x0 && a.y0 < r.y1 && a.y1 > r.y0;
@@ -190,9 +201,7 @@ export function ballBlocks(x: number, y: number, z: number, r: number, low = tru
     if (box.x1 < 0 || box.x0 > 1 || box.y1 < 0 || box.y0 > 1) continue;
     if (low && box.y1 > CANOPY_MAX_PX / h) return `too low @${w}`;
     for (const rect of uiRects(w, h)) if (overlaps(box, rect)) return `${rect.name} @${w}`;
-    const moon = { x: 0.78, y: 0.34 };
-    const keep = moonScreenRadiusScaled(aspect, 1.6).disc * 1.25 + s.ry;
-    if (Math.hypot((s.cx - moon.x) * aspect, s.cy - moon.y) < keep) return `moon @${w}`;
+    if (onMoon(s.cx, s.cy, aspect, s.ry + 0.02)) return `moon @${w}`;
   }
   return null;
 }
@@ -206,100 +215,61 @@ export function tubeBalls(tube: Tube, n = 24): { x: number; y: number; z: number
   });
 }
 
-const TONES: readonly LeafTone[] = ['red', 'red', 'orange', 'orange', 'gold', 'deep'];
-const CORNER_TONES: readonly LeafTone[] = ['red', 'red', 'red', 'deep', 'orange'];
 
 export function buildTreePlan(seed: number): TreePlan {
   const rng = mulberry32(seed);
   const between = (lo: number, hi: number) => lo + (hi - lo) * rng();
   const branches: Tube[] = [...LIMBS];
-  // Twigs: a short thin branch from a point along each limb, leaning up and out.
-  LIMBS.forEach((limb, li) => {
-    for (let k = 0; k < 4; k++) {
-      const t = 0.3 + 0.17 * k + between(-0.04, 0.04);
+  // Twigs: short thin branches off the upper half of each limb, reaching out into the crown.
+  for (const limb of LIMBS) {
+    for (let k = 0; k < 3; k++) {
+      const t = 0.45 + 0.18 * k + between(-0.04, 0.04);
       const p = curvePoint(limb.points, t);
-      const ang = between(0, Math.PI * 2);
-      const len = between(1.1, 2.0);
-      const mid: V3 = [p[0] + Math.cos(ang) * len * 0.5, p[1] + len * 0.35, p[2] + Math.sin(ang) * len * 0.5];
-      const tip: V3 = [p[0] + Math.cos(ang) * len, p[1] + len * 0.75, p[2] + Math.sin(ang) * len];
-      const r0 = radiusAt(limb, t) * 0.5;
-      const twig: Tube = { points: [p, mid, tip], radii: [r0, r0 * 0.6, 0.04] };
-      if (tubeBalls(twig).every((b) => ballBlocks(b.x, b.y, b.z, b.r, false) === null)) branches.push(twig);
+      const out = Math.atan2(p[2] - CROWN.z, p[0] - CROWN.x) + between(-0.7, 0.7);
+      const len = between(0.6, 1.0);
+      const mid: V3 = [p[0] + Math.cos(out) * len * 0.5, p[1] + len * 0.3, p[2] + Math.sin(out) * len * 0.5];
+      const tip: V3 = [p[0] + Math.cos(out) * len, p[1] + len * 0.6, p[2] + Math.sin(out) * len];
+      const r0 = radiusAt(limb, t) * 0.55;
+      branches.push({ points: [p, mid, tip], radii: [r0, r0 * 0.6, 0.03] });
     }
-    void li;
-  });
+  }
+  // The crown: clusters on and just inside the shell of the egg, thinner underneath so the limbs show.
   const clusters: LeafCluster[] = [];
-  const tryCluster = (list: LeafCluster[], x: number, y: number, z: number, r: number, tones: readonly LeafTone[]) => {
-    if (!leavesFit(x, y, z, r)) return false;
-    list.push({ x, y, z, r, tone: tones[Math.floor(rng() * tones.length)]!, rotY: between(0, Math.PI * 2) });
-    return true;
-  };
-  // Leaves along every limb and twig, and a crown above the trunk.
-  for (const tube of branches) {
-    const steps = tube.radii[0]! > 0.2 ? 10 : 3;
-    for (let s = 0; s < steps; s++) {
-      const p = curvePoint(tube.points, 0.25 + 0.75 * (s / steps));
-      for (let tries = 0; tries < 3; tries++) {
-        const r = between(0.95, 1.75);
-        if (tryCluster(clusters, p[0] + between(-1.2, 1.2), p[1] + between(-0.2, 1.7), p[2] + between(-1.2, 1.2), r, TONES)) break;
-      }
-    }
+  for (let i = 0; i < 1400 && clusters.length < 95; i++) {
+    const u = between(-1, 1);
+    const th = between(0, Math.PI * 2);
+    const ring = Math.sqrt(1 - u * u);
+    const shell = between(0.55, 1);
+    const ux = ring * Math.cos(th);
+    const uz = ring * Math.sin(th);
+    // Fewer clusters low down: the underside is open.
+    if (u < -0.35 && rng() < 0.75) continue;
+    const r = between(0.42, 0.68);
+    const x = CROWN.x + ux * CROWN.rx * shell;
+    const y = CROWN.y + u * CROWN.ry * shell;
+    const z = CROWN.z + uz * CROWN.rz * shell;
+    if (!leavesFit(x, y, z, r)) continue;
+    // Gold on top where the light falls, deep red underneath.
+    const k = rng();
+    const tone: LeafTone = u > 0.45 ? (k < 0.4 ? 'gold' : k < 0.8 ? 'orange' : 'red') : u < -0.2 ? (k < 0.5 ? 'deep' : 'red') : k < 0.5 ? 'red' : k < 0.85 ? 'orange' : 'gold';
+    clusters.push({ x, y, z, r, tone, rotY: between(0, Math.PI * 2) });
   }
-  // Then fill the free parts of the screen (fractions at 16:9): the band under the brand on the left, the top edge above the
-  // header (only the lowest leaves hang into view) and the right-hand edge for the corner branch. Every cluster is still
-  // checked in every window, so none sits behind a control or the moon.
-  const cam = cameraAt(0, 16 / 9, true);
-  const fwd = basis(cam).f;
-  /** A cluster at a screen point and depth. With `edge`, the cluster's lowest point must land in that band (so it shows). */
-  const sample = (list: LeafCluster[], area: readonly [number, number, number, number], depth: readonly [number, number], tones: readonly LeafTone[], edge?: readonly [number, number]) => {
-    const d = between(depth[0], depth[1]);
-    const dir = directionAt(between(area[0], area[1]), between(area[2], area[3]), cam);
-    const t = d / dot(dir, fwd);
-    const x = cam.position[0] + dir[0] * t;
-    const y = cam.position[1] + dir[1] * t;
-    const z = cam.position[2] + dir[2] * t;
-    const r = d * between(0.035, 0.075);
-    if (edge) {
-      const sc = ballOnScreen(x, y, z, r, 16 / 9);
-      const bottom = sc ? sc.cy + sc.ry : -1;
-      if (bottom < edge[0] || bottom > edge[1]) return false;
-    }
-    return tryCluster(list, x, y, z, r, tones);
-  };
-  const fill = (n: number, area: readonly [number, number, number, number], depth: readonly [number, number], edge?: readonly [number, number]) => {
-    let added = 0;
-    for (let i = 0; i < n * 60 && added < n; i++) if (sample(clusters, area, depth, TONES, edge)) added++;
-  };
-  fill(80, [-0.15, 0.22, 0.15, 0.31], [6.5, 16]);
-  fill(60, [-0.1, 0.72, -0.2, 0.0], [8, 20], [0.004, 0.05]);
-  const cornerClusters: LeafCluster[] = [];
-  for (let s = 0; s < 10; s++) {
-    const p = curvePoint(CORNER.points, 0.1 + 0.9 * (s / 10));
-    for (let tries = 0; tries < 8; tries++) {
-      if (tryCluster(cornerClusters, p[0] + between(-0.8, 1.2), p[1] + between(-1.2, 0.8), p[2] + between(-0.5, 0.5), between(0.45, 1.0), CORNER_TONES)) break;
-    }
-  }
-  for (let i = 0; i < 3000 && cornerClusters.length < 34; i++) sample(cornerClusters, [0.84, 1.12, -0.2, 0.3], [9, 15], CORNER_TONES, [0.004, 0.32]);
-  const knotT = 0.3;
+  // A small knot hole low on the trunk, facing the camera.
+  const knotT = 0.35;
   const knotCentre = curvePoint(TRUNK.points, knotT);
   const knotR = radiusAt(TRUNK, knotT);
-  const knotY = knotCentre[1];
-  // The hole faces the camera (a little to the right, toward the trail).
-  const rotY = 0.45;
+  const rotY = Math.atan2(0.5 - B.x, 16 - B.z);
   return {
     base: { x: B.x, z: B.z },
     trunk: TRUNK,
     branches,
-    corner: CORNER,
     clusters,
-    cornerClusters,
-    knot: { x: knotCentre[0] + Math.sin(rotY) * knotR * 1.02, y: knotY, z: knotCentre[2] + Math.cos(rotY) * knotR * 1.02, rotY, w: 0.34, h: 0.5 },
+    knot: { x: knotCentre[0] + Math.sin(rotY) * knotR * 1.02, y: knotCentre[1], z: knotCentre[2] + Math.cos(rotY) * knotR * 1.02, rotY, w: 0.13, h: 0.2 },
   };
 }
 
-// ---------- the trick-or-treaters ----------
+// ---------- the trick-or-treater: a little witch ----------
 
-export type KidKind = 'ghost' | 'witch';
 export interface Route {
   /** Points along the trail the children walk, toward the barn. */
   points: { x: number; z: number }[];
@@ -347,10 +317,8 @@ export function kidsAt(route: Route, t: number, reduced: boolean): { s: number; 
   const scale = Math.min(1, f / KID_FADE, (1 - f) / KID_FADE);
   return { s: f * route.length, scale: smooth(0, 1, scale) };
 }
-/** Sideways offset of each child from the middle of the trail. */
-export const KID_LATERAL: Record<KidKind, number> = { ghost: -0.33, witch: 0.33 };
-/** Child heights, for the tests (the dry corn must be taller). */
-export const KID_HEIGHT = { ghost: 1.25, witch: 1.6 };
+/** The little witch's height, for the tests (the dry corn must be taller). */
+export const KID_HEIGHT = 1.6;
 
 // ---------- dry corn, fence, tufts, leaves, light ----------
 
@@ -404,6 +372,8 @@ export interface AutumnPlan {
   /** The trail's centre line, for the grass banks. */
   line: TrackPoint[];
   stalks: Stalk[];
+  /** Green corn that fills the empty land of the fields. */
+  fieldCorn: Stalk[];
   /** One list of posts for each side of the trail (left first). */
   fence: FencePost[][];
   tufts: Tuft[];
@@ -418,8 +388,58 @@ export const LANE_Z = { from: 8.5, to: -15.5 };
 /** Nothing of the lane grows this close to the tree's trunk. */
 const TREE_CLEAR = 2.3;
 const nearTree = (x: number, z: number) => Math.hypot(x - TREE_FOOTPRINT.x, z - TREE_FOOTPRINT.z) < TREE_CLEAR;
+/** Would a stalk this tall at this spot stand over the moon in some window? */
+function overMoon(x: number, z: number, h: number): boolean {
+  return FRAME_WINDOWS.some(([w, hh]) => {
+    const cam = cameraAt(0, w / hh, true);
+    return [h, h * 0.7, h * 0.4].some((y) => {
+      const q = project([x, y, z], cam);
+      return q !== null && onMoon(q.x, q.y, w / hh, 0.03);
+    });
+  });
+}
 
-export function buildAutumnPlan(seed: number, line: readonly TrackPoint[]): AutumnPlan {
+/** Height of a field corn stalk at scale 1 (`buildFieldStalk`). */
+export const FIELD_STALK_H = 2.3;
+/** Field corn stays this far from the trail's centre line (the lane is the dry corn's) and inside these bounds. */
+const FIELD = { keep: 5.4, minX: -27, maxX: 27, minZ: -42, maxZ: 3, step: 1.35 };
+/** No field corn in front of the tree, so its trunk and roots stay in view. */
+const inFrontOfTree = (x: number, z: number) => x > B.x - 3.2 && x < B.x + 4 && z > B.z - 1 && z < B.z + 9;
+/**
+ * Field corn on a jittered grid over the empty land: clear of the trail, every prop (wide margins round the barn, the silo
+ * and the windmill), the reserved spots, the pumpkin patch on the right and the front of the tree, and never over the moon.
+ */
+export function buildFieldCorn(seed: number, line: readonly TrackPoint[], placements: readonly Placement[], reserved: readonly Footprint[], max = 420): Stalk[] {
+  const rng = mulberry32(seed + 71);
+  const between = (lo: number, hi: number) => lo + (hi - lo) * rng();
+  const big = new Set(['farm_barn', 'farm_silo', 'farm_windmill']);
+  const out: Stalk[] = [];
+  const cams = FRAME_WINDOWS.map(([w, h]) => ({ aspect: w / h, cam: cameraAt(0, w / h, true) }));
+  for (let z = FIELD.maxZ; z >= FIELD.minZ && out.length < max; z -= FIELD.step) {
+    for (let x = FIELD.minX; x <= FIELD.maxX && out.length < max; x += FIELD.step) {
+      const px = x + between(-0.45, 0.45);
+      const pz = z + between(-0.45, 0.45);
+      const scale = between(0.85, 1.2);
+      if (line.reduce((m, c) => Math.min(m, Math.hypot(c.x - px, c.z - pz)), Infinity) < FIELD.keep) continue;
+      if (px > 3.5 && px < 12 && pz > -13 && pz < 8) continue;
+      if (inFrontOfTree(px, pz)) continue;
+      const f: Footprint = { x: px, z: pz, hx: 0.35, hz: 0.35, rotY: 0 };
+      if (placements.some((p) => footprintsOverlap(f, footprintOf(p), big.has(p.model) ? 1.4 : 0.15))) continue;
+      if (reserved.some((r) => footprintsOverlap(f, r, 0.3))) continue;
+      const h = FIELD_STALK_H * scale;
+      if (cams.some(({ aspect, cam }) => [h, h * 0.5].some((y) => {
+        const q = project([px, y, pz], cam);
+        return q !== null && onMoon(q.x, q.y, aspect, 0.03);
+      }))) continue;
+      const lean = between(0, 0.1);
+      const dir = between(0, Math.PI * 2);
+      out.push({ x: px, z: pz, y: 0, rotY: between(0, Math.PI * 2), scale, leanX: Math.cos(dir) * lean, leanZ: Math.sin(dir) * lean });
+    }
+  }
+  return out;
+}
+
+export function buildAutumnPlan(seed: number, line: readonly TrackPoint[], placements: readonly Placement[] = [], reserved: readonly Footprint[] = []): AutumnPlan {
   const rng = mulberry32(seed + 31);
   const between = (lo: number, hi: number) => lo + (hi - lo) * rng();
   const lane = line.filter((c) => c.z <= LANE_Z.from && c.z >= LANE_Z.to);
@@ -435,7 +455,7 @@ export function buildAutumnPlan(seed: number, line: readonly TrackPoint[]): Autu
         const z = p.z + between(-0.55, 0.55);
         const lean = between(0.04, 0.2);
         const dir = between(0, Math.PI * 2);
-        if (nearTree(x, z)) continue;
+        if (nearTree(x, z) || overMoon(x, z, 2.6 * 1.3)) continue;
         stalks.push({ x, z, y: bankHeight(off), rotY: between(0, Math.PI * 2), scale: between(0.95, 1.3), leanX: Math.cos(dir) * lean, leanZ: Math.sin(dir) * lean });
       }
       // A post about every second sample (3 units apart), each leaning a little, none the same height.
@@ -469,6 +489,12 @@ export function buildAutumnPlan(seed: number, line: readonly TrackPoint[]): Autu
     const p = sideOf(c, side, off);
     leaves.push({ x: p.x, z: p.z, y: onTrail ? 0.07 : bankHeight(off) + 0.04, rotY: between(0, Math.PI * 2), scale: between(0.6, 1.3), tone: tones[Math.floor(rng() * tones.length)]! });
   }
+  // A carpet of leaves under the tree.
+  for (let i = 0; i < 50; i++) {
+    const a = between(0, Math.PI * 2);
+    const d = Math.sqrt(rng()) * 2.4 + 0.5;
+    leaves.push({ x: B.x + Math.cos(a) * d, z: B.z + Math.sin(a) * d, y: 0.04, rotY: between(0, Math.PI * 2), scale: between(0.7, 1.2), tone: tones[Math.floor(rng() * tones.length)]! });
+  }
   // Warm patches of light on the trail.
   const patches: LightPatch[] = [];
   for (let i = 0; i < 12; i++) {
@@ -481,6 +507,7 @@ export function buildAutumnPlan(seed: number, line: readonly TrackPoint[]): Autu
     route: routeOf(line, 3, -15.2),
     line: [...line],
     stalks,
+    fieldCorn: buildFieldCorn(seed, line, placements, reserved),
     fence,
     tufts,
     leaves,

@@ -4,16 +4,16 @@
 import { MODELS, type ModelId, type Placement, type WarmSource } from '../layout';
 import { WINDMILL_FOOT } from '../windmill';
 import { WEATHER } from '../weather';
-import { LANE, LANE_Z, TREE_FOOTPRINT, bankHeight, buildAutumnPlan, sideOf, smoothPolyline } from './autumn';
+import { LANE, LANE_Z, MOON_SCALE, TREE_FOOTPRINT, bankHeight, buildAutumnPlan, moonSpot, sideOf, smoothPolyline } from './autumn';
 import { Placer, modelsOf, sampleLine, type UniqueMoon, type UniqueSceneSpec } from './types';
 
 /** Added to the caller's seed, so this theme has its own random stream. */
 export const PUMPKIN_SEED = 7101;
 
-/** A big harvest moon, low over the horizon on the right, clear of the header and above the cards. */
+/** A pale gold harvest moon in the clear sky on the right, beside the windmill, its whole disc above the horizon. */
 export const PUMPKIN_MOON: UniqueMoon = {
-  target: () => ({ x: 0.78, y: 0.34 }),
-  scale: 1.6,
+  target: moonSpot,
+  scale: MOON_SCALE,
   crisp: true,
 };
 
@@ -23,20 +23,20 @@ const TRACK_HALF_WIDTH = 1.3;
 /** Props keep this far from the trail's centre line: the lane (jack-o'-lanterns, fence and dry corn) is theirs. */
 const LANE_KEEP = 4.6;
 
-/** The barn faces the camera; the silo and the windmill stand behind it, to the left, so the right side of the sky is left for the moon. */
+/** The barn faces the camera; the silo stands behind it on the left, and the windmill on the right, turned toward the camera. */
 export const BARN = { x: -3.8, z: -23, rotY: 0.1, scale: 1.25 };
 export const SILO = { x: -13, z: -27.5, rotY: 0, scale: 1.1 };
-export const WINDMILL = { x: -22, z: -35, rotY: 0.12, scale: 6.5 };
-/** The scarecrow (drawn by `ScarecrowShape`): a clearing in the corn on the left. */
-export const SCARECROW = { x: -7.4, z: -3.2, rotY: 0.25, scale: 1, hx: 0.9, hz: 0.9, h: 3.3 };
+export const WINDMILL = { x: 14, z: -30, rotY: -0.28, scale: 5 };
+/** The scarecrow (drawn by `ScarecrowShape`): standing guard in the pumpkin patch on the right. */
+export const SCARECROW = { x: 7.4, z: 1.2, rotY: -0.35, scale: 1, hx: 0.9, hz: 0.9, h: 3.3 };
 
 /** Upper bounds for the parts the scene draws itself, for the budget test (`tests/uniqueScenes.test.ts` checks the real shapes). */
 export const PUMPKIN_PARTS = {
   scarecrowTris: 320,
   groundTris: 2,
-  /** The tree, the children, the dry corn, the fence, the grass banks and tufts, the leaves and the light patches (checked in `tests/autumn.test.ts`). */
-  autumnTris: 26000,
-  /** Scarecrow, ground, trail, windmill sails, then the tree (wood and leaves), two children, dry corn, fence, banks, tufts, fallen leaves, light patches. */
+  /** The tree, the little witch, the dry and field corn, the fence, the grass banks and tufts, the leaves and the light patches (checked in `tests/autumn.test.ts`). */
+  autumnTris: 31000,
+  /** Scarecrow, ground, trail, windmill sails, then the tree (wood and leaves), the witch, dry corn, field corn, fence, banks, tufts, fallen leaves, light patches. */
   calls: 14,
 };
 
@@ -139,15 +139,12 @@ export function buildPumpkinPatch(seed: number): UniqueSceneSpec {
     lights,
     glows,
     anchors: [],
-    ghostSpots: [
-      { x: 6.5, y: 1.8, z: -4.5 },
-      { x: -6, y: 1.7, z: -9.5 },
-      { x: 2.5, y: 2.1, z: -15 },
-    ],
+    // No floating ghosts in the Pumpkin Patch: the little witch walking the lane is its only figure.
+    ghostSpots: [],
     weather: WEATHER.leaves,
-    layers: { clouds: true, witch: true, bats: 1, ghosts: true, mist: true, embers: true },
+    layers: { clouds: true, witch: true, bats: 1, ghosts: false, mist: true, embers: true },
     // The scarecrow, the ground plane, the track and the windmill's sails (a second draw for the same model).
     extras: { tris: PUMPKIN_PARTS.scarecrowTris + PUMPKIN_PARTS.groundTris + 2 * centre.length + PUMPKIN_PARTS.autumnTris, calls: PUMPKIN_PARTS.calls },
-    autumn: buildAutumnPlan(PUMPKIN_SEED + seed, line),
+    autumn: buildAutumnPlan(PUMPKIN_SEED + seed, line, placements, placer.reserved),
   };
 }

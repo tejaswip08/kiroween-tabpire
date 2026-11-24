@@ -97,14 +97,13 @@ function buildKnot(knot: TreePlan['knot']): BufferGeometry[] {
   ];
 }
 
-/** The trunk, the limbs, the twigs, the knot hole and the corner branch: one geometry. */
+/** The trunk, the limbs, the twigs and the knot hole: one geometry. */
 export function buildTreeWood(plan: TreePlan): BufferGeometry {
-  const parts: BufferGeometry[] = [buildTube(plan.trunk, 12, 20, true)];
+  const parts: BufferGeometry[] = [buildTube(plan.trunk, 12, 14, true)];
   for (const b of plan.branches) {
     const thick = b.radii[0]! > 0.2;
-    parts.push(buildTube(b, thick ? 8 : 5, thick ? 14 : 4, false));
+    parts.push(buildTube(b, thick ? 8 : 5, thick ? 10 : 4, false));
   }
-  parts.push(buildTube(plan.corner, 6, 8, false));
   parts.push(...buildKnot(plan.knot));
   return merge(parts);
 }
@@ -153,21 +152,6 @@ function bucket(x: number, y: number, z: number): BufferGeometry[] {
     paint(at(new CylinderGeometry(0.008, 0.008, 0.2, 3).rotateZ(Math.PI / 2), x, y + 0.1, z), '#2a1a12'),
   ];
 }
-/**
- * A child in a white bedsheet, standing at y = 0 with its back to +z (it walks toward -z): a sheet that flares to a hem, a round
- * head under it, two shoes, a small arm and a pumpkin bucket. About 1.25 units tall.
- */
-export function buildGhostKid(): BufferGeometry {
-  return merge([
-    paint(at(new CylinderGeometry(0.2, 0.38, 0.86, 10, 1, true), 0, 0.5, 0), '#f3efe4'),
-    paint(at(new SphereGeometry(0.235, 10, 7), 0, 0.93, 0), '#f6f2e8'),
-    paint(at(new CylinderGeometry(0.385, 0.39, 0.05, 10, 1, true), 0, 0.075, 0), '#dcd5c3'),
-    paint(at(new BoxGeometry(0.12, 0.1, 0.18), -0.1, 0.05, -0.06), '#3b2a22'),
-    paint(at(new BoxGeometry(0.12, 0.1, 0.18), 0.1, 0.05, -0.06), '#3b2a22'),
-    paint(at(new CylinderGeometry(0.05, 0.065, 0.3, 6).rotateZ(0.5), 0.3, 0.55, -0.02), '#f3efe4'),
-    ...bucket(0.4, 0.36, -0.02),
-  ]);
-}
 /** A little witch: a dark dress, striped legs, hair seen from behind and a tall pointed hat. About 1.65 units tall. */
 export function buildWitchKid(): BufferGeometry {
   return merge([
@@ -186,6 +170,37 @@ export function buildWitchKid(): BufferGeometry {
     paint(at(new ConeGeometry(0.19, 0.5, 10), 0, 1.4, 0), '#2a1a46'),
     ...bucket(-0.38, 0.4, -0.02),
   ]);
+}
+
+// ---------- corn ----------
+
+/**
+ * A low-poly green field corn stalk, about 2.3 units tall at scale 1, for filling the fields cheaply: a stem, four broad
+ * blades, a yellow ear and a tassel. 25 triangles.
+ */
+export function buildFieldStalk(): BufferGeometry {
+  const parts: BufferGeometry[] = [paint(at(new CylinderGeometry(0.03, 0.055, 2.2, 4, 1, true), 0, 1.1, 0), '#5f7f34')];
+  const tones = ['#6f9a3a', '#5a8430', '#86a845', '#4f7a2c'];
+  for (let i = 0; i < 4; i++) {
+    const ang = i * 1.75 + 0.4;
+    const h = 0.55 + i * 0.38;
+    const len = 0.75 - i * 0.08;
+    const dx = Math.cos(ang);
+    const dz = Math.sin(ang);
+    const px = -dz * 0.08;
+    const pz = dx * 0.08;
+    const arr = new Float32Array([
+      dx * 0.03 - px, h, dz * 0.03 - pz, dx * 0.03 + px, h, dz * 0.03 + pz, dx * len * 0.55, h + len * 0.3, dz * len * 0.55,
+      dx * 0.03 + px, h, dz * 0.03 + pz, dx * len, h - len * 0.1, dz * len, dx * len * 0.55, h + len * 0.3, dz * len * 0.55,
+    ]);
+    const g = new BufferGeometry();
+    g.setAttribute('position', new BufferAttribute(arr, 3));
+    g.computeVertexNormals();
+    parts.push(paint(g, tones[i]!));
+  }
+  parts.push(paint(at(new ConeGeometry(0.07, 0.34, 3).rotateZ(-0.45), 0.12, 1.35, 0), '#e8c24a'));
+  parts.push(paint(at(new ConeGeometry(0.05, 0.36, 3), 0, 2.36, 0), '#c9a24a'));
+  return merge(parts);
 }
 
 // ---------- dry corn ----------

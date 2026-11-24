@@ -213,14 +213,22 @@ describe('ThemeSceneRoot for the Pumpkin Patch', () => {
   });
   it('draws the autumn lane: the tree, the children, dry corn, the fence, grass, leaves and light, in the draw calls it declared', async () => {
     const { scene } = await mount(pumpkinRoot);
-    const lane = ['autumn-tree', 'autumn-leaves', 'kid-ghost', 'kid-witch', 'dry-corn', 'rustic-fence', 'grass-banks', 'grass-tufts', 'fallen-leaves', 'light-patches'];
+    const lane = ['autumn-tree', 'autumn-leaves', 'kid-witch', 'dry-corn', 'field-corn', 'rustic-fence', 'grass-banks', 'grass-tufts', 'fallen-leaves', 'light-patches'];
+    // No floating ghosts and no ghost child in the Pumpkin Patch.
+    expect(named(scene, 'kid-ghost')).toBeUndefined();
+    let ghostLayer = false;
+    scene.traverse((o) => {
+      const m = (o as THREE.Mesh).material as THREE.ShaderMaterial | undefined;
+      if (m?.isShaderMaterial && 'uCount' in m.uniforms && 'uBody' in m.uniforms) ghostLayer = true;
+    });
+    expect(ghostLayer).toBe(false);
     for (const n of lane) expect(named(scene, n), n).toBeDefined();
     const own = ['scarecrow', 'theme-ground', 'theme-path', 'windmill-sails', ...lane];
     expect(own.length).toBe(PUMPKIN_PARTS.calls);
   });
-  it('walks the children away down the trail, bobbing, and holds them still under reduced motion', async () => {
+  it('walks the little witch away down the trail, bobbing, and holds her still under reduced motion', async () => {
     const moving = await mount(pumpkinRoot);
-    const ghost = named(moving.scene, 'kid-ghost')!.parent!;
+    const ghost = named(moving.scene, 'kid-witch')!.parent!;
     const zs: number[] = [];
     for (const t of [4, 8, 12]) {
       moving.display.time = t;
@@ -422,13 +430,13 @@ describe('ThemeSceneRoot for the Frozen Cemetery', () => {
     expect([body.r, body.g, body.b].map((v) => +v.toFixed(5))).toEqual([want.r, want.g, want.b].map((v) => +v.toFixed(5)));
     expect(body.b).toBeGreaterThan(body.r);
     // The Crypt's ghosts (no tint) take the palette colour.
-    const pumpkin = await mount(pumpkinRoot);
+    const castle = await mount(castleRoot);
     let plain: THREE.ShaderMaterial | undefined;
-    pumpkin.scene.traverse((o) => {
+    castle.scene.traverse((o) => {
       const m = (o as THREE.Mesh).material as THREE.ShaderMaterial | undefined;
       if (m?.isShaderMaterial && 'uCount' in m.uniforms) plain = m;
     });
-    const pal = sceneThemeFor('pumpkin').colors.ghost.clone().multiplyScalar(0.95);
+    const pal = sceneThemeFor('castle').colors.ghost.clone().multiplyScalar(0.95);
     const plainBody = plain!.uniforms.uBody!.value as THREE.Color;
     expect(plainBody.r).toBeCloseTo(pal.r, 5);
     expect(plainBody.g).toBeCloseTo(pal.g, 5);

@@ -3,7 +3,7 @@
 import { describe, expect, it } from 'vitest';
 import { Color, type Mesh, type MeshStandardMaterial } from 'three';
 import {
-  buildBanks, buildDryStalk, buildFence, buildFlatLeaf, buildGhostKid, buildTreeLeaves, buildTreeWood, buildTuft, buildWitchKid, trianglesOf,
+  buildBanks, buildDryStalk, buildFence, buildFieldStalk, buildFlatLeaf, buildTreeLeaves, buildTreeWood, buildTuft, buildWitchKid, trianglesOf,
 } from '../entrypoints/newtab/layers/scene/themes/autumnBuild';
 import { cornerIndices, worldPositions } from '../entrypoints/newtab/layers/scene/geometryTools';
 import { collectParts, shadePumpkin } from '../entrypoints/newtab/layers/scene/ModelBatch';
@@ -11,10 +11,12 @@ import { cameraAt, project } from '../lib/scene/camera';
 import { MODELS } from '../lib/scene/layout';
 import { themeScene } from '../lib/scene/themeLayout';
 import {
-  BANK, FRAME_WINDOWS, KID_HEIGHT, KID_PAUSE_S, KID_SPEED, LANE, LANE_Z, ballBlocks, ballOnScreen, bankHeight, kidsAt, pointAlong, tubeBalls, uiRects,
+  BANK, CROWN, FIELD_STALK_H, FRAME_WINDOWS, KID_HEIGHT, KID_PAUSE_S, KID_SPEED, LANE, LANE_Z, MOON_SCALE, ballBlocks, ballOnScreen, bankHeight, kidsAt,
+  moonSpot, onMoon, pointAlong, tubeBalls, uiRects,
 } from '../lib/scene/uniqueScenes/autumn';
-import { BARN, PUMPKIN_PARTS } from '../lib/scene/uniqueScenes/pumpkin';
-import { distToPath } from '../lib/scene/uniqueScenes/types';
+import { BARN, PUMPKIN_MOON, PUMPKIN_PARTS, SCARECROW } from '../lib/scene/uniqueScenes/pumpkin';
+import { distToPath, viewOf } from '../lib/scene/uniqueScenes/types';
+import { moonScreenRadiusScaled } from '../lib/scene/sky';
 import { SAIL_CENTRE, SAIL_RADIUS, splitBlades } from '../lib/scene/windmill';
 import { themeById } from '../lib/themes';
 import { loadGlbGeometry } from './helpers/glb';
@@ -28,36 +30,47 @@ const visibleIn = (c: { x: number; y: number; z: number; r: number }, [w, h]: re
   return s.cx + s.rx > 0 && s.cx - s.rx < 1 && s.cy + s.ry > 0 && s.cy - s.ry < 1 ? s : null;
 };
 
-describe('the big autumn tree', () => {
-  it('stands in the left foreground, with a thick trunk, a knot hole, limbs and many leaf clusters in red, orange and gold', () => {
-    expect(tree.base.x).toBeLessThan(-3);
-    expect(tree.base.z).toBeGreaterThan(5);
-    expect(tree.trunk.radii[0]).toBeGreaterThanOrEqual(1);
-    expect(tree.branches.length).toBeGreaterThanOrEqual(4);
-    expect(tree.clusters.length).toBeGreaterThan(120);
+describe('the autumn tree', () => {
+  const parts = () => [...tree.clusters, ...tubeBalls(tree.trunk), ...tree.branches.flatMap((t) => tubeBalls(t, 8))];
+  it('is a whole tree: a thick trunk with roots and a knot hole, four limbs and twigs, and a round crown in red, orange and gold', () => {
+    expect(tree.base.x).toBeLessThan(-5);
+    expect(tree.trunk.radii[0]).toBeGreaterThan(tree.trunk.radii[tree.trunk.radii.length - 1]!);
+    expect(tree.branches.length).toBeGreaterThanOrEqual(10);
+    expect(tree.clusters.length).toBeGreaterThan(50);
     const tones = new Set(tree.clusters.map((c) => c.tone));
     for (const t of ['red', 'orange', 'gold'] as const) expect(tones.has(t), t).toBe(true);
-    // The knot hole is on the trunk's surface, low on the trunk.
-    expect(tree.knot.y).toBeGreaterThan(1);
-    expect(tree.knot.y).toBeLessThan(3.5);
+    // The crown sits on top of the trunk: every cluster is around the crown's centre, none lower than the fork.
+    for (const c of tree.clusters) {
+      expect(Math.hypot((c.x - CROWN.x) / CROWN.rx, (c.y - CROWN.y) / CROWN.ry, (c.z - CROWN.z) / CROWN.rz)).toBeLessThanOrEqual(1 + 1e-9);
+      expect(c.y).toBeGreaterThan(2.5);
+    }
+    expect(tree.knot.y).toBeGreaterThan(0.3);
+    expect(tree.knot.y).toBeLessThan(1.6);
+    expect(tree.knot.h).toBeLessThan(0.3);
   });
-  it('frames the top-left and the top edge, and a red branch peeks in from the top-right corner (reference window)', () => {
-    const shown = tree.clusters.map((c) => visibleIn(c, REF)).filter((s) => s !== null);
-    expect(shown.length).toBeGreaterThan(30);
-    // Leaves on the left, under the brand.
-    expect(shown.filter((s) => s.cx < 0.3 && s.cy > 0.15).length).toBeGreaterThan(10);
-    // Leaves hanging in along the top edge, reaching toward the centre.
-    const top = shown.filter((s) => s.cy - s.ry < 0.01);
-    expect(top.length).toBeGreaterThan(8);
-    expect(Math.max(...top.map((s) => s.cx))).toBeGreaterThan(0.25);
-    const corner = tree.cornerClusters.map((c) => visibleIn(c, REF)).filter((s) => s !== null);
-    expect(corner.length).toBeGreaterThan(3);
-    for (const s of corner) expect(s.cx).toBeGreaterThan(0.7);
-    expect(tree.cornerClusters.every((c) => c.tone === 'red' || c.tone === 'deep' || c.tone === 'orange')).toBe(true);
+  it('is fully on screen in every window: roots, trunk and crown, nothing cut by an edge', () => {
+    for (const [w, h] of FRAME_WINDOWS) {
+      for (const c of parts()) {
+        const sc = ballOnScreen(c.x, c.y, c.z, c.r, w / h)!;
+        expect(sc.cx - sc.rx, `left @${w}`).toBeGreaterThanOrEqual(-0.01);
+        expect(sc.cy - sc.ry, `top @${w}`).toBeGreaterThan(0.1);
+        expect(sc.cy + sc.ry, `bottom @${w}`).toBeLessThan(0.95);
+      }
+      // And big enough to read as a tree: more than a third of the window high.
+      const ys = parts().map((c) => ballOnScreen(c.x, c.y, c.z, c.r, w / h)!.cy);
+      expect(Math.max(...ys) - Math.min(...ys)).toBeGreaterThan(0.35);
+    }
+  });
+  it('has nothing standing in front of it: no corn, no props', () => {
+    for (const p of [...plan.fieldCorn, ...plan.stalks]) {
+      const inFront = p.z > tree.base.z && Math.abs(p.x - tree.base.x) < 2.5;
+      expect(inFront, `${p.x},${p.z}`).toBe(false);
+    }
+    for (const p of spec.placements) expect(Math.hypot(p.x - tree.base.x, p.z - tree.base.z), p.id).toBeGreaterThan(1.6);
   });
   it('never sits behind the header, the search box, the pinned pages, the chips or the moon, in any window', () => {
-    for (const c of [...tree.clusters, ...tree.cornerClusters]) expect(ballBlocks(c.x, c.y, c.z, c.r), `leaves at ${c.x},${c.y},${c.z}`).toBeNull();
-    for (const t of [tree.trunk, ...tree.branches, tree.corner]) {
+    for (const c of tree.clusters) expect(ballBlocks(c.x, c.y, c.z, c.r), `leaves at ${c.x},${c.y},${c.z}`).toBeNull();
+    for (const t of [tree.trunk, ...tree.branches]) {
       for (const b of tubeBalls(t)) expect(ballBlocks(b.x, b.y, b.z, b.r, false), `wood at ${b.x},${b.y},${b.z}`).toBeNull();
     }
   });
@@ -77,7 +90,7 @@ describe('the big autumn tree', () => {
   });
 });
 
-describe('the trick-or-treaters', () => {
+describe('the trick-or-treater', () => {
   const { route } = plan;
   it('walk the trail toward the barn, on the path', () => {
     expect(route.length).toBeGreaterThan(10);
@@ -104,23 +117,15 @@ describe('the trick-or-treaters', () => {
     expect(first.scale).toBe(1);
     expect(pointAlong(route, first.s).z).toBeLessThan(route.points[0]!.z);
   });
-  it('are small: a bedsheet ghost and a little witch with a pointed hat, each with a pumpkin bucket', () => {
-    const ghost = buildGhostKid();
+  it('is one small witch with a pointed hat and a pumpkin bucket (no ghost child)', () => {
     const witch = buildWitchKid();
-    ghost.computeBoundingBox();
     witch.computeBoundingBox();
-    expect(ghost.boundingBox!.max.y).toBeCloseTo(KID_HEIGHT.ghost, 0);
-    expect(witch.boundingBox!.max.y).toBeGreaterThan(1.5);
-    expect(witch.boundingBox!.max.y).toBeLessThan(1.8);
-    // Orange bucket colours on both.
-    const hasOrange = (g: ReturnType<typeof buildGhostKid>) => {
-      const c = g.getAttribute('color');
-      const o = new Color('#f08a1c');
-      for (let i = 0; i < c.count; i++) if (Math.abs(c.getX(i) - o.r) < 1e-3 && Math.abs(c.getY(i) - o.g) < 1e-3) return true;
-      return false;
-    };
-    expect(hasOrange(ghost)).toBe(true);
-    expect(hasOrange(witch)).toBe(true);
+    expect(witch.boundingBox!.max.y).toBeCloseTo(KID_HEIGHT, 0);
+    const c = witch.getAttribute('color');
+    const o = new Color('#f08a1c');
+    let bucket = false;
+    for (let i = 0; i < c.count; i++) if (Math.abs(c.getX(i) - o.r) < 1e-3 && Math.abs(c.getY(i) - o.g) < 1e-3) bucket = true;
+    expect(bucket).toBe(true);
   });
 });
 
@@ -137,7 +142,7 @@ describe('the corn lane', () => {
     const h = stalk.boundingBox!.max.y;
     expect(plan.stalks.length).toBeGreaterThan(60);
     for (const s of plan.stalks) {
-      expect(h * s.scale).toBeGreaterThan(KID_HEIGHT.witch + 0.6);
+      expect(h * s.scale).toBeGreaterThan(KID_HEIGHT + 0.6);
       const lean = Math.hypot(s.leanX, s.leanZ);
       expect(lean).toBeGreaterThan(0.03);
       expect(lean).toBeLessThan(0.25);
@@ -199,7 +204,70 @@ describe('the grass, the trail and the leaves', () => {
   });
 });
 
+describe('the fields', () => {
+  it('fills the empty land with green corn, clear of the trail, the props, the pumpkin patch and the moon', () => {
+    expect(plan.fieldCorn.length).toBeGreaterThan(300);
+    const g = buildFieldStalk();
+    g.computeBoundingBox();
+    expect(g.boundingBox!.max.y).toBeCloseTo(FIELD_STALK_H, 0);
+    expect(trianglesOf(g)).toBeLessThanOrEqual(30);
+    for (const c of plan.fieldCorn) {
+      expect(distToPath(spec.path.centre, c.x, c.z)).toBeGreaterThan(5);
+      expect(c.x > 3.5 && c.x < 12 && c.z > -13 && c.z < 8, `${c.x},${c.z} in the pumpkin patch`).toBe(false);
+    }
+    // Both sides of the farm, near and far.
+    expect(plan.fieldCorn.some((c) => c.x < -15)).toBe(true);
+    expect(plan.fieldCorn.some((c) => c.x > 15)).toBe(true);
+    expect(plan.fieldCorn.some((c) => c.z < -30)).toBe(true);
+  });
+});
+
+describe('the windmill', () => {
+  it('stands on the right, fully in view, facing the camera, clear of the moon', () => {
+    const w = spec.placements.find((p) => p.model === 'farm_windmill')!;
+    expect(w.x).toBeGreaterThan(BARN.x + 10);
+    for (const [ww, hh] of FRAME_WINDOWS) {
+      const a = ww / hh;
+      const v = viewOf(w, a)!;
+      expect(v.left, `@${ww}`).toBeGreaterThan(0.55);
+      expect(v.right).toBeLessThan(0.95);
+      expect(v.top).toBeGreaterThan(0.17);
+      const m = moonSpot(a);
+      expect(v.right, `windmill and moon @${ww}`).toBeLessThan(m.x - moonScreenRadiusScaled(a, MOON_SCALE).disc / a);
+    }
+    // Turned toward the camera (which is at x 0.5, z 16).
+    expect(Math.abs(w.rotY - Math.atan2(0.5 - w.x, 16 - w.z))).toBeLessThan(0.1);
+  });
+  it('leaves the scarecrow out in the pumpkin patch, not in front of the tree', () => {
+    expect(SCARECROW.x).toBeGreaterThan(3);
+  });
+});
+
 describe('the sky and the moon', () => {
+  it('puts the whole moon in clear sky on the right: under the header buttons, above the horizon, with nothing in front of it', () => {
+    expect(PUMPKIN_MOON.target).toBe(moonSpot);
+    expect(PUMPKIN_MOON.scale).toBe(MOON_SCALE);
+    for (const [w, h] of FRAME_WINDOWS) {
+      const a = w / h;
+      const m = moonSpot(a);
+      const r = moonScreenRadiusScaled(a, MOON_SCALE).disc;
+      const actions = uiRects(w, h).find((x) => x.name === 'actions')!;
+      expect(m.y - r, `top @${w}`).toBeGreaterThan(actions.y1);
+      // The horizon is at about 0.43 of the window height.
+      expect(m.y + r, `bottom @${w}`).toBeLessThan(0.41);
+      expect(m.x + r / a, `right edge @${w}`).toBeLessThan(0.98);
+      const cam = cameraAt(0, a, true);
+      // Nothing stands over the disc: no placement's top, no lane stalk, no field corn, no leaves.
+      for (const p of spec.placements) {
+        const top = project([p.x, p.y + MODELS[p.model].h * p.scale, p.z], cam);
+        if (top) expect(onMoon(top.x, top.y, a), p.id).toBe(false);
+      }
+      for (const st of [...plan.stalks, ...plan.fieldCorn]) {
+        const top = project([st.x, st.y + 3 * st.scale, st.z], cam);
+        if (top) expect(onMoon(top.x, top.y, a), `stalk ${st.x},${st.z} @${w}`).toBe(false);
+      }
+    }
+  });
   it('blends orange dusk at the horizon into purple-blue twilight at the top', () => {
     const pal = themeById('pumpkin').scene;
     const top = new Color(pal.skyTop);
@@ -222,8 +290,8 @@ describe('the sky and the moon', () => {
 describe('the budget of the lane', () => {
   it('fits in the triangles the plan counts', () => {
     const tris =
-      trianglesOf(buildTreeWood(tree)) + trianglesOf(buildTreeLeaves([...tree.clusters, ...tree.cornerClusters])) + trianglesOf(buildGhostKid()) +
-      trianglesOf(buildWitchKid()) + trianglesOf(buildDryStalk()) * plan.stalks.length + trianglesOf(buildFence(plan.fence)) +
+      trianglesOf(buildTreeWood(tree)) + trianglesOf(buildTreeLeaves(tree.clusters)) + trianglesOf(buildWitchKid()) +
+      trianglesOf(buildDryStalk()) * plan.stalks.length + trianglesOf(buildFieldStalk()) * plan.fieldCorn.length + trianglesOf(buildFence(plan.fence)) +
       trianglesOf(buildBanks(plan.line)) + trianglesOf(buildTuft()) * plan.tufts.length + trianglesOf(buildFlatLeaf()) * plan.leaves.length + 2 * plan.patches.length;
     expect(tris).toBeLessThanOrEqual(PUMPKIN_PARTS.autumnTris);
     expect(spec.extras.tris).toBeGreaterThanOrEqual(PUMPKIN_PARTS.autumnTris);

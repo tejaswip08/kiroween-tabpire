@@ -3,10 +3,10 @@ import { useEffect, useMemo, useRef } from 'react';
 import {
   AdditiveBlending, Color, DoubleSide, Euler, type Group, InstancedMesh, Matrix4, MeshStandardMaterial, PlaneGeometry, Quaternion, ShaderMaterial, Vector3,
 } from 'three';
-import { KID_LATERAL, kidsAt, pointAlong, type AutumnPlan, type FallenLeaf, type LeafTone, type Route } from '../../../../../lib/scene/uniqueScenes/autumn';
+import { kidsAt, pointAlong, type AutumnPlan, type FallenLeaf, type LeafTone, type Route } from '../../../../../lib/scene/uniqueScenes/autumn';
 import { useDisplay } from '../display';
 import {
-  buildBanks, buildDryStalk, buildFence, buildFlatLeaf, buildGhostKid, buildTreeLeaves, buildTreeWood, buildTuft, buildWitchKid,
+  buildBanks, buildDryStalk, buildFence, buildFieldStalk, buildFlatLeaf, buildTreeLeaves, buildTreeWood, buildTuft, buildWitchKid,
 } from './autumnBuild';
 
 const m4 = new Matrix4();
@@ -15,11 +15,11 @@ const pos = new Vector3();
 const scl = new Vector3();
 const eul = new Euler();
 
-/** The big old tree: dark twisted wood with a knot hole, and canopy leaves that sway a little. Two meshes (wood, leaves). */
+/** The autumn tree: a twisted trunk with a knot hole, four limbs and a round crown of leaves, and canopy leaves that sway a little. Two meshes (wood, leaves). */
 export function AutumnTree({ plan }: { plan: AutumnPlan['tree'] }) {
   const display = useDisplay();
   const wood = useMemo(() => buildTreeWood(plan), [plan]);
-  const leaves = useMemo(() => buildTreeLeaves([...plan.clusters, ...plan.cornerClusters]), [plan]);
+  const leaves = useMemo(() => buildTreeLeaves(plan.clusters), [plan]);
   const uTime = useMemo(() => ({ value: 0 }), []);
   const leafMaterial = useMemo(() => {
     const m = new MeshStandardMaterial({ vertexColors: true, flatShading: true, roughness: 0.85, metalness: 0, emissive: new Color('#ff5a1a'), emissiveIntensity: 0.16 });
@@ -56,56 +56,43 @@ export function AutumnTree({ plan }: { plan: AutumnPlan['tree'] }) {
 }
 
 /**
- * Two children seen from behind, walking slowly away down the trail toward the barn: a bedsheet ghost and a little witch, each
- * with a pumpkin bucket. They bob as they walk, shrink away at the barn and come back at the start. With reduced motion they
- * stand still.
+ * A little witch seen from behind, with a pumpkin bucket, walking slowly away down the trail toward the barn. She bobs as she
+ * walks, shrinks away at the barn and comes back at the start. With reduced motion she stands still.
  */
-export function TrickOrTreaters({ route }: { route: Route }) {
+export function TrickOrTreater({ route }: { route: Route }) {
   const display = useDisplay();
-  const ghost = useMemo(buildGhostKid, []);
   const witch = useMemo(buildWitchKid, []);
-  useEffect(() => () => ghost.dispose(), [ghost]);
   useEffect(() => () => witch.dispose(), [witch]);
-  const refs = { ghost: useRef<Group>(null), witch: useRef<Group>(null) };
+  const ref = useRef<Group>(null);
   useFrame(() => {
+    const g = ref.current;
+    if (!g) return;
     const { s, scale } = kidsAt(route, display.time, display.reduced);
-    (['ghost', 'witch'] as const).forEach((kind, i) => {
-      const g = refs[kind].current;
-      if (!g) return;
-      // The witch walks a step ahead and a little out of step with the ghost.
-      const p = pointAlong(route, s + (kind === 'witch' ? 0.25 : 0));
-      const lat = KID_LATERAL[kind];
-      const phase = display.time * 3.4 + i * 1.7;
-      const bob = display.reduced ? 0 : Math.abs(Math.sin(phase)) * 0.05;
-      g.visible = scale > 0.01;
-      g.position.set(p.x + p.dz * lat, bob, p.z - p.dx * lat);
-      g.rotation.set(0, Math.atan2(-p.dx, -p.dz), display.reduced ? 0 : Math.sin(phase) * 0.05);
-      g.scale.setScalar(Math.max(scale, 0.001));
-    });
+    const p = pointAlong(route, s);
+    const phase = display.time * 3.4;
+    const bob = display.reduced ? 0 : Math.abs(Math.sin(phase)) * 0.05;
+    g.visible = scale > 0.01;
+    g.position.set(p.x, bob, p.z);
+    g.rotation.set(0, Math.atan2(-p.dx, -p.dz), display.reduced ? 0 : Math.sin(phase) * 0.05);
+    g.scale.setScalar(Math.max(scale, 0.001));
   });
   return (
-    <>
-      <group ref={refs.ghost}>
-        <mesh geometry={ghost} name="kid-ghost" frustumCulled={false}>
-          <meshStandardMaterial vertexColors roughness={1} metalness={0} side={DoubleSide} />
-        </mesh>
-      </group>
-      <group ref={refs.witch}>
-        <mesh geometry={witch} name="kid-witch" frustumCulled={false}>
-          <meshStandardMaterial vertexColors roughness={1} metalness={0} side={DoubleSide} />
-        </mesh>
-      </group>
-    </>
+    <group ref={ref}>
+      <mesh geometry={witch} name="kid-witch" frustumCulled={false}>
+        <meshStandardMaterial vertexColors roughness={1} metalness={0} side={DoubleSide} />
+      </mesh>
+    </group>
   );
 }
 
-/** Tall dry corn stalks on both sides of the trail, leaning a little: one instanced mesh. */
-export function DryCorn({ stalks }: { stalks: AutumnPlan['stalks'] }) {
+/** Corn stalks, leaning a little: one instanced mesh. `kind` picks the tall dry stalks of the lane or the green field corn. */
+export function Stalks({ stalks, kind }: { stalks: AutumnPlan['stalks']; kind: 'dry' | 'field' }) {
   const { mesh, geometry, material } = useMemo(() => {
-    const geometry = buildDryStalk();
+    const geometry = kind === 'dry' ? buildDryStalk() : buildFieldStalk();
     const material = new MeshStandardMaterial({ vertexColors: true, roughness: 1, metalness: 0, side: DoubleSide });
-    const mesh = new InstancedMesh(geometry, material, stalks.length);
-    mesh.name = 'dry-corn';
+    const mesh = new InstancedMesh(geometry, material, Math.max(1, stalks.length));
+    mesh.count = stalks.length;
+    mesh.name = kind === 'dry' ? 'dry-corn' : 'field-corn';
     mesh.frustumCulled = false;
     stalks.forEach((s, i) => {
       quat.setFromEuler(eul.set(s.leanX, s.rotY, s.leanZ));
@@ -114,7 +101,7 @@ export function DryCorn({ stalks }: { stalks: AutumnPlan['stalks'] }) {
     });
     mesh.instanceMatrix.needsUpdate = true;
     return { mesh, geometry, material };
-  }, [stalks]);
+  }, [stalks, kind]);
   useEffect(() => () => {
     mesh.dispose();
     geometry.dispose();
@@ -258,10 +245,11 @@ export function AutumnLane({ plan }: { plan: AutumnPlan }) {
       <GrassBanks plan={plan} />
       <LightPatches patches={plan.patches} />
       <FallenLeaves leaves={plan.leaves} />
-      <DryCorn stalks={plan.stalks} />
+      <Stalks stalks={plan.stalks} kind="dry" />
+      <Stalks stalks={plan.fieldCorn} kind="field" />
       <RusticFence fence={plan.fence} />
       <AutumnTree plan={plan.tree} />
-      <TrickOrTreaters route={plan.route} />
+      <TrickOrTreater route={plan.route} />
     </>
   );
 }
