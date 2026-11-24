@@ -1,6 +1,7 @@
 // The only module that touches browser.storage.local.
 // Local-first: no synced storage and no network calls here.
 import { browser } from 'wxt/browser';
+import { DEFAULT_THEME, isThemeId, type ThemeId } from './themes';
 
 export interface Stats {
   staked: number;
@@ -35,7 +36,7 @@ export interface Haunt {
 /** The most haunts the row can hold. */
 export const MAX_HAUNTS = 10;
 
-export type ThemeId = string;
+export type { ThemeId };
 
 export const KEYS = {
   stats: 'tabpire:stats',
@@ -48,7 +49,7 @@ export const KEYS = {
   theme: 'tabpire:theme',
 } as const;
 
-export const DEFAULT_THEME: ThemeId = 'crypt';
+export { DEFAULT_THEME };
 
 const defaultStats = (): Stats => ({
   staked: 0,
@@ -138,7 +139,14 @@ export const store = {
   },
   setHaunts: (v: Haunt[]) => write(KEYS.haunts, v),
 
-  getTheme: () => read(KEYS.theme, isStr, () => DEFAULT_THEME),
+  /** An unknown, missing or unreadable value gives the default theme. Never throws. */
+  getTheme: async (): Promise<ThemeId> => {
+    try {
+      return await read(KEYS.theme, isThemeId, () => DEFAULT_THEME);
+    } catch {
+      return DEFAULT_THEME;
+    }
+  },
   setTheme: (v: ThemeId) => write(KEYS.theme, v),
 };
 

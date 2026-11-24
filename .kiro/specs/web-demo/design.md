@@ -180,7 +180,7 @@ Behaviour:
 | `alarms`, `action`, `windows.update` | As today. The demo has no background script, so nothing reads the badge. |
 | `tabs.getCurrent` | Returns `currentTabId`. The demo sets it to the Crypt tab. |
 
-The fake never touches `localStorage`, `sessionStorage`, IndexedDB or cookies. It is plain objects and arrays.
+The fake never touches `localStorage`, `sessionStorage`, IndexedDB or cookies. It is plain objects and arrays. The one documented exception to the no-`localStorage` rule is the Sky_Cache of the themes spec (`lib/themeCache.ts`, one Theme_Id in `localStorage`, outside the Fake_Browser).
 
 ### Router: `demo/src/route.ts`
 

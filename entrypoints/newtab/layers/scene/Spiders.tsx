@@ -4,9 +4,9 @@ import {
   BufferAttribute, BufferGeometry, DoubleSide, Euler, InstancedMesh, LineBasicMaterial, LineSegments, Matrix4, MeshBasicMaterial, PlaneGeometry, Quaternion, ShaderMaterial, Vector3,
 } from 'three';
 import { spiderLength } from '../../../../lib/scene/critters';
-import { layout } from '../../../../lib/scene/layout';
 import { at, ball, mergePieces, stickBetween, type Piece } from './critterGeo';
 import { useDisplay } from './display';
+import { useSceneTheme } from './themeColors';
 
 const BODY: [number, number, number] = [0.04, 0.03, 0.06];
 const LEG: [number, number, number] = [0.03, 0.025, 0.05];
@@ -47,7 +47,8 @@ const tmpE = new Euler();
  */
 export function Spiders() {
   const display = useDisplay();
-  const spiders = useMemo(() => layout().scenery.spiders, []);
+  const { scene } = useSceneTheme();
+  const spiders = useMemo(() => scene.layout.scenery.spiders, [scene.layout.scenery.spiders]);
   const { mesh, threads, attr } = useMemo(() => {
     const m = new InstancedMesh(spiderGeometry(), new MeshBasicMaterial({ vertexColors: true, toneMapped: false }), spiders.length);
     m.frustumCulled = false;
@@ -102,7 +103,8 @@ void main() {
 
 /** Cobwebs hung between neighbouring gravestones: thin strands and sagging rings, drawn in the shader. One draw call. */
 export function Cobwebs() {
-  const webs = useMemo(() => layout().scenery.cobwebs, []);
+  const { scene } = useSceneTheme();
+  const webs = useMemo(() => scene.layout.scenery.cobwebs, [scene.layout.scenery.cobwebs]);
   const mesh = useMemo(() => {
     const mat = new ShaderMaterial({ vertexShader: webVertex, fragmentShader: webFragment, transparent: true, depthWrite: false, side: DoubleSide, fog: false });
     const m = new InstancedMesh(new PlaneGeometry(1, 1), mat, Math.max(1, webs.length));

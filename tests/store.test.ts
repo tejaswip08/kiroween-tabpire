@@ -65,8 +65,8 @@ describe('store round trips', () => {
     expect(await store.getHaunts()).toEqual(v);
   });
   it('theme', async () => {
-    await store.setTheme('moon');
-    expect(await store.getTheme()).toBe('moon');
+    await store.setTheme('frost');
+    expect(await store.getTheme()).toBe('frost');
   });
 });
 
@@ -171,5 +171,27 @@ describe('haunts and the log keep working with data from before the rename', () 
   it('drops a log with an unknown action', async () => {
     data.set(KEYS.log, [{ at: 1, action: 'explode', site: null }]);
     expect(await store.getLog()).toEqual([]);
+  });
+});
+describe('theme storage', () => {
+  it('Feature: themes, Property 3: round trip, and unknown values read as crypt', async () => {
+    const { THEME_IDS } = await import('../lib/themes');
+    const fc = (await import('fast-check')).default ?? (await import('fast-check'));
+    await fc.assert(
+      fc.asyncProperty(fc.constantFrom(...THEME_IDS), fc.anything(), async (id, other) => {
+        data.clear();
+        await store.setTheme(id);
+        expect(data.get('tabpire:theme')).toBe(id);
+        expect(await store.getTheme()).toBe(id);
+        const ok = typeof other === 'string' && (THEME_IDS as readonly string[]).includes(other);
+        data.set(KEYS.theme, other);
+        expect(await store.getTheme()).toBe(ok ? other : 'crypt');
+      }),
+      { numRuns: 150 },
+    );
+  });
+  it.each([undefined, null, 7, { a: 1 }, 'nope'])('reads %j as crypt', async (v) => {
+    data.set(KEYS.theme, v);
+    expect(await store.getTheme()).toBe('crypt');
   });
 });

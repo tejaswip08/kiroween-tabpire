@@ -1,9 +1,9 @@
 import { useFrame } from '@react-three/fiber';
 import { useMemo } from 'react';
-import { AdditiveBlending, CircleGeometry, Mesh, ShaderMaterial } from 'three';
-import { layout } from '../../../../lib/scene/layout';
-import { C } from './colors';
+import { AdditiveBlending, CircleGeometry, type Color, Mesh, ShaderMaterial } from 'three';
+import { sceneColorsFor } from './colors';
 import { useDisplay } from './display';
+import { useColorSync, useSceneTheme } from './themeColors';
 
 const RADIUS = 0.55;
 
@@ -27,16 +27,18 @@ void main() {
  * The cauldron's green glow: a swirling liquid just under the rim (no bubbles or rings). The pot is the Quaternius model, drawn with the other props. The soft green pool of light on the ground
  * comes from the scene's glows.
  */
+const LIQUID_LEVEL = 2.6;
 export function CauldronFx() {
   const display = useDisplay();
-  const pot = useMemo(() => layout().scenery.cauldron, []);
+  const { scene } = useSceneTheme();
+  const pot = useMemo(() => scene.layout.scenery.cauldron, [scene.layout.scenery.cauldron]);
   const liquid = useMemo(() => {
     const g = new CircleGeometry(RADIUS, 32);
     g.rotateX(-Math.PI / 2);
     const m = new ShaderMaterial({
       vertexShader: liquidVertex,
       fragmentShader: liquidFragment,
-      uniforms: { uTime: { value: 0 }, uColor: { value: C.cauldron.clone().multiplyScalar(2.6) } },
+      uniforms: { uTime: { value: 0 }, uColor: { value: sceneColorsFor('crypt').cauldron.clone().multiplyScalar(LIQUID_LEVEL) } },
       transparent: true,
       depthWrite: false,
       blending: AdditiveBlending,
@@ -46,6 +48,9 @@ export function CauldronFx() {
     mesh.renderOrder = 6;
     return mesh;
   }, []);
+  useColorSync((c) => {
+    ((liquid.material as ShaderMaterial).uniforms.uColor!.value as Color).copy(c.cauldron).multiplyScalar(LIQUID_LEVEL);
+  });
   useFrame(() => {
     const t = display.reduced ? 0 : display.time;
     (liquid.material as ShaderMaterial).uniforms.uTime!.value = t;

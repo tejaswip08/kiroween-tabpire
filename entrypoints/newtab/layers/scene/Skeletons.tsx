@@ -2,8 +2,8 @@ import { useGLTF } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import { useMemo } from 'react';
 import { Euler, InstancedMesh, Matrix4, MeshStandardMaterial, Quaternion, SphereGeometry, Vector3 } from 'three';
-import { layout } from '../../../../lib/scene/layout';
 import { useDisplay } from './display';
+import { useSceneTheme } from './themeColors';
 import { collectParts, type Part } from './Props';
 import { assetUrl } from '../../../../lib/assetUrl';
 
@@ -84,7 +84,8 @@ const BONE_B: (Pose | null)[] = [
  */
 export function Skeletons() {
   const display = useDisplay();
-  const mounds = useMemo(() => layout().scenery.mounds.slice(0, MAX_MOUNDS), []);
+  const { scene } = useSceneTheme();
+  const mounds = useMemo(() => scene.layout.scenery.mounds.slice(0, MAX_MOUNDS), [scene.layout.scenery.mounds]);
   const gltfs = useGLTF(urls, false, true);
   const parts = useMemo(() => {
     const list = Array.isArray(gltfs) ? gltfs : [gltfs];

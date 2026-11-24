@@ -3,11 +3,14 @@ import { useFrame } from '@react-three/fiber';
 import { useMemo, useRef } from 'react';
 import { Color, DoubleSide, InstancedMesh, type Mesh, MeshBasicMaterial, PlaneGeometry } from 'three';
 import { FAR_ITEMS } from '../../../../lib/scene/depth';
-import { C } from './colors';
+import { sceneColorsFor } from './colors';
 import { useDisplay } from './display';
+import { useColorSync } from './themeColors';
 import { buildFarVillage } from './farBuild';
 import { assetUrl } from '../../../../lib/assetUrl';
 
+/** How much of the fog colour the far village silhouette takes. */
+const SILHOUETTE_FOG_MIX = 0.22;
 const urls = [
   assetUrl('models/quaternius/farm_barn.glb'),
   assetUrl('models/quaternius/farm_windmill.glb'),
@@ -31,7 +34,13 @@ export function FarVillage() {
     return buildFarVillage({ barn: barn!, windmill: windmill!, fortress: fortress!, ruins: ruins! });
   }, [gltfs]);
 
-  const silhouette = useMemo(() => new MeshBasicMaterial({ color: new Color('#190c36').lerp(C.fog, 0.22), fog: true }), []);
+  const silhouette = useMemo(() => {
+    const crypt = sceneColorsFor('crypt');
+    return new MeshBasicMaterial({ color: crypt.farSilhouette.clone().lerp(crypt.fog, SILHOUETTE_FOG_MIX), fog: true });
+  }, []);
+  useColorSync((c) => {
+    silhouette.color.copy(c.farSilhouette).lerp(c.fog, SILHOUETTE_FOG_MIX);
+  });
   const windowMesh = useMemo(() => {
     const mat = new MeshBasicMaterial({ color: new Color(3.6, 1.5, 0.35), toneMapped: false, fog: true, side: DoubleSide });
     const m = new InstancedMesh(new PlaneGeometry(1, 1), mat, Math.max(1, built.wins.length));

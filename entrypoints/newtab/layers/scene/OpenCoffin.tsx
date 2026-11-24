@@ -3,9 +3,9 @@ import { useFrame } from '@react-three/fiber';
 import { useMemo, useRef } from 'react';
 import { AdditiveBlending, DoubleSide, type Mesh, type Object3D, type ShaderMaterial } from 'three';
 import { COFFIN } from '../../../../lib/vampire/rig';
-import { layout } from '../../../../lib/scene/layout';
-import { C } from './colors';
+import { sceneColorsFor } from './colors';
 import { useDisplay } from './display';
+import { useColorSync, useSceneTheme } from './themeColors';
 import { assetUrl } from '../../../../lib/assetUrl';
 
 const SCALE = 2.2;
@@ -28,9 +28,11 @@ void main() {
  * A half-open coffin: the little open coffin model with its lid lifted at the front, and a soft eerie
  * glow coming from inside. It stands in the yard beside the path.
  */
+const GLOW_LEVEL = 1.5;
 export function OpenCoffin() {
   const display = useDisplay();
-  const spot = useMemo(() => layout().scenery.openCoffin, []);
+  const themed = useSceneTheme().scene;
+  const spot = useMemo(() => themed.layout.scenery.openCoffin, [themed.layout]);
   const gltf = useGLTF(assetUrl('models/coffin.glb'), false, true);
   const glow = useRef<Mesh>(null);
   const scene = useMemo(() => {
@@ -48,7 +50,10 @@ export function OpenCoffin() {
     }
     return root;
   }, [gltf]);
-  const uniforms = useMemo(() => ({ uColor: { value: C.mushroom.clone().multiplyScalar(1.5) }, uTime: { value: 0 } }), []);
+  const uniforms = useMemo(() => ({ uColor: { value: sceneColorsFor('crypt').mushroom.clone().multiplyScalar(GLOW_LEVEL) }, uTime: { value: 0 } }), []);
+  useColorSync((c) => {
+    uniforms.uColor.value.copy(c.mushroom).multiplyScalar(GLOW_LEVEL);
+  });
   useFrame(() => {
     uniforms.uTime.value = display.reduced ? 0 : display.time;
     void (glow.current?.material as ShaderMaterial | undefined);

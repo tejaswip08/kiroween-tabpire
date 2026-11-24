@@ -3,8 +3,9 @@ import { useMemo } from 'react';
 import { AdditiveBlending, BufferAttribute, BufferGeometry } from 'three';
 import { LOOK } from '../../../../lib/scene/config';
 import { mulberry32 } from '../../../../lib/scene/rng';
-import { C } from './colors';
+import { sceneColorsFor } from './colors';
 import { useDisplay } from './display';
+import { useColorSync } from './themeColors';
 
 const COUNT = 400;
 
@@ -50,9 +51,12 @@ export function Embers() {
     return g;
   }, []);
   const uniforms = useMemo(
-    () => ({ uTime: { value: 0 }, uRate: { value: 0.15 }, uBurst: { value: 0 }, uPixel: { value: 1 }, uColor: { value: C.ember.clone().multiplyScalar(LOOK.glow.ember) } }),
+    () => ({ uTime: { value: 0 }, uRate: { value: 0.15 }, uBurst: { value: 0 }, uPixel: { value: 1 }, uColor: { value: sceneColorsFor('crypt').ember.clone().multiplyScalar(LOOK.glow.ember) } }),
     [],
   );
+  useColorSync((c) => {
+    uniforms.uColor.value.copy(c.ember).multiplyScalar(LOOK.glow.ember);
+  });
   useFrame(({ gl }) => {
     uniforms.uTime.value = display.time;
     uniforms.uRate.value = display.emberRate;

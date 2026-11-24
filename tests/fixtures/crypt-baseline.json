@@ -1,0 +1,4259 @@
+{
+  "COLD": {
+    "skyTop": "#140632",
+    "fog": "#3b2270",
+    "hemisphereSky": "#9a78ff",
+    "hemisphereGround": "#4a2a78",
+    "rim": "#9a86ff"
+  },
+  "WARM": {
+    "candle": "#ffb347",
+    "lantern": "#ff9a3d",
+    "jackOLantern": "#ff8a1c",
+    "ember": "#ff6a1f",
+    "cryptDoor": "#ffb066"
+  },
+  "ACCENT": {
+    "moon": "#ff2d45",
+    "moonlight": "#e2809c"
+  },
+  "C": {
+    "skyTop": "#140632",
+    "fog": "#3b2270",
+    "hemiSky": "#9a78ff",
+    "hemiGround": "#4a2a78",
+    "rim": "#9a86ff",
+    "candle": "#ffb347",
+    "lantern": "#ff9a3d",
+    "jack": "#ff8a1c",
+    "ember": "#ff6a1f",
+    "door": "#ffb066",
+    "moon": "#ff2d45",
+    "moonlight": "#e2809c",
+    "horizon": "#5c1a5c",
+    "mid": "#2a0e58",
+    "haze": "#74205c",
+    "mushroom": "#35e8d0",
+    "cauldron": "#5cff58",
+    "wisp": "#58f0c8",
+    "ghost": "#a8f0d0"
+  },
+  "shader": {
+    "moonLight": [
+      0.462,
+      0.058,
+      0.023
+    ],
+    "moonDark": [
+      0.195,
+      0.018,
+      0.009
+    ],
+    "cloudBody": [
+      0.045,
+      0.045,
+      0.1
+    ],
+    "cloudTint": [
+      0.2,
+      0.07,
+      0.12
+    ]
+  },
+  "components": {
+    "lowCloud": "#2a1648",
+    "farSilhouette": "#190c36",
+    "groundBase": "#2d2832",
+    "groundTint": "#b4aab4"
+  },
+  "halo": {
+    "starving": [
+      1.8,
+      0.1,
+      0.12
+    ],
+    "dawn": {
+      "color": [
+        3,
+        1,
+        0.25
+      ],
+      "scale": 0.7
+    },
+    "whiteHot": {
+      "color": [
+        3,
+        2.2,
+        1.6
+      ],
+      "scale": 0.7
+    }
+  },
+  "tokens": {
+    "sky-top": "#0b0612",
+    "sky-bottom": "#26112e",
+    "sky-glow": "rgba(214, 40, 63, 0.2)",
+    "vignette": "rgba(0, 0, 0, 0.6)",
+    "ink": "#f6eaf0",
+    "ink-dim": "#c9b5c4",
+    "card-top": "#2e1a3b",
+    "card-bottom": "#1b0e26",
+    "card-edge": "rgba(255, 255, 255, 0.16)",
+    "card-highlight": "rgba(255, 255, 255, 0.1)",
+    "panel-solid": "#2a1636",
+    "panel-fill-top": "rgba(70, 40, 88, 0.55)",
+    "panel-fill-bottom": "rgba(34, 17, 46, 0.55)",
+    "panel-fill-fallback": "rgba(34, 17, 46, 0.92)",
+    "button-top": "#3d2350",
+    "button-bottom": "#26122f",
+    "accent": "#d6283f",
+    "accent-bright": "#ff5d73",
+    "blood-top": "#ff4d63",
+    "blood-bottom": "#8f1020",
+    "glass": "rgba(255, 255, 255, 0.12)",
+    "dawn-top": "#4b2a78",
+    "dawn-bottom": "#9c4a3a",
+    "dawn-glow": "#ffd36e",
+    "state-awake": "#b9a5ff",
+    "state-starving": "#ff6b6b",
+    "state-asleep": "#6fb7e8",
+    "state-protected": "#f4d58a",
+    "badge-1": "#c77dff",
+    "badge-2": "#ff8fab",
+    "badge-3": "#ffb86b",
+    "badge-4": "#7bdff2",
+    "badge-5": "#95e68a",
+    "badge-6": "#f7a8e0",
+    "badge-ink": "#1b0e26",
+    "shadow-card-inset": "0 1px 0 var(--card-highlight) inset, 0 -14px 24px rgba(0, 0, 0, 0.28) inset",
+    "shadow-card-outer": "0 2px 2px rgba(0, 0, 0, 0.35), 0 10px 18px rgba(0, 0, 0, 0.4), 0 22px 40px rgba(6, 2, 12, 0.5)",
+    "shadow-card": "var(--shadow-card-inset), var(--shadow-card-outer)",
+    "shadow-panel": "0 1px 0 rgba(255, 255, 255, 0.18) inset, 0 8px 24px rgba(0, 0, 0, 0.4)",
+    "shadow-button": "0 1px 0 rgba(255, 255, 255, 0.2) inset, 0 -3px 6px rgba(0, 0, 0, 0.3) inset, 0 3px 8px rgba(0, 0, 0, 0.45)",
+    "focus-ring": "#ffd9e0"
+  },
+  "layout": {
+    "placements": [
+      {
+        "id": "path-0",
+        "model": "path_C",
+        "group": "path",
+        "x": -0.36407830863535956,
+        "y": 0.02,
+        "z": 8.821359436211786,
+        "rotY": 4.71238898038469,
+        "scale": 0.9
+      },
+      {
+        "id": "path-1",
+        "model": "path_B",
+        "group": "path",
+        "x": 0.9640783086353595,
+        "y": 0.02,
+        "z": 8.378640563788213,
+        "rotY": 4.71238898038469,
+        "scale": 0.9
+      },
+      {
+        "id": "path-2",
+        "model": "path_A",
+        "group": "path",
+        "x": -0.9174768991648259,
+        "y": 0.02,
+        "z": 7.161163664623387,
+        "rotY": 3.141592653589793,
+        "scale": 0.9
+      },
+      {
+        "id": "path-3",
+        "model": "path_C",
+        "group": "path",
+        "x": 0.41067971810589315,
+        "y": 0.02,
+        "z": 6.718444792199814,
+        "rotY": 3.141592653589793,
+        "scale": 0.9
+      },
+      {
+        "id": "path-4",
+        "model": "path_A",
+        "group": "path",
+        "x": -1.4708754896942922,
+        "y": 0.02,
+        "z": 5.5009678930349875,
+        "rotY": 3.141592653589793,
+        "scale": 0.9
+      },
+      {
+        "id": "path-5",
+        "model": "path_A",
+        "group": "path",
+        "x": -0.14271887242357317,
+        "y": 0.02,
+        "z": 5.058249020611415,
+        "rotY": 3.141592653589793,
+        "scale": 0.9
+      },
+      {
+        "id": "path-6",
+        "model": "path_A",
+        "group": "path",
+        "x": -1.2318739295456087,
+        "y": 0.02,
+        "z": 3.419600943822613,
+        "rotY": 1.5707963267948966,
+        "scale": 0.9
+      },
+      {
+        "id": "path-7",
+        "model": "path_C",
+        "group": "path",
+        "x": 0.12754690096306343,
+        "y": 0.02,
+        "z": 3.754227609793978,
+        "rotY": 0,
+        "scale": 0.9
+      },
+      {
+        "id": "path-8",
+        "model": "path_A",
+        "group": "path",
+        "x": -0.8135905970814018,
+        "y": 0.02,
+        "z": 1.720324905686772,
+        "rotY": 0,
+        "scale": 0.9
+      },
+      {
+        "id": "path-9",
+        "model": "path_B",
+        "group": "path",
+        "x": 0.5458302334272703,
+        "y": 0.02,
+        "z": 2.0549515716581372,
+        "rotY": 3.141592653589793,
+        "scale": 0.9
+      },
+      {
+        "id": "path-10",
+        "model": "path_B",
+        "group": "path",
+        "x": -0.3953072646171948,
+        "y": 0.02,
+        "z": 0.02104886755093094,
+        "rotY": 1.5707963267948966,
+        "scale": 0.9
+      },
+      {
+        "id": "path-11",
+        "model": "path_A",
+        "group": "path",
+        "x": 0.9641135658914773,
+        "y": 0.02,
+        "z": 0.3556755335222964,
+        "rotY": 4.71238898038469,
+        "scale": 0.9
+      },
+      {
+        "id": "path-12",
+        "model": "path_B",
+        "group": "path",
+        "x": 0.009591949170238201,
+        "y": 0.02,
+        "z": -1.3839696057403708,
+        "rotY": 3.141592653589793,
+        "scale": 0.9
+      },
+      {
+        "id": "path-13",
+        "model": "path_B",
+        "group": "path",
+        "x": 1.3863270017123552,
+        "y": 0.02,
+        "z": -1.6381360769789155,
+        "rotY": 4.71238898038469,
+        "scale": 0.9
+      },
+      {
+        "id": "path-14",
+        "model": "path_A",
+        "group": "path",
+        "x": -0.30811613987794256,
+        "y": 0.02,
+        "z": -3.104888421418016,
+        "rotY": 4.71238898038469,
+        "scale": 0.9
+      },
+      {
+        "id": "path-15",
+        "model": "path_A",
+        "group": "path",
+        "x": 1.0686189126641743,
+        "y": 0.02,
+        "z": -3.3590548926565607,
+        "rotY": 4.71238898038469,
+        "scale": 0.9
+      },
+      {
+        "id": "path-16",
+        "model": "path_C",
+        "group": "path",
+        "x": -0.6258242289261234,
+        "y": 0.02,
+        "z": -4.825807237095662,
+        "rotY": 0,
+        "scale": 0.9
+      },
+      {
+        "id": "path-17",
+        "model": "path_A",
+        "group": "path",
+        "x": 0.7509108236159935,
+        "y": 0.02,
+        "z": -5.079973708334207,
+        "rotY": 4.71238898038469,
+        "scale": 0.9
+      },
+      {
+        "id": "path-18",
+        "model": "path_C",
+        "group": "path",
+        "x": -0.9435323179743041,
+        "y": 0.02,
+        "z": -6.546726052773309,
+        "rotY": 0,
+        "scale": 0.9
+      },
+      {
+        "id": "path-19",
+        "model": "path_B",
+        "group": "path",
+        "x": 0.4332027345678128,
+        "y": 0.02,
+        "z": -6.800892524011854,
+        "rotY": 4.71238898038469,
+        "scale": 0.9
+      },
+      {
+        "id": "path-20",
+        "model": "path_C",
+        "group": "path",
+        "x": -1.1161412592445892,
+        "y": 0.02,
+        "z": -8.521047676847694,
+        "rotY": 3.141592653589793,
+        "scale": 0.9
+      },
+      {
+        "id": "path-21",
+        "model": "path_B",
+        "group": "path",
+        "x": 0.26090792108327954,
+        "y": 0.02,
+        "z": -8.268588660454252,
+        "rotY": 1.5707963267948966,
+        "scale": 0.9
+      },
+      {
+        "id": "path-22",
+        "model": "path_C",
+        "group": "path",
+        "x": -0.8005674887527862,
+        "y": 0.02,
+        "z": -10.24235915225753,
+        "rotY": 1.5707963267948966,
+        "scale": 0.9
+      },
+      {
+        "id": "path-23",
+        "model": "path_B",
+        "group": "path",
+        "x": 0.5764816915750827,
+        "y": 0.02,
+        "z": -9.989900135864088,
+        "rotY": 1.5707963267948966,
+        "scale": 0.9
+      },
+      {
+        "id": "path-24",
+        "model": "path_B",
+        "group": "path",
+        "x": -0.4849937182609828,
+        "y": 0.02,
+        "z": -11.963670627667366,
+        "rotY": 3.141592653589793,
+        "scale": 0.9
+      },
+      {
+        "id": "path-25",
+        "model": "path_B",
+        "group": "path",
+        "x": 0.892055462066886,
+        "y": 0.02,
+        "z": -11.711211611273924,
+        "rotY": 0,
+        "scale": 0.9
+      },
+      {
+        "id": "path-26",
+        "model": "path_C",
+        "group": "path",
+        "x": -0.16941994776917946,
+        "y": 0.02,
+        "z": -13.684982103077202,
+        "rotY": 0,
+        "scale": 0.9
+      },
+      {
+        "id": "path-27",
+        "model": "path_A",
+        "group": "path",
+        "x": 1.2076292325586895,
+        "y": 0.02,
+        "z": -13.43252308668376,
+        "rotY": 4.71238898038469,
+        "scale": 0.9
+      },
+      {
+        "id": "path-28",
+        "model": "path_C",
+        "group": "path",
+        "x": -0.13586611332047616,
+        "y": 0.02,
+        "z": -15.281459732020396,
+        "rotY": 0,
+        "scale": 0.9
+      },
+      {
+        "id": "path-29",
+        "model": "path_A",
+        "group": "path",
+        "x": 1.2635940755933293,
+        "y": 0.02,
+        "z": -15.32033362615689,
+        "rotY": 4.71238898038469,
+        "scale": 0.9
+      },
+      {
+        "id": "path-30",
+        "model": "path_A",
+        "group": "path",
+        "x": -0.1844584809910943,
+        "y": 0.02,
+        "z": -17.030784968162653,
+        "rotY": 0,
+        "scale": 0.9
+      },
+      {
+        "id": "path-31",
+        "model": "path_C",
+        "group": "path",
+        "x": 1.2150017079227111,
+        "y": 0.02,
+        "z": -17.069658862299146,
+        "rotY": 3.141592653589793,
+        "scale": 0.9
+      },
+      {
+        "id": "gate-32",
+        "model": "arch_gate",
+        "group": "gate",
+        "x": 0.5,
+        "y": 0,
+        "z": -20.4,
+        "rotY": 0,
+        "scale": 1
+      },
+      {
+        "id": "fence-33",
+        "model": "fence_broken",
+        "group": "fence",
+        "x": 4.949999999999999,
+        "y": 0,
+        "z": -20.4,
+        "rotY": 0,
+        "scale": 1
+      },
+      {
+        "id": "fence-34",
+        "model": "fence_pillar",
+        "group": "fence",
+        "x": 7.249999999999999,
+        "y": 0,
+        "z": -20.4,
+        "rotY": 0,
+        "scale": 1
+      },
+      {
+        "id": "fence-35",
+        "model": "fence",
+        "group": "fence",
+        "x": 9.549999999999999,
+        "y": 0,
+        "z": -20.4,
+        "rotY": 0,
+        "scale": 1
+      },
+      {
+        "id": "fence-36",
+        "model": "fence_pillar",
+        "group": "fence",
+        "x": 11.849999999999998,
+        "y": 0,
+        "z": -20.4,
+        "rotY": 0,
+        "scale": 1
+      },
+      {
+        "id": "fence-37",
+        "model": "fence",
+        "group": "fence",
+        "x": 14.149999999999999,
+        "y": 0,
+        "z": -20.4,
+        "rotY": 0,
+        "scale": 1
+      },
+      {
+        "id": "fence-38",
+        "model": "fence_pillar",
+        "group": "fence",
+        "x": 16.45,
+        "y": 0,
+        "z": -20.4,
+        "rotY": 0,
+        "scale": 1
+      },
+      {
+        "id": "fence-39",
+        "model": "fence_broken",
+        "group": "fence",
+        "x": 18.75,
+        "y": 0,
+        "z": -20.4,
+        "rotY": 0,
+        "scale": 1
+      },
+      {
+        "id": "fence-40",
+        "model": "fence_pillar",
+        "group": "fence",
+        "x": 21.05,
+        "y": 0,
+        "z": -20.4,
+        "rotY": 0,
+        "scale": 1
+      },
+      {
+        "id": "fence-41",
+        "model": "fence",
+        "group": "fence",
+        "x": 23.349999999999998,
+        "y": 0,
+        "z": -20.4,
+        "rotY": 0,
+        "scale": 1
+      },
+      {
+        "id": "fence-42",
+        "model": "fence_pillar",
+        "group": "fence",
+        "x": 25.65,
+        "y": 0,
+        "z": -20.4,
+        "rotY": 0,
+        "scale": 1
+      },
+      {
+        "id": "fence-43",
+        "model": "fence",
+        "group": "fence",
+        "x": -3.9499999999999993,
+        "y": 0,
+        "z": -20.4,
+        "rotY": 0,
+        "scale": 1
+      },
+      {
+        "id": "fence-44",
+        "model": "fence_pillar",
+        "group": "fence",
+        "x": -6.249999999999999,
+        "y": 0,
+        "z": -20.4,
+        "rotY": 0,
+        "scale": 1
+      },
+      {
+        "id": "fence-45",
+        "model": "fence",
+        "group": "fence",
+        "x": -8.549999999999999,
+        "y": 0,
+        "z": -20.4,
+        "rotY": 0,
+        "scale": 1
+      },
+      {
+        "id": "fence-46",
+        "model": "fence_pillar",
+        "group": "fence",
+        "x": -10.849999999999998,
+        "y": 0,
+        "z": -20.4,
+        "rotY": 0,
+        "scale": 1
+      },
+      {
+        "id": "fence-47",
+        "model": "fence",
+        "group": "fence",
+        "x": -13.149999999999999,
+        "y": 0,
+        "z": -20.4,
+        "rotY": 0,
+        "scale": 1
+      },
+      {
+        "id": "fence-48",
+        "model": "fence_pillar",
+        "group": "fence",
+        "x": -15.45,
+        "y": 0,
+        "z": -20.4,
+        "rotY": 0,
+        "scale": 1
+      },
+      {
+        "id": "fence-49",
+        "model": "fence",
+        "group": "fence",
+        "x": -17.75,
+        "y": 0,
+        "z": -20.4,
+        "rotY": 0,
+        "scale": 1
+      },
+      {
+        "id": "fence-50",
+        "model": "fence_pillar",
+        "group": "fence",
+        "x": -20.05,
+        "y": 0,
+        "z": -20.4,
+        "rotY": 0,
+        "scale": 1
+      },
+      {
+        "id": "fence-51",
+        "model": "fence",
+        "group": "fence",
+        "x": -22.349999999999998,
+        "y": 0,
+        "z": -20.4,
+        "rotY": 0,
+        "scale": 1
+      },
+      {
+        "id": "fence-52",
+        "model": "fence_pillar",
+        "group": "fence",
+        "x": -24.65,
+        "y": 0,
+        "z": -20.4,
+        "rotY": 0,
+        "scale": 1
+      },
+      {
+        "id": "crypt-53",
+        "model": "crypt",
+        "group": "crypt",
+        "x": 8,
+        "y": 0,
+        "z": -27,
+        "rotY": -0.17268149161800544,
+        "scale": 1
+      },
+      {
+        "id": "pumpkin-54",
+        "model": "pumpkin_orange_jackolantern",
+        "group": "pumpkin",
+        "x": -3.9,
+        "y": 0,
+        "z": 6.1,
+        "rotY": 0.35,
+        "scale": 1
+      },
+      {
+        "id": "pumpkin-55",
+        "model": "pumpkin_yellow_jackolantern",
+        "group": "pumpkin",
+        "x": 4,
+        "y": 0,
+        "z": 5,
+        "rotY": -0.4,
+        "scale": 0.95
+      },
+      {
+        "id": "pumpkin-56",
+        "model": "pumpkin_orange_jackolantern",
+        "group": "pumpkin",
+        "x": -5.6,
+        "y": 0,
+        "z": 0.8,
+        "rotY": 0.5,
+        "scale": 0.87
+      },
+      {
+        "id": "pumpkin-57",
+        "model": "pumpkin_yellow_jackolantern",
+        "group": "pumpkin",
+        "x": 5.8,
+        "y": 0,
+        "z": -3.6,
+        "rotY": -0.5,
+        "scale": 0.84
+      },
+      {
+        "id": "lantern-58",
+        "model": "lantern_standing",
+        "group": "lantern",
+        "x": -2,
+        "y": 0,
+        "z": -18.7,
+        "rotY": 0,
+        "scale": 1.5
+      },
+      {
+        "id": "lantern-59",
+        "model": "lantern_standing",
+        "group": "lantern",
+        "x": 3,
+        "y": 0,
+        "z": -18.7,
+        "rotY": 0,
+        "scale": 1.5
+      },
+      {
+        "id": "lantern-60",
+        "model": "post_lantern",
+        "group": "lantern",
+        "x": -14.5,
+        "y": 0,
+        "z": -5,
+        "rotY": 1.5707963267948966,
+        "scale": 1
+      },
+      {
+        "id": "lantern-61",
+        "model": "post_lantern",
+        "group": "lantern",
+        "x": 14.5,
+        "y": 0,
+        "z": -2,
+        "rotY": -1.5707963267948966,
+        "scale": 1
+      },
+      {
+        "id": "lantern-62",
+        "model": "post_lantern",
+        "group": "lantern",
+        "x": -11,
+        "y": 0,
+        "z": -17,
+        "rotY": 1.5707963267948966,
+        "scale": 1
+      },
+      {
+        "id": "lantern-63",
+        "model": "post_lantern",
+        "group": "lantern",
+        "x": -19.5,
+        "y": 0,
+        "z": -14,
+        "rotY": 1.5707963267948966,
+        "scale": 1
+      },
+      {
+        "id": "newGrave-64",
+        "model": "gravestone",
+        "group": "newGrave",
+        "x": -16.7,
+        "y": 0,
+        "z": -5,
+        "rotY": 0.04934796418994665,
+        "scale": 1,
+        "slot": 0
+      },
+      {
+        "id": "newGrave-65",
+        "model": "grave_B",
+        "group": "newGrave",
+        "x": -11.75,
+        "y": 0,
+        "z": -5,
+        "rotY": 0.0066893276944756525,
+        "scale": 1,
+        "slot": 1
+      },
+      {
+        "id": "newGrave-66",
+        "model": "gravestone",
+        "group": "newGrave",
+        "x": -9.6,
+        "y": 0,
+        "z": -5,
+        "rotY": -0.010038016280159351,
+        "scale": 1,
+        "slot": 2
+      },
+      {
+        "id": "newGrave-67",
+        "model": "grave_B",
+        "group": "newGrave",
+        "x": -6.4,
+        "y": 0,
+        "z": -5,
+        "rotY": -0.012333546057343485,
+        "scale": 1,
+        "slot": 3
+      },
+      {
+        "id": "newGrave-68",
+        "model": "gravestone",
+        "group": "newGrave",
+        "x": 6.8,
+        "y": 0,
+        "z": -5,
+        "rotY": 0.025419675791636107,
+        "scale": 1,
+        "slot": 4
+      },
+      {
+        "id": "newGrave-69",
+        "model": "grave_B",
+        "group": "newGrave",
+        "x": 10,
+        "y": 0,
+        "z": -5,
+        "rotY": 0.029899932118132716,
+        "scale": 1,
+        "slot": 5
+      },
+      {
+        "id": "newGrave-70",
+        "model": "gravestone",
+        "group": "newGrave",
+        "x": 13.2,
+        "y": 0,
+        "z": -5,
+        "rotY": -0.004229941936209798,
+        "scale": 1,
+        "slot": 6
+      },
+      {
+        "id": "newGrave-71",
+        "model": "grave_B",
+        "group": "newGrave",
+        "x": 16.4,
+        "y": 0,
+        "z": -5,
+        "rotY": -0.03538954264484346,
+        "scale": 1,
+        "slot": 7
+      },
+      {
+        "id": "newGrave-72",
+        "model": "gravestone",
+        "group": "newGrave",
+        "x": -16,
+        "y": 0,
+        "z": -10,
+        "rotY": 0.028074621828272944,
+        "scale": 1,
+        "slot": 8
+      },
+      {
+        "id": "newGrave-73",
+        "model": "grave_B",
+        "group": "newGrave",
+        "x": -12.8,
+        "y": 0,
+        "z": -10,
+        "rotY": -0.03367583052255213,
+        "scale": 1,
+        "slot": 9
+      },
+      {
+        "id": "newGrave-74",
+        "model": "gravestone",
+        "group": "newGrave",
+        "x": -9.6,
+        "y": 0,
+        "z": -10,
+        "rotY": 0.010495904143899684,
+        "scale": 1,
+        "slot": 10
+      },
+      {
+        "id": "newGrave-75",
+        "model": "grave_B",
+        "group": "newGrave",
+        "x": -6.4,
+        "y": 0,
+        "z": -10,
+        "rotY": -0.025749278627336024,
+        "scale": 1,
+        "slot": 11
+      },
+      {
+        "id": "newGrave-76",
+        "model": "gravestone",
+        "group": "newGrave",
+        "x": 6.8,
+        "y": 0,
+        "z": -10,
+        "rotY": -0.054199441177770494,
+        "scale": 1,
+        "slot": 12
+      },
+      {
+        "id": "newGrave-77",
+        "model": "grave_B",
+        "group": "newGrave",
+        "x": 10,
+        "y": 0,
+        "z": -10,
+        "rotY": -0.014625537190586325,
+        "scale": 1,
+        "slot": 13
+      },
+      {
+        "id": "newGrave-78",
+        "model": "gravestone",
+        "group": "newGrave",
+        "x": 13.2,
+        "y": 0,
+        "z": -10,
+        "rotY": 0.0030439234524965303,
+        "scale": 1,
+        "slot": 14
+      },
+      {
+        "id": "newGrave-79",
+        "model": "grave_B",
+        "group": "newGrave",
+        "x": 16.4,
+        "y": 0,
+        "z": -10,
+        "rotY": -0.04969228634610772,
+        "scale": 1,
+        "slot": 15
+      },
+      {
+        "id": "newGrave-80",
+        "model": "gravestone",
+        "group": "newGrave",
+        "x": -16,
+        "y": 0,
+        "z": -15,
+        "rotY": -0.0278838983271271,
+        "scale": 1,
+        "slot": 16
+      },
+      {
+        "id": "newGrave-81",
+        "model": "grave_B",
+        "group": "newGrave",
+        "x": -12.8,
+        "y": 0,
+        "z": -15,
+        "rotY": 0.043261308744549754,
+        "scale": 1,
+        "slot": 17
+      },
+      {
+        "id": "newGrave-82",
+        "model": "gravestone",
+        "group": "newGrave",
+        "x": -9.6,
+        "y": 0,
+        "z": -15,
+        "rotY": 0.05594892181456089,
+        "scale": 1,
+        "slot": 18
+      },
+      {
+        "id": "newGrave-83",
+        "model": "grave_B",
+        "group": "newGrave",
+        "x": -6.4,
+        "y": 0,
+        "z": -15,
+        "rotY": 0.015408873371779916,
+        "scale": 1,
+        "slot": 19
+      },
+      {
+        "id": "newGrave-84",
+        "model": "gravestone",
+        "group": "newGrave",
+        "x": 6.8,
+        "y": 0,
+        "z": -15,
+        "rotY": 0.04647583748213947,
+        "scale": 1,
+        "slot": 20
+      },
+      {
+        "id": "newGrave-85",
+        "model": "grave_B",
+        "group": "newGrave",
+        "x": 10,
+        "y": 0,
+        "z": -15,
+        "rotY": -0.0024943186808377496,
+        "scale": 1,
+        "slot": 21
+      },
+      {
+        "id": "newGrave-86",
+        "model": "gravestone",
+        "group": "newGrave",
+        "x": 13.2,
+        "y": 0,
+        "z": -15,
+        "rotY": 0.053434001673012974,
+        "scale": 1,
+        "slot": 22
+      },
+      {
+        "id": "newGrave-87",
+        "model": "grave_B",
+        "group": "newGrave",
+        "x": 16.4,
+        "y": 0,
+        "z": -15,
+        "rotY": -0.03346062119118869,
+        "scale": 1,
+        "slot": 23
+      },
+      {
+        "id": "coffin-88",
+        "model": "coffin_open",
+        "group": "coffin",
+        "x": -23,
+        "y": 0,
+        "z": -26,
+        "rotY": -0.013585164258256552,
+        "scale": 2.2,
+        "slot": 0
+      },
+      {
+        "id": "coffin-89",
+        "model": "coffin_open",
+        "group": "coffin",
+        "x": -19.5,
+        "y": 0,
+        "z": -26,
+        "rotY": 0.06447196928784252,
+        "scale": 2.2,
+        "slot": 1
+      },
+      {
+        "id": "coffin-90",
+        "model": "coffin_open",
+        "group": "coffin",
+        "x": -16,
+        "y": 0,
+        "z": -26.5,
+        "rotY": -0.01150643769651652,
+        "scale": 2.2,
+        "slot": 2
+      },
+      {
+        "id": "coffin-91",
+        "model": "coffin_open",
+        "group": "coffin",
+        "x": -12.5,
+        "y": 0,
+        "z": -27,
+        "rotY": 0.07449964988045396,
+        "scale": 2.2,
+        "slot": 3
+      },
+      {
+        "id": "coffin-92",
+        "model": "coffin_open",
+        "group": "coffin",
+        "x": -9,
+        "y": 0,
+        "z": -28.5,
+        "rotY": -0.013525389926508063,
+        "scale": 2.2,
+        "slot": 4
+      },
+      {
+        "id": "coffin-93",
+        "model": "coffin_open",
+        "group": "coffin",
+        "x": -5,
+        "y": 0,
+        "z": -29,
+        "rotY": -0.08013169928453863,
+        "scale": 2.2,
+        "slot": 5
+      },
+      {
+        "id": "coffin-94",
+        "model": "coffin_open",
+        "group": "coffin",
+        "x": -1.5,
+        "y": 0,
+        "z": -30,
+        "rotY": -0.038561141397804026,
+        "scale": 2.2,
+        "slot": 6
+      },
+      {
+        "id": "coffin-95",
+        "model": "coffin_open",
+        "group": "coffin",
+        "x": 2,
+        "y": 0,
+        "z": -31.5,
+        "rotY": -0.009733762731775647,
+        "scale": 2.2,
+        "slot": 7
+      },
+      {
+        "id": "candle-96",
+        "model": "candle_triple",
+        "group": "candle",
+        "x": -3.6307692307692307,
+        "y": 0,
+        "z": 3.5,
+        "rotY": 0.7214481975903976,
+        "scale": 1,
+        "slot": 0
+      },
+      {
+        "id": "candle-97",
+        "model": "candle_thin",
+        "group": "candle",
+        "x": 2.5692307692307694,
+        "y": 0,
+        "z": 3.5,
+        "rotY": 5.536179775675075,
+        "scale": 1,
+        "slot": 1
+      },
+      {
+        "id": "candle-98",
+        "model": "candle_melted",
+        "group": "candle",
+        "x": -2.4,
+        "y": 0,
+        "z": -1.5,
+        "rotY": 2.6105287611270316,
+        "scale": 1,
+        "slot": 2
+      },
+      {
+        "id": "candle-99",
+        "model": "candle_triple",
+        "group": "candle",
+        "x": 3.8000000000000003,
+        "y": 0,
+        "z": -1.5,
+        "rotY": 0.6320729920572006,
+        "scale": 1,
+        "slot": 3
+      },
+      {
+        "id": "candle-100",
+        "model": "candle_thin",
+        "group": "candle",
+        "x": -3.3230769230769233,
+        "y": 0,
+        "z": -6.5,
+        "rotY": 3.036500619856187,
+        "scale": 1,
+        "slot": 4
+      },
+      {
+        "id": "candle-101",
+        "model": "candle_melted",
+        "group": "candle",
+        "x": 2.876923076923077,
+        "y": 0,
+        "z": -6.5,
+        "rotY": 0.8010676340137952,
+        "scale": 1,
+        "slot": 5
+      },
+      {
+        "id": "candle-102",
+        "model": "candle_triple",
+        "group": "candle",
+        "x": -3.05,
+        "y": 0,
+        "z": -11,
+        "rotY": 3.0053297035424054,
+        "scale": 1,
+        "slot": 6
+      },
+      {
+        "id": "candle-103",
+        "model": "candle_thin",
+        "group": "candle",
+        "x": 3.1500000000000004,
+        "y": 0,
+        "z": -11,
+        "rotY": 5.377384402536109,
+        "scale": 1,
+        "slot": 7
+      },
+      {
+        "id": "candle-104",
+        "model": "candle_melted",
+        "group": "candle",
+        "x": -2.513888888888889,
+        "y": 0,
+        "z": -14.5,
+        "rotY": 5.181969549305951,
+        "scale": 1,
+        "slot": 8
+      },
+      {
+        "id": "candle-105",
+        "model": "candle_triple",
+        "group": "candle",
+        "x": 3.6861111111111113,
+        "y": 0,
+        "z": -14.5,
+        "rotY": 1.8413229094157881,
+        "scale": 1,
+        "slot": 9
+      },
+      {
+        "id": "candle-106",
+        "model": "candle_thin",
+        "group": "candle",
+        "x": -2.5833333333333335,
+        "y": 0,
+        "z": -17,
+        "rotY": 4.634918061524244,
+        "scale": 1,
+        "slot": 10
+      },
+      {
+        "id": "candle-107",
+        "model": "candle_melted",
+        "group": "candle",
+        "x": 3.6166666666666667,
+        "y": 0,
+        "z": -17,
+        "rotY": 3.260533831418697,
+        "scale": 1,
+        "slot": 11
+      },
+      {
+        "id": "tree-108",
+        "model": "tree_pine_orange_large",
+        "group": "tree",
+        "x": -23.37138893860392,
+        "y": 0,
+        "z": -9.094081851886585,
+        "rotY": 6.197566831386405,
+        "scale": 1.1082425564527512,
+        "tilt": [
+          -0.06945557412225754,
+          0.010863945917226378
+        ]
+      },
+      {
+        "id": "tree-109",
+        "model": "tree_pine_orange_large",
+        "group": "tree",
+        "x": 20.628038154309614,
+        "y": 0,
+        "z": -10.836801408790052,
+        "rotY": 5.208385506413739,
+        "scale": 1.090721876535099,
+        "tilt": [
+          0.06991510746069254,
+          0.06752478672657164
+        ]
+      },
+      {
+        "id": "tree-110",
+        "model": "tree_pine_orange_medium",
+        "group": "tree",
+        "x": -23.05489890249446,
+        "y": 0,
+        "z": 3.296273987274617,
+        "rotY": 2.239078604028451,
+        "scale": 1.1335960503201932,
+        "tilt": [
+          -0.03711589869577438,
+          -0.0272485744394362
+        ]
+      },
+      {
+        "id": "tree-111",
+        "model": "tree_pine_orange_medium",
+        "group": "tree",
+        "x": 22.376724391197786,
+        "y": 0,
+        "z": -3.6797261997126043,
+        "rotY": 0.7880813467970926,
+        "scale": 1.1158281150856055,
+        "tilt": [
+          -0.06097657022532076,
+          0.017537771472707395
+        ]
+      },
+      {
+        "id": "tree-112",
+        "model": "tree_pine_orange_large",
+        "group": "tree",
+        "x": -23.854576960834674,
+        "y": 0,
+        "z": -15.094220709521323,
+        "rotY": 1.7247617895829959,
+        "scale": 1.1253322181873955,
+        "tilt": [
+          0.013297671251930293,
+          -0.05341896719299258
+        ]
+      },
+      {
+        "id": "tree-114",
+        "model": "tree_pine_orange_medium",
+        "group": "tree",
+        "x": -21.50032554799691,
+        "y": 0,
+        "z": -29.821274711284786,
+        "rotY": 1.1400708298747726,
+        "scale": 1.0814266091911122,
+        "tilt": [
+          0.04422692267689854,
+          -0.03600877003744245
+        ]
+      },
+      {
+        "id": "tree-115",
+        "model": "tree_dead_large",
+        "group": "tree",
+        "x": -21.773095200373792,
+        "y": 0,
+        "z": -1.7566793262958527,
+        "rotY": 0.28972935881359807,
+        "scale": 1.0764908479526638,
+        "tilt": [
+          -0.02435206441674382,
+          0.017319848062470555
+        ]
+      },
+      {
+        "id": "tree-116",
+        "model": "tree_dead_large_decorated",
+        "group": "tree",
+        "x": 21.240461896010675,
+        "y": 0,
+        "z": 0.9165024887770414,
+        "rotY": 3.798792771926947,
+        "scale": 1.0828041210537775,
+        "tilt": [
+          -0.01139665593858808,
+          -0.0008266990259289675
+        ]
+      },
+      {
+        "id": "tree-117",
+        "model": "tree_dead_medium",
+        "group": "tree",
+        "x": -20.1710889544338,
+        "y": 0,
+        "z": -23.30442305537872,
+        "rotY": 4.090733840512849,
+        "scale": 1.1078777080983855,
+        "tilt": [
+          -0.024948223833926024,
+          0.029682711269706494
+        ]
+      },
+      {
+        "id": "tree-118",
+        "model": "tree_dead_medium",
+        "group": "tree",
+        "x": 23.154123919084668,
+        "y": 0,
+        "z": -23.586226460058242,
+        "rotY": 0.30571203872779806,
+        "scale": 1.1894908246467821,
+        "tilt": [
+          -0.012542906957678499,
+          -0.03622671007178724
+        ]
+      },
+      {
+        "id": "tree-119",
+        "model": "forest_twisted_a",
+        "group": "tree",
+        "x": -23.983227241085842,
+        "y": 0,
+        "z": -4.334047362208366,
+        "rotY": 0.8897010918045072,
+        "scale": 0.29635672605596486,
+        "tilt": [
+          -0.0129078320087865,
+          -0.06180315242614598
+        ]
+      },
+      {
+        "id": "tree-120",
+        "model": "tree_dead_large",
+        "group": "tree",
+        "x": -3.9579905262216926,
+        "y": 0,
+        "z": -25.50550641817972,
+        "rotY": 2.3298866134722536,
+        "scale": 1.1461776199867018,
+        "tilt": [
+          -0.017892950722016396,
+          0.036838680091314024
+        ]
+      },
+      {
+        "id": "tree-121",
+        "model": "tree_pine_yellow_medium",
+        "group": "tree",
+        "x": -8.468161798547953,
+        "y": 0,
+        "z": -25.01121765212156,
+        "rotY": 2.0537557043343817,
+        "scale": 1.1475878363125958,
+        "tilt": [
+          0.03587585432920605,
+          0.0013593464298173735
+        ]
+      },
+      {
+        "id": "tree-122",
+        "model": "tree_dead_large",
+        "group": "tree",
+        "x": 24.17559014484286,
+        "y": 0,
+        "z": -15.869085954502225,
+        "rotY": 4.575831066553734,
+        "scale": 1.0571313261170872,
+        "tilt": [
+          0.05439106448087842,
+          -0.04262732555158437
+        ]
+      },
+      {
+        "id": "tree-124",
+        "model": "tree_dead_medium",
+        "group": "tree",
+        "x": 23.925807425635867,
+        "y": 0,
+        "z": 0.39356118999421597,
+        "rotY": 5.35020344167713,
+        "scale": 1.199416012794245,
+        "tilt": [
+          0.03253768716473132,
+          -0.04410100399050862
+        ]
+      },
+      {
+        "id": "tree-125",
+        "model": "tree_dead_large",
+        "group": "tree",
+        "x": -14.287489936687052,
+        "y": 0,
+        "z": -22.91322727687657,
+        "rotY": 0.02277376653878809,
+        "scale": 1.020427486859262,
+        "tilt": [
+          0.025363460117951042,
+          -0.010191537486389284
+        ]
+      },
+      {
+        "id": "oldGrave-128",
+        "model": "gravestone",
+        "group": "oldGrave",
+        "x": -5.085062514059246,
+        "y": 0,
+        "z": 3.755346099846065,
+        "rotY": -0.00862476504407822,
+        "scale": 0.990714056766592,
+        "tilt": [
+          0.0465949732111767,
+          0.008844974380917844
+        ]
+      },
+      {
+        "id": "oldGrave-130",
+        "model": "grave_B",
+        "group": "oldGrave",
+        "x": -11.992212817072868,
+        "y": 0,
+        "z": 3.124319028109312,
+        "rotY": -0.09237648513168097,
+        "scale": 1.0510295353480614,
+        "tilt": [
+          -0.03199050701223314,
+          -0.038807581597939136
+        ]
+      },
+      {
+        "id": "oldGrave-132",
+        "model": "gravestone",
+        "group": "oldGrave",
+        "x": 5.4578244931995865,
+        "y": 0,
+        "z": 3.120838598161936,
+        "rotY": -0.055282615050673486,
+        "scale": 1.0776900810422376,
+        "tilt": [
+          -0.031196816451847555,
+          -0.009304372081533077
+        ]
+      },
+      {
+        "id": "oldGrave-133",
+        "model": "grave_B",
+        "group": "oldGrave",
+        "x": 8.844216939434409,
+        "y": 0,
+        "z": 3.1776598781347274,
+        "rotY": -0.05689139991067349,
+        "scale": 0.9501899960916489,
+        "tilt": [
+          -0.04119676428381354,
+          -0.03378992788493633
+        ]
+      },
+      {
+        "id": "oldGrave-134",
+        "model": "gravemarker_B",
+        "group": "oldGrave",
+        "x": 12.302915021404624,
+        "y": 0,
+        "z": 3.3276046505197883,
+        "rotY": 0.1016940265428275,
+        "scale": 1.25,
+        "tilt": [
+          0.020408702059648925,
+          0.01727263061329723
+        ]
+      },
+      {
+        "id": "oldGrave-136",
+        "model": "grave_A_destroyed",
+        "group": "oldGrave",
+        "x": -5.697620654478669,
+        "y": 0,
+        "z": -0.8343710172921419,
+        "rotY": 0.06232904568314551,
+        "scale": 0.9847276156069711,
+        "tilt": [
+          -0.016322734067216516,
+          0.009562885365448894
+        ]
+      },
+      {
+        "id": "oldGrave-137",
+        "model": "gravemarker_A",
+        "group": "oldGrave",
+        "x": -8.433541284129024,
+        "y": 0,
+        "z": -1.3716667324304581,
+        "rotY": -0.13699238894507287,
+        "scale": 1.25,
+        "tilt": [
+          -0.008076683478429915,
+          -0.038141684047877794
+        ]
+      },
+      {
+        "id": "oldGrave-138",
+        "model": "gravestone",
+        "group": "oldGrave",
+        "x": -12.325204946100712,
+        "y": 0,
+        "z": -0.8678528439253569,
+        "rotY": -0.07572996030561625,
+        "scale": 1.0381306332186797,
+        "tilt": [
+          -0.027721153013408186,
+          -0.038765423605218535
+        ]
+      },
+      {
+        "id": "oldGrave-139",
+        "model": "grave_B",
+        "group": "oldGrave",
+        "x": -15.305038972571491,
+        "y": 0,
+        "z": -0.8378216022625565,
+        "rotY": -0.17356490557081997,
+        "scale": 1.0204428617842496,
+        "tilt": [
+          0.04854785194620491,
+          0.03506862877402454
+        ]
+      },
+      {
+        "id": "oldGrave-140",
+        "model": "grave_A",
+        "group": "oldGrave",
+        "x": 5.763382748328149,
+        "y": 0,
+        "z": -1.3880047218874096,
+        "rotY": 0.05717137752100826,
+        "scale": 0.9984494474367238,
+        "tilt": [
+          -0.009941870160400865,
+          0.005903195729479192
+        ]
+      },
+      {
+        "id": "oldGrave-141",
+        "model": "gravestone",
+        "group": "oldGrave",
+        "x": 9.363217508234083,
+        "y": 0,
+        "z": -1.3777427539229392,
+        "rotY": -0.02766873755492269,
+        "scale": 1.0372930107754657,
+        "tilt": [
+          0.04246488038916141,
+          -0.03604767569340766
+        ]
+      },
+      {
+        "id": "oldGrave-142",
+        "model": "gravestone",
+        "group": "oldGrave",
+        "x": 12.446010393835603,
+        "y": 0,
+        "z": -0.6115236645564437,
+        "rotY": -0.06767227660864591,
+        "scale": 1.0239802971249445,
+        "tilt": [
+          0.025666373479180035,
+          0.03313404901418836
+        ]
+      },
+      {
+        "id": "oldGrave-143",
+        "model": "grave_A",
+        "group": "oldGrave",
+        "x": 16.12015216127038,
+        "y": 0,
+        "z": -0.9518571764230728,
+        "rotY": 0.08714283317327498,
+        "scale": 1.0037252047681249,
+        "tilt": [
+          0.039495943672955044,
+          0.049895654735155406
+        ]
+      },
+      {
+        "id": "oldGrave-146",
+        "model": "gravestone",
+        "group": "oldGrave",
+        "x": -15.645057597197592,
+        "y": 0,
+        "z": -7.50345824547112,
+        "rotY": -0.05684287740848959,
+        "scale": 1.00337947193766,
+        "tilt": [
+          -0.006196099612861869,
+          -0.018048785114660862
+        ]
+      },
+      {
+        "id": "oldGrave-147",
+        "model": "gravestone",
+        "group": "oldGrave",
+        "x": -19.063590583764018,
+        "y": 0,
+        "z": -7.666393337026238,
+        "rotY": -0.16817542833276092,
+        "scale": 0.9839777364977635,
+        "tilt": [
+          -0.02635038420557976,
+          0.031858958909288054
+        ]
+      },
+      {
+        "id": "oldGrave-148",
+        "model": "grave_B",
+        "group": "oldGrave",
+        "x": 9.456623673066495,
+        "y": 0,
+        "z": -7.242558258585632,
+        "rotY": 0.061018570661544785,
+        "scale": 1.0606235745945014,
+        "tilt": [
+          0.027765569486655303,
+          0.03842866339255124
+        ]
+      },
+      {
+        "id": "oldGrave-149",
+        "model": "grave_A_destroyed",
+        "group": "oldGrave",
+        "x": 12.616580841876566,
+        "y": 0,
+        "z": -7.363354768976569,
+        "rotY": -0.174875402553007,
+        "scale": 1.0478695430792868,
+        "tilt": [
+          -0.003079383494332434,
+          -0.04904775903560221
+        ]
+      },
+      {
+        "id": "oldGrave-150",
+        "model": "gravemarker_A",
+        "group": "oldGrave",
+        "x": 15.667425674200057,
+        "y": 0,
+        "z": -7.116896444931626,
+        "rotY": 0.12855863180011512,
+        "scale": 1.25,
+        "tilt": [
+          0.016522642201744014,
+          -0.03697943727020175
+        ]
+      },
+      {
+        "id": "oldGrave-151",
+        "model": "gravestone",
+        "group": "oldGrave",
+        "x": -5.415393653698266,
+        "y": 0,
+        "z": -12.439277696795761,
+        "rotY": 0.08229985166341064,
+        "scale": 1.0635716518154368,
+        "tilt": [
+          -0.013095220411196352,
+          -0.040960969123989346
+        ]
+      },
+      {
+        "id": "oldGrave-152",
+        "model": "grave_A",
+        "group": "oldGrave",
+        "x": -12.27644637711346,
+        "y": 0,
+        "z": -12.59220911283046,
+        "rotY": 0.022193038780242202,
+        "scale": 0.9972360794665291,
+        "tilt": [
+          0.037374535226263106,
+          -0.039178758533671504
+        ]
+      },
+      {
+        "id": "oldGrave-154",
+        "model": "grave_A_destroyed",
+        "group": "oldGrave",
+        "x": -19.18391143605113,
+        "y": 0,
+        "z": -12.121162586845458,
+        "rotY": -0.014897512318566453,
+        "scale": 0.9515720889787189,
+        "tilt": [
+          -0.049116714973933995,
+          -0.038378490461036564
+        ]
+      },
+      {
+        "id": "oldGrave-155",
+        "model": "gravemarker_A",
+        "group": "oldGrave",
+        "x": 5.699724137037992,
+        "y": 0,
+        "z": -12.453050246834755,
+        "rotY": -0.06520242260769009,
+        "scale": 1.25,
+        "tilt": [
+          0.03620770804118366,
+          -0.04786823696922511
+        ]
+      },
+      {
+        "id": "oldGrave-156",
+        "model": "grave_B",
+        "group": "oldGrave",
+        "x": 12.78291060179472,
+        "y": 0,
+        "z": -12.63056035656482,
+        "rotY": -0.00974704856984318,
+        "scale": 1.043955490353983,
+        "tilt": [
+          0.033895476395264273,
+          0.02078629301395267
+        ]
+      },
+      {
+        "id": "oldGrave-157",
+        "model": "gravemarker_B",
+        "group": "oldGrave",
+        "x": 15.885765853710472,
+        "y": 0,
+        "z": -12.256942081078886,
+        "rotY": -0.16104479025118051,
+        "scale": 1.25,
+        "tilt": [
+          0.04274636609479786,
+          0.028003347478806978
+        ]
+      },
+      {
+        "id": "oldGrave-158",
+        "model": "grave_B",
+        "group": "oldGrave",
+        "x": -5.785846115089953,
+        "y": 0,
+        "z": -17.693118791468443,
+        "rotY": -0.09908474058844148,
+        "scale": 0.991795169445686,
+        "tilt": [
+          0.02042910153977573,
+          -0.02475055051036179
+        ]
+      },
+      {
+        "id": "oldGrave-159",
+        "model": "gravestone",
+        "group": "oldGrave",
+        "x": -15.798409505560993,
+        "y": 0,
+        "z": -17.670889977551997,
+        "rotY": 0.0170132990553975,
+        "scale": 1.0071343404473736,
+        "tilt": [
+          -0.01837950635235757,
+          0.029868773231282827
+        ]
+      },
+      {
+        "id": "oldGrave-160",
+        "model": "grave_B",
+        "group": "oldGrave",
+        "x": -19.100010406784712,
+        "y": 0,
+        "z": -17.825724160857497,
+        "rotY": -0.10336255718953907,
+        "scale": 1.0266259082010947,
+        "tilt": [
+          -0.03480921608861536,
+          0.041420969669707125
+        ]
+      },
+      {
+        "id": "oldGrave-161",
+        "model": "gravemarker_B",
+        "group": "oldGrave",
+        "x": 5.4317833771929145,
+        "y": 0,
+        "z": -17.439799461886288,
+        "rotY": -0.17915209279395639,
+        "scale": 1.25,
+        "tilt": [
+          0.04282592185772956,
+          -0.022810849291272462
+        ]
+      },
+      {
+        "id": "oldGrave-162",
+        "model": "grave_A",
+        "group": "oldGrave",
+        "x": 9.246492517739533,
+        "y": 0,
+        "z": -17.34464706145227,
+        "rotY": -0.13017224304378033,
+        "scale": 0.9611542120226658,
+        "tilt": [
+          0.022465321328490967,
+          -0.004445616155862808
+        ]
+      },
+      {
+        "id": "oldGrave-163",
+        "model": "gravestone",
+        "group": "oldGrave",
+        "x": 16.00579598080367,
+        "y": 0,
+        "z": -17.792463915608824,
+        "rotY": -0.16043465534225104,
+        "scale": 1.0158092417055742,
+        "tilt": [
+          -0.00026279529556631764,
+          0.0301942304475233
+        ]
+      },
+      {
+        "id": "oldGrave-164",
+        "model": "grave_A",
+        "group": "oldGrave",
+        "x": 19.18740987796336,
+        "y": 0,
+        "z": -17.47796124741435,
+        "rotY": -0.08625569681636988,
+        "scale": 1.0572068233974279,
+        "tilt": [
+          -0.04114434600342065,
+          0.02117430251091719
+        ]
+      },
+      {
+        "id": "small-165",
+        "model": "gravemarker_B",
+        "group": "small",
+        "x": -18.21034732705448,
+        "y": 0,
+        "z": 1.3362164534628391,
+        "rotY": 5.544605140751063,
+        "scale": 1.3,
+        "tilt": [
+          0.038469106703996656,
+          -0.03763571353629232
+        ]
+      },
+      {
+        "id": "small-166",
+        "model": "gravemarker_A",
+        "group": "small",
+        "x": 5.200384716968983,
+        "y": 0,
+        "z": -9.171680607134476,
+        "rotY": 0.9743950238524447,
+        "scale": 1.3,
+        "tilt": [
+          -0.03707082013133914,
+          -0.01629588226787746
+        ]
+      },
+      {
+        "id": "small-167",
+        "model": "gravemarker_B",
+        "group": "small",
+        "x": 6.820974445086904,
+        "y": 0,
+        "z": -7.190110658295453,
+        "rotY": 5.1189414076794355,
+        "scale": 1.3,
+        "tilt": [
+          0.012598306173458695,
+          -0.04887343344744295
+        ]
+      },
+      {
+        "id": "small-168",
+        "model": "gravemarker_A",
+        "group": "small",
+        "x": 18.38906489009969,
+        "y": 0,
+        "z": 0.13017080910503864,
+        "rotY": 0.9099491566119658,
+        "scale": 1.3,
+        "tilt": [
+          -0.044938902975991374,
+          -0.03518021507188678
+        ]
+      },
+      {
+        "id": "small-171",
+        "model": "gravemarker_B",
+        "group": "small",
+        "x": -10.522470057592727,
+        "y": 0,
+        "z": -1.3030046613421291,
+        "rotY": 3.810325712937375,
+        "scale": 1.3,
+        "tilt": [
+          0.03343511258717627,
+          0.02958112584892661
+        ]
+      },
+      {
+        "id": "small-172",
+        "model": "gravemarker_A",
+        "group": "small",
+        "x": -6.672127149766311,
+        "y": 0,
+        "z": -13.969386329874396,
+        "rotY": 0.12028214998291943,
+        "scale": 1.3,
+        "tilt": [
+          0.0151495570782572,
+          -0.03412725541274995
+        ]
+      },
+      {
+        "id": "small-174",
+        "model": "gravemarker_A",
+        "group": "small",
+        "x": 15.826507991063409,
+        "y": 0,
+        "z": -3.706122092436999,
+        "rotY": 3.229191812206364,
+        "scale": 1.3,
+        "tilt": [
+          -0.04147736290469766,
+          0.02644979415927083
+        ]
+      },
+      {
+        "id": "small-175",
+        "model": "skull",
+        "group": "small",
+        "x": -13.634960940200834,
+        "y": 0,
+        "z": 0.743433328345418,
+        "rotY": 4.886764308182733,
+        "scale": 1.1350628163665535,
+        "tilt": [
+          0.015434133773669603,
+          0.020131751219742006
+        ]
+      },
+      {
+        "id": "small-177",
+        "model": "skull",
+        "group": "small",
+        "x": 13.808511197008192,
+        "y": 0,
+        "z": 0.36962911300361156,
+        "rotY": 3.938809356179694,
+        "scale": 1.442083205655217,
+        "tilt": [
+          -0.040812438796274365,
+          -0.02143944741692394
+        ]
+      },
+      {
+        "id": "small-179",
+        "model": "skull",
+        "group": "small",
+        "x": -11.01715154768899,
+        "y": 0,
+        "z": 0.7518289107829332,
+        "rotY": 0.5686920955313125,
+        "scale": 1.4937974103726446,
+        "tilt": [
+          -0.006896765576675533,
+          0.014181872643530366
+        ]
+      },
+      {
+        "id": "small-180",
+        "model": "skull",
+        "group": "small",
+        "x": -4.44942830465734,
+        "y": 0,
+        "z": -3.3270297460258007,
+        "rotY": 1.81195848480678,
+        "scale": 1.4862245711497963,
+        "tilt": [
+          0.0311409228714183,
+          -0.015545405237935482
+        ]
+      },
+      {
+        "id": "small-181",
+        "model": "skull",
+        "group": "small",
+        "x": -14.086363288760184,
+        "y": 0,
+        "z": -2.5284565668553114,
+        "rotY": 3.44058409054898,
+        "scale": 1.2012427417561413,
+        "tilt": [
+          -0.0015225899405777454,
+          0.014721659966744488
+        ]
+      },
+      {
+        "id": "small-182",
+        "model": "skull",
+        "group": "small",
+        "x": 17.71199553031474,
+        "y": 0,
+        "z": 1.7240425404161215,
+        "rotY": 2.2569120055126333,
+        "scale": 1.4675798369571567,
+        "tilt": [
+          -0.023689094837754967,
+          -0.03693746258504689
+        ]
+      },
+      {
+        "id": "small-183",
+        "model": "skull_candle",
+        "group": "small",
+        "x": 14.289767267787827,
+        "y": 0,
+        "z": -11.354035805910826,
+        "rotY": 5.695293940607285,
+        "scale": 1.25,
+        "tilt": [
+          -0.0073190872790291905,
+          0.027786042005755004
+        ]
+      },
+      {
+        "id": "small-184",
+        "model": "skull_candle",
+        "group": "small",
+        "x": 8.325963645381853,
+        "y": 0,
+        "z": 1.3242529928684235,
+        "rotY": 1.9249466188732303,
+        "scale": 1.25,
+        "tilt": [
+          -0.03833155177999288,
+          0.028105140407569715
+        ]
+      },
+      {
+        "id": "small-187",
+        "model": "bone_A",
+        "group": "small",
+        "x": 4.844255056232214,
+        "y": 0,
+        "z": -13.179329487960786,
+        "rotY": 2.8463690177346455,
+        "scale": 1.2216169481864199,
+        "tilt": [
+          0.022396970656700432,
+          0.01853288954589516
+        ]
+      },
+      {
+        "id": "small-189",
+        "model": "bone_C",
+        "group": "small",
+        "x": 18.40410818308592,
+        "y": 0,
+        "z": -7.142171972896904,
+        "rotY": 4.926253334270603,
+        "scale": 1.3449930458329618,
+        "tilt": [
+          -0.010627718316391109,
+          0.04446264591533691
+        ]
+      },
+      {
+        "id": "small-190",
+        "model": "bone_A",
+        "group": "small",
+        "x": -17.303002779930832,
+        "y": 0,
+        "z": -3.582787644583732,
+        "rotY": 1.278407128365445,
+        "scale": 1.4000635247677564,
+        "tilt": [
+          0.028687758301384744,
+          0.025412455503828826
+        ]
+      },
+      {
+        "id": "small-192",
+        "model": "bone_C",
+        "group": "small",
+        "x": -3.546031877025962,
+        "y": 0,
+        "z": -12.904759745579213,
+        "rotY": 1.0126293899529761,
+        "scale": 1.2559536232613027,
+        "tilt": [
+          0.018519316124729818,
+          -0.047920688963495196
+        ]
+      },
+      {
+        "id": "small-193",
+        "model": "ribcage",
+        "group": "small",
+        "x": 17.060429914295675,
+        "y": 0,
+        "z": -7.945276718121022,
+        "rotY": 1.0349665017776284,
+        "scale": 1.4967320914613083,
+        "tilt": [
+          -0.027359380712732674,
+          -0.01326132568065077
+        ]
+      },
+      {
+        "id": "small-194",
+        "model": "ribcage",
+        "group": "small",
+        "x": -16.95222156122327,
+        "y": 0,
+        "z": 0.3152387896552682,
+        "rotY": 3.8142191245764545,
+        "scale": 1.4441659559262916,
+        "tilt": [
+          0.01746784439310431,
+          -0.008025125297717747
+        ]
+      },
+      {
+        "id": "small-195",
+        "model": "bone_A",
+        "group": "small",
+        "x": 9.394785248860718,
+        "y": 0,
+        "z": -16.345648949500173,
+        "rotY": 3.326555878781976,
+        "scale": 1.5511830074712634,
+        "tilt": [
+          0.03227321291342378,
+          0.005316444439813495
+        ]
+      },
+      {
+        "id": "small-196",
+        "model": "bone_C",
+        "group": "small",
+        "x": -11.214894142001867,
+        "y": 0,
+        "z": -3.383384468499571,
+        "rotY": 3.90328826424078,
+        "scale": 1.6779056244296953,
+        "tilt": [
+          -0.014565411815419795,
+          -0.04962509060278535
+        ]
+      },
+      {
+        "id": "small-197",
+        "model": "shrine_candles",
+        "group": "small",
+        "x": -16.349843993782997,
+        "y": 0,
+        "z": -2.480208293069154,
+        "rotY": 4.708688480826887,
+        "scale": 1.2,
+        "tilt": [
+          0.0321301348041743,
+          0.018262072792276735
+        ]
+      },
+      {
+        "id": "small-203",
+        "model": "candle_triple",
+        "group": "small",
+        "x": 10.677231603534892,
+        "y": 0,
+        "z": 2.5325892132706938,
+        "rotY": 1.8655762873920458,
+        "scale": 1.3,
+        "tilt": [
+          -0.04983396800234914,
+          0.04389141900464892
+        ]
+      },
+      {
+        "id": "small-204",
+        "model": "candle_thin",
+        "group": "small",
+        "x": 10.111377778183668,
+        "y": 0,
+        "z": 3.08498496604152,
+        "rotY": 1.262524437439045,
+        "scale": 1.3,
+        "tilt": [
+          0.0027491117361932993,
+          0.026160503784194586
+        ]
+      },
+      {
+        "id": "small-205",
+        "model": "candle_melted",
+        "group": "small",
+        "x": 10.926260960055515,
+        "y": 0,
+        "z": 1.5344832372386006,
+        "rotY": 1.6911097525034327,
+        "scale": 1.3,
+        "tilt": [
+          -0.003921865345910193,
+          -0.04740999597124756
+        ]
+      },
+      {
+        "id": "small-206",
+        "model": "candle_thin",
+        "group": "small",
+        "x": 9.776373630668967,
+        "y": 0,
+        "z": 1.9447330974508077,
+        "rotY": 4.035404726598883,
+        "scale": 1.3,
+        "tilt": [
+          0.016520693572238093,
+          0.0030835425248369602
+        ]
+      },
+      {
+        "id": "small-207",
+        "model": "candle_triple",
+        "group": "small",
+        "x": -12.783457884658128,
+        "y": 0,
+        "z": -2.8141814221628008,
+        "rotY": 5.617268553851026,
+        "scale": 1.3,
+        "tilt": [
+          0.023388712457381194,
+          0.021751070045866072
+        ]
+      },
+      {
+        "id": "small-208",
+        "model": "candle_thin",
+        "group": "small",
+        "x": -14.072797588724644,
+        "y": 0,
+        "z": -3.750216818973422,
+        "rotY": 2.5743631513699343,
+        "scale": 1.3,
+        "tilt": [
+          -0.046335015422664584,
+          0.043247236590832475
+        ]
+      },
+      {
+        "id": "small-209",
+        "model": "candle_melted",
+        "group": "small",
+        "x": -12.557143845316023,
+        "y": 0,
+        "z": -3.6204282514285295,
+        "rotY": 6.021468434787058,
+        "scale": 1.3,
+        "tilt": [
+          -0.03862702767364681,
+          0.04464684585109353
+        ]
+      },
+      {
+        "id": "small-210",
+        "model": "candle_thin",
+        "group": "small",
+        "x": -13.293782774126157,
+        "y": 0,
+        "z": -3.324662006739527,
+        "rotY": 3.647485505897698,
+        "scale": 1.3,
+        "tilt": [
+          0.0372852323576808,
+          0.0074173841858282685
+        ]
+      },
+      {
+        "id": "small-211",
+        "model": "candle_triple",
+        "group": "small",
+        "x": 12.542278784280644,
+        "y": 0,
+        "z": -10.976002472173422,
+        "rotY": 5.978585797170218,
+        "scale": 1.3,
+        "tilt": [
+          0.04376594214700162,
+          -0.028694359725341203
+        ]
+      },
+      {
+        "id": "small-212",
+        "model": "candle_thin",
+        "group": "small",
+        "x": 13.263049681996927,
+        "y": 0,
+        "z": -9.365540365688503,
+        "rotY": 1.4943089935904557,
+        "scale": 1.3,
+        "tilt": [
+          -0.04963972212281079,
+          -0.0029265303863212494
+        ]
+      },
+      {
+        "id": "small-213",
+        "model": "candle_melted",
+        "group": "small",
+        "x": 11.502531455876307,
+        "y": 0,
+        "z": -9.454710224596782,
+        "rotY": 4.544200268775472,
+        "scale": 1.3,
+        "tilt": [
+          -0.011758783692494036,
+          -0.03800874212756753
+        ]
+      },
+      {
+        "id": "small-214",
+        "model": "candle_thin",
+        "group": "small",
+        "x": 11.789970922237263,
+        "y": 0,
+        "z": -10.138878387166187,
+        "rotY": 5.437718463486208,
+        "scale": 1.3,
+        "tilt": [
+          0.03498036907985806,
+          -0.023067471967078746
+        ]
+      },
+      {
+        "id": "small-215",
+        "model": "candle_triple",
+        "group": "small",
+        "x": 8.25863907611929,
+        "y": 0,
+        "z": -14.569880214240403,
+        "rotY": 0.6395097346502371,
+        "scale": 1.3,
+        "tilt": [
+          0.0464558269828558,
+          0.021471123932860797
+        ]
+      },
+      {
+        "id": "small-216",
+        "model": "candle_thin",
+        "group": "small",
+        "x": 7.445061199227347,
+        "y": 0,
+        "z": -15.664881444815547,
+        "rotY": 5.144302202938354,
+        "scale": 1.3,
+        "tilt": [
+          0.043619797704741364,
+          0.03619103468954564
+        ]
+      },
+      {
+        "id": "small-217",
+        "model": "candle_melted",
+        "group": "small",
+        "x": 8.016529849451034,
+        "y": 0,
+        "z": -16.124675298854708,
+        "rotY": 4.92476092229994,
+        "scale": 1.3,
+        "tilt": [
+          -0.04336368353106082,
+          0.033426717901602385
+        ]
+      },
+      {
+        "id": "small-218",
+        "model": "candle_thin",
+        "group": "small",
+        "x": 6.714234940474853,
+        "y": 0,
+        "z": -15.554908600775525,
+        "rotY": 3.041334045599199,
+        "scale": 1.3,
+        "tilt": [
+          -0.017137176357209682,
+          -0.03641289870720357
+        ]
+      },
+      {
+        "id": "small-219",
+        "model": "candle_triple",
+        "group": "small",
+        "x": -17.323571041086687,
+        "y": 0,
+        "z": 3.6530506428331133,
+        "rotY": 4.02931637608036,
+        "scale": 1.3,
+        "tilt": [
+          -0.00016518216580152512,
+          -0.049781110137701035
+        ]
+      },
+      {
+        "id": "small-220",
+        "model": "candle_thin",
+        "group": "small",
+        "x": -16.33398039052263,
+        "y": 0,
+        "z": 3.2389954824000595,
+        "rotY": 3.951861454229111,
+        "scale": 1.3,
+        "tilt": [
+          -0.015495284763164821,
+          -0.046270843432284894
+        ]
+      },
+      {
+        "id": "pumpkin-231",
+        "model": "pumpkin_orange",
+        "group": "pumpkin",
+        "x": 3.402164738876941,
+        "y": 0,
+        "z": 7.181796366917557,
+        "rotY": 1.6666093213107025,
+        "scale": 0.9523625164991245
+      },
+      {
+        "id": "pumpkin-232",
+        "model": "pumpkin_yellow_small",
+        "group": "pumpkin",
+        "x": -5.395259962775539,
+        "y": 0,
+        "z": 2.1370515499270217,
+        "rotY": 1.8117419992635737,
+        "scale": 0.7130173021694645
+      },
+      {
+        "id": "pumpkin-233",
+        "model": "pumpkin_orange",
+        "group": "pumpkin",
+        "x": 4.839787196759762,
+        "y": 0,
+        "z": 0.8009722926337435,
+        "rotY": 4.263618175370766,
+        "scale": 0.9249308663420379
+      },
+      {
+        "id": "pumpkin-234",
+        "model": "pumpkin_orange",
+        "group": "pumpkin",
+        "x": -3.553841316518499,
+        "y": 0,
+        "z": -2.1580225814237686,
+        "rotY": 1.880577227852857,
+        "scale": 0.9782416358357295
+      },
+      {
+        "id": "pumpkin-235",
+        "model": "pumpkin_yellow_small",
+        "group": "pumpkin",
+        "x": 4.557890673281027,
+        "y": 0,
+        "z": -7.433035064761195,
+        "rotY": 3.793860177893178,
+        "scale": 0.8325275590643286
+      },
+      {
+        "id": "pumpkin-236",
+        "model": "pumpkin_orange",
+        "group": "pumpkin",
+        "x": -4.232925521824144,
+        "y": 0,
+        "z": -8.982431839543949,
+        "rotY": 2.2787166605068925,
+        "scale": 0.9205632911529392
+      },
+      {
+        "id": "pumpkin-237",
+        "model": "pumpkin_yellow_small",
+        "group": "pumpkin",
+        "x": 3.932264573765931,
+        "y": 0,
+        "z": -13.400676254162804,
+        "rotY": 3.153279432139601,
+        "scale": 0.8395880063762888
+      },
+      {
+        "id": "critter-238",
+        "model": "gravestone",
+        "group": "critter",
+        "x": -5.7,
+        "y": 0,
+        "z": 2.9,
+        "rotY": 0.15,
+        "scale": 1.35
+      },
+      {
+        "id": "critter-239",
+        "model": "dirt_mound",
+        "group": "critter",
+        "x": 3.2,
+        "y": 0,
+        "z": 1.6,
+        "rotY": 3.999492305675522,
+        "scale": 1
+      },
+      {
+        "id": "critter-240",
+        "model": "dirt_mound",
+        "group": "critter",
+        "x": -3.5,
+        "y": 0,
+        "z": -5.2,
+        "rotY": 6.212112722555176,
+        "scale": 1
+      },
+      {
+        "id": "critter-241",
+        "model": "dirt_mound",
+        "group": "critter",
+        "x": 3.7,
+        "y": 0,
+        "z": -9.8,
+        "rotY": 0.4844191620219499,
+        "scale": 1
+      },
+      {
+        "id": "critter-242",
+        "model": "forest_cauldron",
+        "group": "critter",
+        "x": 6.4,
+        "y": 0,
+        "z": 0.09999999999999998,
+        "rotY": 0.3,
+        "scale": 4.2
+      },
+      {
+        "id": "critter-243",
+        "model": "open_coffin_spot",
+        "group": "critter",
+        "x": -7.1499999999999995,
+        "y": 0,
+        "z": -7.4,
+        "rotY": 0.5,
+        "scale": 1
+      },
+      {
+        "id": "tree-244",
+        "model": "tree_dead_large",
+        "group": "tree",
+        "x": -10.8,
+        "y": 0,
+        "z": -7.2,
+        "rotY": 0.2542876270506531,
+        "scale": 1.1,
+        "tilt": [
+          -0.010400872714817523,
+          -0.0017988246865570517
+        ]
+      },
+      {
+        "id": "tree-245",
+        "model": "tree_dead_medium",
+        "group": "tree",
+        "x": -15.5,
+        "y": 0,
+        "z": -12.8,
+        "rotY": 4.5195373250637205,
+        "scale": 1.2,
+        "tilt": [
+          0.035202798657119276,
+          -0.01772331627085805
+        ]
+      },
+      {
+        "id": "tree-246",
+        "model": "tree_dead_large",
+        "group": "tree",
+        "x": 2.8,
+        "y": 0,
+        "z": -22.7,
+        "rotY": 6.053600168870762,
+        "scale": 1.1,
+        "tilt": [
+          0.0091781241632998,
+          0.02811648258939386
+        ]
+      },
+      {
+        "id": "small-247",
+        "model": "forest_mushroom",
+        "group": "small",
+        "x": 8.4311947287526,
+        "y": 0,
+        "z": -3.1710136181209236,
+        "rotY": 2.806090034901906,
+        "scale": 2.1250139081152155,
+        "tilt": [
+          0.03586603426374496,
+          0.04312267219647764
+        ]
+      },
+      {
+        "id": "small-248",
+        "model": "forest_mushroom",
+        "group": "small",
+        "x": -8.119902027584613,
+        "y": 0,
+        "z": 1.1267693878617138,
+        "rotY": 1.4495923892043947,
+        "scale": 2.391652279254049,
+        "tilt": [
+          0.06890728343278171,
+          0.005587106291204694
+        ]
+      },
+      {
+        "id": "small-249",
+        "model": "forest_mushroom",
+        "group": "small",
+        "x": -7.931812121346594,
+        "y": 0,
+        "z": -3.099237577873282,
+        "rotY": 4.823943138743153,
+        "scale": 2.458091593789868,
+        "tilt": [
+          0.09590699123218657,
+          0.05389986024238169
+        ]
+      },
+      {
+        "id": "small-250",
+        "model": "forest_mushroom",
+        "group": "small",
+        "x": -18.96519634751603,
+        "y": 0,
+        "z": -4.179721772088669,
+        "rotY": 2.7317180622221504,
+        "scale": 2.3679804134182634,
+        "tilt": [
+          0.07524832626804709,
+          0.03717018864117563
+        ]
+      },
+      {
+        "id": "small-252",
+        "model": "forest_mushroom",
+        "group": "small",
+        "x": 14.861735936254265,
+        "y": 0,
+        "z": 2.880509169306606,
+        "rotY": 4.42879092482734,
+        "scale": 2.391580695915036,
+        "tilt": [
+          -0.06138513688929379,
+          -0.011270832410082227
+        ]
+      },
+      {
+        "id": "small-255",
+        "model": "forest_mushroom",
+        "group": "small",
+        "x": -17.854448627959936,
+        "y": 0,
+        "z": -16.236382856033742,
+        "rotY": 5.120128094641139,
+        "scale": 1.803624933725223,
+        "tilt": [
+          0.026476663630455727,
+          0.09153093951754274
+        ]
+      },
+      {
+        "id": "small-256",
+        "model": "forest_mushroom",
+        "group": "small",
+        "x": 19.449660724727437,
+        "y": 0,
+        "z": -1.9717992402147502,
+        "rotY": 5.634312099531686,
+        "scale": 2.3220525515731425,
+        "tilt": [
+          -0.08312260266393423,
+          0.03635844490490853
+        ]
+      },
+      {
+        "id": "small-258",
+        "model": "forest_mushroom",
+        "group": "small",
+        "x": 12.359633421432228,
+        "y": 0,
+        "z": -16.7410645945929,
+        "rotY": 4.071398898449189,
+        "scale": 2.2777141913073136,
+        "tilt": [
+          0.09838121538050473,
+          -0.07609164626337589
+        ]
+      },
+      {
+        "id": "small-259",
+        "model": "forest_mushroom",
+        "group": "small",
+        "x": -19.018501173797997,
+        "y": 0,
+        "z": -9.270717258448713,
+        "rotY": 2.823512065285116,
+        "scale": 1.9089852103730665,
+        "tilt": [
+          -0.07034629601985216,
+          0.004197109397500759
+        ]
+      },
+      {
+        "id": "small-260",
+        "model": "forest_mushroom",
+        "group": "small",
+        "x": -8.877840458368883,
+        "y": 0,
+        "z": -12.351060041110031,
+        "rotY": 4.035503173671027,
+        "scale": 2.1488432648824527,
+        "tilt": [
+          0.009032511059194809,
+          -0.01594803188927471
+        ]
+      },
+      {
+        "id": "tree-261",
+        "model": "tree_pine_orange_large",
+        "group": "tree",
+        "x": -5.630891896784306,
+        "y": 0,
+        "z": -37.017722558975215,
+        "rotY": 4.580809110943228,
+        "scale": 1.108215685095638,
+        "tilt": [
+          -0.0002197328489273731,
+          -0.07359344819560648
+        ]
+      },
+      {
+        "id": "tree-262",
+        "model": "forest_twisted_c",
+        "group": "tree",
+        "x": -21.75128845870495,
+        "y": 0,
+        "z": -36.30954645127058,
+        "rotY": 3.7487321032583716,
+        "scale": 0.2968339611683041,
+        "tilt": [
+          -0.05065876855514944,
+          -0.050243705185130244
+        ]
+      },
+      {
+        "id": "tree-263",
+        "model": "tree_pine_orange_medium",
+        "group": "tree",
+        "x": -12.999477477744222,
+        "y": 0,
+        "z": -33.026682102680205,
+        "rotY": 6.1359061656054115,
+        "scale": 1.0063458519056439,
+        "tilt": [
+          -0.03600102593190968,
+          0.048046605242416274
+        ]
+      },
+      {
+        "id": "tree-264",
+        "model": "tree_dead_large",
+        "group": "tree",
+        "x": -16.838668333366513,
+        "y": 0,
+        "z": -37.1287490516901,
+        "rotY": 0.8030638315808029,
+        "scale": 1.030976531538181,
+        "tilt": [
+          -0.025558983208611608,
+          -0.08979308339767159
+        ]
+      },
+      {
+        "id": "tree-265",
+        "model": "tree_pine_yellow_medium",
+        "group": "tree",
+        "x": -25.924546856433153,
+        "y": 0,
+        "z": -37.77059332877397,
+        "rotY": 4.6224332167115065,
+        "scale": 1.0212520550470798,
+        "tilt": [
+          0.031927828630432475,
+          -0.09339853655546904
+        ]
+      },
+      {
+        "id": "tree-266",
+        "model": "tree_dead_medium",
+        "group": "tree",
+        "x": -0.06852972973138094,
+        "y": 0,
+        "z": -36.487637540698046,
+        "rotY": 2.3206132128834724,
+        "scale": 1.1398420313838868,
+        "tilt": [
+          -0.09520400073379279,
+          -0.08618960166350008
+        ]
+      },
+      {
+        "id": "tree-267",
+        "model": "forest_twisted_b",
+        "group": "tree",
+        "x": -18.09666219074279,
+        "y": 0,
+        "z": -32.61979222744703,
+        "rotY": 5.983079597922043,
+        "scale": 0.28232357614208015,
+        "tilt": [
+          -0.009573019528761509,
+          -0.008952551381662482
+        ]
+      },
+      {
+        "id": "tree-268",
+        "model": "tree_pine_orange_medium",
+        "group": "tree",
+        "x": -25.3310003047809,
+        "y": 0,
+        "z": -33.05809713900089,
+        "rotY": 2.81869890823029,
+        "scale": 0.9101770750479773,
+        "tilt": [
+          0.06608737134374679,
+          0.0035469120834022705
+        ]
+      },
+      {
+        "id": "tree-269",
+        "model": "tree_dead_large",
+        "group": "tree",
+        "x": 4.237989035435021,
+        "y": 0,
+        "z": -35.58424720615148,
+        "rotY": 5.523214671313763,
+        "scale": 1.3321675893152132,
+        "tilt": [
+          0.051771149784326564,
+          -0.047991164168342954
+        ]
+      },
+      {
+        "id": "tree-270",
+        "model": "tree_pine_yellow_medium",
+        "group": "tree",
+        "x": -12.510112684220076,
+        "y": 0,
+        "z": -37.06338059902191,
+        "rotY": 4.672108928654343,
+        "scale": 0.9868064729729668,
+        "tilt": [
+          0.042986567458137864,
+          0.03667187211103737
+        ]
+      },
+      {
+        "id": "tree-271",
+        "model": "tree_dead_large",
+        "group": "tree",
+        "x": 0.32153475657105446,
+        "y": 0,
+        "z": -33.57560692280531,
+        "rotY": 3.378350906884298,
+        "scale": 1.3202675264095887,
+        "tilt": [
+          0.08971294802613558,
+          0.019774229452013972
+        ]
+      },
+      {
+        "id": "tree-272",
+        "model": "tree_dead_large",
+        "group": "tree",
+        "x": -8.967089339159429,
+        "y": 0,
+        "z": -32.99386569112539,
+        "rotY": 1.6190953989699484,
+        "scale": 0.9357396873878315,
+        "tilt": [
+          -0.020545596769079563,
+          -0.07691887607797981
+        ]
+      },
+      {
+        "id": "tree-273",
+        "model": "tree_dead_medium",
+        "group": "tree",
+        "x": -4.0993305910378695,
+        "y": 0,
+        "z": -32.74023656249046,
+        "rotY": 0.845080768596381,
+        "scale": 1.2790774028748273,
+        "tilt": [
+          0.04677696665748954,
+          0.053538165567442786
+        ]
+      },
+      {
+        "id": "tree-274",
+        "model": "tree_pine_orange_medium",
+        "group": "tree",
+        "x": -24.561631158925593,
+        "y": 0,
+        "z": -23.261914148693904,
+        "rotY": 2.5010190704185518,
+        "scale": 0.9157414814922958,
+        "tilt": [
+          -0.033650500047951934,
+          -0.0928020351100713
+        ]
+      },
+      {
+        "id": "tree-275",
+        "model": "tree_dead_medium",
+        "group": "tree",
+        "x": -17.12861765967682,
+        "y": 0,
+        "z": -23.413521816488355,
+        "rotY": 0.8299934091791511,
+        "scale": 1.016505568777211,
+        "tilt": [
+          0.08127615433186294,
+          -0.06127163642086089
+        ]
+      },
+      {
+        "id": "tree-276",
+        "model": "tree_dead_medium",
+        "group": "tree",
+        "x": 25.888015875127167,
+        "y": 0,
+        "z": -9.82767244358547,
+        "rotY": 4.349675327129662,
+        "scale": 0.8645759915234521,
+        "tilt": [
+          0.058322947286069404,
+          -0.02116200397722423
+        ]
+      },
+      {
+        "id": "tree-277",
+        "model": "tree_dead_large",
+        "group": "tree",
+        "x": 18.711493505863473,
+        "y": 0,
+        "z": -14.00163093721494,
+        "rotY": 3.5715718431584538,
+        "scale": 0.9326121956575661,
+        "tilt": [
+          0.033714361069723975,
+          0.0803088533692062
+        ]
+      },
+      {
+        "id": "tree-278",
+        "model": "tree_dead_large_decorated",
+        "group": "tree",
+        "x": -25.256956454366446,
+        "y": 0,
+        "z": -0.14207746740430593,
+        "rotY": 1.047137021534145,
+        "scale": 1.1124118320876732,
+        "tilt": [
+          0.06266427631489932,
+          -0.02226678812876344
+        ]
+      },
+      {
+        "id": "tree-279",
+        "model": "tree_dead_large_decorated",
+        "group": "tree",
+        "x": 24.986213530413806,
+        "y": 0,
+        "z": 3.102013153024018,
+        "rotY": 0.5079868669901043,
+        "scale": 1.0154891976388172,
+        "tilt": [
+          -0.02584926253184676,
+          -0.06307205953635275
+        ]
+      },
+      {
+        "id": "oldGrave-283",
+        "model": "gravemarker_A",
+        "group": "oldGrave",
+        "x": 3.829758650995791,
+        "y": 0,
+        "z": -4.626493654586374,
+        "rotY": 0.3686639016959816,
+        "scale": 0.8617777448380366,
+        "tilt": [
+          0.023473052289336924,
+          -0.025378904272802177
+        ]
+      },
+      {
+        "id": "oldGrave-284",
+        "model": "gravemarker_B",
+        "group": "oldGrave",
+        "x": 21.487825031392276,
+        "y": 0,
+        "z": -18.11453567033168,
+        "rotY": -0.2829759956803173,
+        "scale": 0.9752867063391022,
+        "tilt": [
+          -0.03880767167545855,
+          0.04143823564052582
+        ]
+      },
+      {
+        "id": "oldGrave-285",
+        "model": "gravestone",
+        "group": "oldGrave",
+        "x": 4.776855259388685,
+        "y": 0,
+        "z": -16.36301333834417,
+        "rotY": -0.37488074298016727,
+        "scale": 1.0076118909870275,
+        "tilt": [
+          -0.0372505561541766,
+          0.02642070168629289
+        ]
+      },
+      {
+        "id": "oldGrave-287",
+        "model": "gravemarker_A",
+        "group": "oldGrave",
+        "x": -12.529604016244411,
+        "y": 0,
+        "z": -1.6435888040577993,
+        "rotY": -0.41802676348015666,
+        "scale": 1.1207734575262291,
+        "tilt": [
+          -0.05613807865418494,
+          -0.05364673530217261
+        ]
+      },
+      {
+        "id": "oldGrave-289",
+        "model": "grave_B",
+        "group": "oldGrave",
+        "x": -14.894890857860444,
+        "y": 0,
+        "z": -16.332316514244305,
+        "rotY": -0.35195885272696614,
+        "scale": 1.1368740134872497,
+        "tilt": [
+          0.04190543099772186,
+          -0.012888942719437184
+        ]
+      },
+      {
+        "id": "oldGrave-292",
+        "model": "grave_A_destroyed",
+        "group": "oldGrave",
+        "x": -4.219536890089512,
+        "y": 0,
+        "z": -16.18067259937525,
+        "rotY": -0.13833457557484508,
+        "scale": 0.9943070570589043,
+        "tilt": [
+          0.0473286117753014,
+          -0.06660468544345349
+        ]
+      },
+      {
+        "id": "oldGrave-293",
+        "model": "gravemarker_A",
+        "group": "oldGrave",
+        "x": 17.210327101685106,
+        "y": 0,
+        "z": 3.4351309170248,
+        "rotY": -0.30969251738861203,
+        "scale": 0.9317588397883809,
+        "tilt": [
+          0.0008870738092809916,
+          -0.026799822128377858
+        ]
+      },
+      {
+        "id": "oldGrave-294",
+        "model": "gravemarker_B",
+        "group": "oldGrave",
+        "x": 11.820520815812051,
+        "y": 0,
+        "z": -18.667207066179255,
+        "rotY": -0.1552861442323774,
+        "scale": 0.8763964873855002,
+        "tilt": [
+          -0.022550692996010188,
+          0.06954738600645216
+        ]
+      },
+      {
+        "id": "oldGrave-295",
+        "model": "gravestone",
+        "group": "oldGrave",
+        "x": -12.562115791440009,
+        "y": 0,
+        "z": -8.979971047700383,
+        "rotY": 0.0621081383433193,
+        "scale": 1.1480887509649618,
+        "tilt": [
+          0.04752198616974056,
+          0.019044975261203953
+        ]
+      },
+      {
+        "id": "small-296",
+        "model": "shrine_candles",
+        "group": "small",
+        "x": 21.77605446949601,
+        "y": 0,
+        "z": 2.9598250050330535,
+        "rotY": 2.379275953993201,
+        "scale": 1.1121026006992907,
+        "tilt": [
+          0.014098936435766513,
+          0.038120375475846235
+        ]
+      },
+      {
+        "id": "oldGrave-297",
+        "model": "gravemarker_A",
+        "group": "oldGrave",
+        "x": 13.488295424729584,
+        "y": 0,
+        "z": -1.151310756453313,
+        "rotY": -0.2432876320090145,
+        "scale": 1.044580072700046,
+        "tilt": [
+          0.0010891481209546333,
+          0.04439310182351619
+        ]
+      },
+      {
+        "id": "oldGrave-299",
+        "model": "grave_A",
+        "group": "oldGrave",
+        "x": 4.286812716163695,
+        "y": 0,
+        "z": -5.689958130801097,
+        "rotY": -0.21210418199189007,
+        "scale": 0.942911619215738,
+        "tilt": [
+          0.0018878294946625823,
+          0.055147113786079005
+        ]
+      },
+      {
+        "id": "oldGrave-300",
+        "model": "grave_B",
+        "group": "oldGrave",
+        "x": 8.327925408259034,
+        "y": 0,
+        "z": -12.632260767766276,
+        "rotY": 0.22279744036495686,
+        "scale": 0.969962567416951,
+        "tilt": [
+          -0.012113536335527898,
+          -0.04376550044864416
+        ]
+      },
+      {
+        "id": "oldGrave-301",
+        "model": "gravemarker_A",
+        "group": "oldGrave",
+        "x": 4.490264898911119,
+        "y": 0,
+        "z": 2.340215762308798,
+        "rotY": -0.1900895037688315,
+        "scale": 0.9252253338461741,
+        "tilt": [
+          -0.04898008576594294,
+          -0.06716474026441575
+        ]
+      },
+      {
+        "id": "oldGrave-302",
+        "model": "gravemarker_B",
+        "group": "oldGrave",
+        "x": 6.816416501812636,
+        "y": 0,
+        "z": 3.7846635699970648,
+        "rotY": 0.4567921725101769,
+        "scale": 0.9226238271105103,
+        "tilt": [
+          -0.011436747908592226,
+          0.00944811252877116
+        ]
+      },
+      {
+        "id": "oldGrave-303",
+        "model": "gravestone",
+        "group": "oldGrave",
+        "x": -7.512125465087593,
+        "y": 0,
+        "z": -16.374418551591226,
+        "rotY": -0.005101583665236831,
+        "scale": 1.1971784785739146,
+        "tilt": [
+          -0.05213697557337582,
+          0.06777049668133259
+        ]
+      },
+      {
+        "id": "oldGrave-305",
+        "model": "gravemarker_A",
+        "group": "oldGrave",
+        "x": -5.32395987585187,
+        "y": 0,
+        "z": -13.071505215438084,
+        "rotY": 0.21791891008615494,
+        "scale": 0.9523094466538168,
+        "tilt": [
+          -0.015276503167115152,
+          0.04756779142189771
+        ]
+      },
+      {
+        "id": "small-306",
+        "model": "fence_broken",
+        "group": "small",
+        "x": -19.4730347558856,
+        "y": 0,
+        "z": 1.6168034000089406,
+        "rotY": 1.953608967103064,
+        "scale": 0.9420885106548667,
+        "tilt": [
+          -0.05272021052893251,
+          -0.00874888266436756
+        ]
+      },
+      {
+        "id": "oldGrave-307",
+        "model": "grave_B",
+        "group": "oldGrave",
+        "x": 10.064162461645902,
+        "y": 0,
+        "z": 0.07482272346969765,
+        "rotY": -0.35685368557460606,
+        "scale": 0.9950249888817779,
+        "tilt": [
+          -0.03744738924317062,
+          0.02492486383300274
+        ]
+      },
+      {
+        "id": "oldGrave-308",
+        "model": "grave_A",
+        "group": "oldGrave",
+        "x": -15.140550155937671,
+        "y": 0,
+        "z": -8.705068429536187,
+        "rotY": -0.1883644077461213,
+        "scale": 1.1699902375694364,
+        "tilt": [
+          -0.0289440290722996,
+          0.0357031014887616
+        ]
+      },
+      {
+        "id": "oldGrave-309",
+        "model": "grave_B",
+        "group": "oldGrave",
+        "x": 15.301466719806193,
+        "y": 0,
+        "z": -16.709089015889912,
+        "rotY": -0.26646268693730235,
+        "scale": 1.1348910842672921,
+        "tilt": [
+          -0.004780642772093419,
+          -0.03692296285182238
+        ]
+      },
+      {
+        "id": "oldGrave-310",
+        "model": "grave_A_destroyed",
+        "group": "oldGrave",
+        "x": -15.059715213067829,
+        "y": 0,
+        "z": -6.279358037700877,
+        "rotY": 0.041379498783499,
+        "scale": 0.8501736775157042,
+        "tilt": [
+          -0.06531320139300079,
+          0.03856590753421188
+        ]
+      },
+      {
+        "id": "oldGrave-312",
+        "model": "gravemarker_B",
+        "group": "oldGrave",
+        "x": 15.320127267949282,
+        "y": 0,
+        "z": -8.185490835108794,
+        "rotY": -0.15673924516886473,
+        "scale": 0.9513700677780434,
+        "tilt": [
+          -0.045374496746808296,
+          0.039159055640920995
+        ]
+      },
+      {
+        "id": "oldGrave-313",
+        "model": "gravestone",
+        "group": "oldGrave",
+        "x": 15.014358589239418,
+        "y": 0,
+        "z": -13.550371811864899,
+        "rotY": 0.38044287101365626,
+        "scale": 0.8787747988477349,
+        "tilt": [
+          0.04793056752998383,
+          -0.012590061370283366
+        ]
+      },
+      {
+        "id": "small-314",
+        "model": "shrine_candles",
+        "group": "small",
+        "x": 5.072905922308564,
+        "y": 0,
+        "z": -14.271351499995216,
+        "rotY": 5.669627929879352,
+        "scale": 0.9939015533425845,
+        "tilt": [
+          -0.034004414770752195,
+          0.04060475469566882
+        ]
+      },
+      {
+        "id": "oldGrave-316",
+        "model": "grave_B",
+        "group": "oldGrave",
+        "x": 6.080213469825685,
+        "y": 0,
+        "z": 1.8837278740713366,
+        "rotY": -0.48417128482833505,
+        "scale": 0.8526939619565382,
+        "tilt": [
+          -0.043495367332361645,
+          -0.00478070199955255
+        ]
+      },
+      {
+        "id": "oldGrave-317",
+        "model": "grave_B",
+        "group": "oldGrave",
+        "x": -18.629533768072722,
+        "y": 0,
+        "z": -0.630467048939316,
+        "rotY": 0.4849721023347229,
+        "scale": 0.8523035430698656,
+        "tilt": [
+          -0.03981018498539925,
+          0.012419024626724423
+        ]
+      },
+      {
+        "id": "oldGrave-318",
+        "model": "grave_A_destroyed",
+        "group": "oldGrave",
+        "x": 21.980441769212483,
+        "y": 0,
+        "z": -16.591644881851973,
+        "rotY": -0.13244414352811873,
+        "scale": 0.9193793857702985,
+        "tilt": [
+          -0.007579038874246179,
+          -0.02536441825330258
+        ]
+      },
+      {
+        "id": "oldGrave-319",
+        "model": "gravemarker_A",
+        "group": "oldGrave",
+        "x": 11.984778519533574,
+        "y": 0,
+        "z": 2.110407373262568,
+        "rotY": -0.4663462629541755,
+        "scale": 1.1783969745622016,
+        "tilt": [
+          -0.0376128424378112,
+          -0.018047424606047573
+        ]
+      },
+      {
+        "id": "oldGrave-320",
+        "model": "gravemarker_B",
+        "group": "oldGrave",
+        "x": -17.246993375755846,
+        "y": 0,
+        "z": -13.21079335496761,
+        "rotY": 0.09669429226778448,
+        "scale": 0.9492108579026535,
+        "tilt": [
+          0.020345640480518346,
+          0.02326315473765135
+        ]
+      },
+      {
+        "id": "oldGrave-321",
+        "model": "gravestone",
+        "group": "oldGrave",
+        "x": 8.934209356456995,
+        "y": 0,
+        "z": -18.724199208966457,
+        "rotY": 0.01443660818040371,
+        "scale": 1.0392991068307311,
+        "tilt": [
+          0.007703495551832015,
+          0.06439685676712542
+        ]
+      },
+      {
+        "id": "small-322",
+        "model": "shrine_candles",
+        "group": "small",
+        "x": 20.612432997860015,
+        "y": 0,
+        "z": -6.444492564816029,
+        "rotY": 6.158822193155065,
+        "scale": 1.0677521858364343,
+        "tilt": [
+          0.03757091008126737,
+          0.04862782447133214
+        ]
+      },
+      {
+        "id": "oldGrave-323",
+        "model": "gravemarker_A",
+        "group": "oldGrave",
+        "x": -18.529695404693484,
+        "y": 0,
+        "z": -5.875608099903912,
+        "rotY": -0.09400174673646688,
+        "scale": 1.1961792239802889,
+        "tilt": [
+          -0.01729006427805871,
+          0.01810853355564178
+        ]
+      },
+      {
+        "id": "small-324",
+        "model": "post_skull",
+        "group": "small",
+        "x": -12.158608496654779,
+        "y": 0,
+        "z": -11.279410183429718,
+        "rotY": 1.5707963267948966,
+        "scale": 1,
+        "tilt": [
+          -0.028434614907018842,
+          0.04533370833378285
+        ]
+      },
+      {
+        "id": "small-325",
+        "model": "post_skull",
+        "group": "small",
+        "x": 12.993767218198627,
+        "y": 0,
+        "z": -3.4075732473284006,
+        "rotY": -1.5707963267948966,
+        "scale": 1,
+        "tilt": [
+          -0.041506019164808096,
+          -0.030399750033393503
+        ]
+      }
+    ],
+    "lights": [
+      {
+        "kind": "cryptDoor",
+        "x": 7.30411047146329,
+        "y": 1.6,
+        "z": -23.010233369722865
+      },
+      {
+        "kind": "jackOLantern",
+        "x": -3.9,
+        "y": 0.65,
+        "z": 6.1
+      },
+      {
+        "kind": "jackOLantern",
+        "x": 4,
+        "y": 0.6174999999999999,
+        "z": 5
+      },
+      {
+        "kind": "jackOLantern",
+        "x": -5.6,
+        "y": 0.5655,
+        "z": 0.8
+      },
+      {
+        "kind": "lantern",
+        "x": -2,
+        "y": 0.75,
+        "z": -18.7
+      },
+      {
+        "kind": "lantern",
+        "x": 3,
+        "y": 0.75,
+        "z": -18.7
+      }
+    ],
+    "glows": [
+      {
+        "kind": "cryptDoor",
+        "x": 7.30411047146329,
+        "y": 1.3,
+        "z": -23.010233369722865
+      },
+      {
+        "kind": "jackOLantern",
+        "x": -3.9,
+        "y": 0.65,
+        "z": 6.1
+      },
+      {
+        "kind": "jackOLantern",
+        "x": 4,
+        "y": 0.6174999999999999,
+        "z": 5
+      },
+      {
+        "kind": "jackOLantern",
+        "x": -5.6,
+        "y": 0.5655,
+        "z": 0.8
+      },
+      {
+        "kind": "jackOLantern",
+        "x": 5.8,
+        "y": 0.546,
+        "z": -3.6
+      },
+      {
+        "kind": "lantern",
+        "x": -2,
+        "y": 0.75,
+        "z": -18.7
+      },
+      {
+        "kind": "lantern",
+        "x": 3,
+        "y": 0.75,
+        "z": -18.7
+      },
+      {
+        "kind": "postLantern",
+        "x": -13.5,
+        "y": 2.4,
+        "z": -5
+      },
+      {
+        "kind": "postLantern",
+        "x": 13.5,
+        "y": 2.4,
+        "z": -2
+      },
+      {
+        "kind": "postLantern",
+        "x": -10,
+        "y": 2.4,
+        "z": -17
+      },
+      {
+        "kind": "postLantern",
+        "x": -18.5,
+        "y": 2.4,
+        "z": -14
+      },
+      {
+        "kind": "candle",
+        "x": -3.6307692307692307,
+        "y": 0.79,
+        "z": 3.5,
+        "slot": 0
+      },
+      {
+        "kind": "candle",
+        "x": 2.5692307692307694,
+        "y": 0.79,
+        "z": 3.5,
+        "slot": 1
+      },
+      {
+        "kind": "candle",
+        "x": -2.4,
+        "y": 0.63,
+        "z": -1.5,
+        "slot": 2
+      },
+      {
+        "kind": "candle",
+        "x": 3.8000000000000003,
+        "y": 0.79,
+        "z": -1.5,
+        "slot": 3
+      },
+      {
+        "kind": "candle",
+        "x": -3.3230769230769233,
+        "y": 0.79,
+        "z": -6.5,
+        "slot": 4
+      },
+      {
+        "kind": "candle",
+        "x": 2.876923076923077,
+        "y": 0.63,
+        "z": -6.5,
+        "slot": 5
+      },
+      {
+        "kind": "candle",
+        "x": -3.05,
+        "y": 0.79,
+        "z": -11,
+        "slot": 6
+      },
+      {
+        "kind": "candle",
+        "x": 3.1500000000000004,
+        "y": 0.79,
+        "z": -11,
+        "slot": 7
+      },
+      {
+        "kind": "candle",
+        "x": -2.513888888888889,
+        "y": 0.63,
+        "z": -14.5,
+        "slot": 8
+      },
+      {
+        "kind": "candle",
+        "x": 3.6861111111111113,
+        "y": 0.79,
+        "z": -14.5,
+        "slot": 9
+      },
+      {
+        "kind": "candle",
+        "x": -2.5833333333333335,
+        "y": 0.79,
+        "z": -17,
+        "slot": 10
+      },
+      {
+        "kind": "candle",
+        "x": 3.6166666666666667,
+        "y": 0.63,
+        "z": -17,
+        "slot": 11
+      },
+      {
+        "kind": "candle",
+        "x": 10.677231603534892,
+        "y": 1.0270000000000001,
+        "z": 2.5325892132706938
+      },
+      {
+        "kind": "candle",
+        "x": 10.111377778183668,
+        "y": 1.0270000000000001,
+        "z": 3.08498496604152
+      },
+      {
+        "kind": "candle",
+        "x": 10.926260960055515,
+        "y": 0.8190000000000001,
+        "z": 1.5344832372386006
+      },
+      {
+        "kind": "candle",
+        "x": 9.776373630668967,
+        "y": 1.0270000000000001,
+        "z": 1.9447330974508077
+      },
+      {
+        "kind": "candle",
+        "x": -12.783457884658128,
+        "y": 1.0270000000000001,
+        "z": -2.8141814221628008
+      },
+      {
+        "kind": "candle",
+        "x": -14.072797588724644,
+        "y": 1.0270000000000001,
+        "z": -3.750216818973422
+      },
+      {
+        "kind": "candle",
+        "x": -12.557143845316023,
+        "y": 0.8190000000000001,
+        "z": -3.6204282514285295
+      },
+      {
+        "kind": "candle",
+        "x": -13.293782774126157,
+        "y": 1.0270000000000001,
+        "z": -3.324662006739527
+      },
+      {
+        "kind": "candle",
+        "x": 12.542278784280644,
+        "y": 1.0270000000000001,
+        "z": -10.976002472173422
+      },
+      {
+        "kind": "candle",
+        "x": 13.263049681996927,
+        "y": 1.0270000000000001,
+        "z": -9.365540365688503
+      },
+      {
+        "kind": "candle",
+        "x": 11.502531455876307,
+        "y": 0.8190000000000001,
+        "z": -9.454710224596782
+      },
+      {
+        "kind": "candle",
+        "x": 11.789970922237263,
+        "y": 1.0270000000000001,
+        "z": -10.138878387166187
+      },
+      {
+        "kind": "candle",
+        "x": 8.25863907611929,
+        "y": 1.0270000000000001,
+        "z": -14.569880214240403
+      },
+      {
+        "kind": "candle",
+        "x": 7.445061199227347,
+        "y": 1.0270000000000001,
+        "z": -15.664881444815547
+      },
+      {
+        "kind": "candle",
+        "x": 8.016529849451034,
+        "y": 0.8190000000000001,
+        "z": -16.124675298854708
+      },
+      {
+        "kind": "candle",
+        "x": 6.714234940474853,
+        "y": 1.0270000000000001,
+        "z": -15.554908600775525
+      },
+      {
+        "kind": "candle",
+        "x": -16.33398039052263,
+        "y": 1.0270000000000001,
+        "z": 3.2389954824000595
+      },
+      {
+        "kind": "cauldron",
+        "x": 6.4,
+        "y": 1.05,
+        "z": 0.09999999999999998
+      },
+      {
+        "kind": "mushroom",
+        "x": 8.4311947287526,
+        "y": 0.81281781985407,
+        "z": -3.1710136181209236
+      },
+      {
+        "kind": "mushroom",
+        "x": -8.119902027584613,
+        "y": 0.9148069968146738,
+        "z": 1.1267693878617138
+      },
+      {
+        "kind": "mushroom",
+        "x": -7.931812121346594,
+        "y": 0.9402200346246244,
+        "z": -3.099237577873282
+      },
+      {
+        "kind": "mushroom",
+        "x": -18.96519634751603,
+        "y": 0.9057525081324858,
+        "z": -4.179721772088669
+      },
+      {
+        "kind": "mushroom",
+        "x": 14.861735936254265,
+        "y": 0.9147796161875014,
+        "z": 2.880509169306606
+      },
+      {
+        "kind": "mushroom",
+        "x": -17.854448627959936,
+        "y": 0.6898865371498978,
+        "z": -16.236382856033742
+      },
+      {
+        "kind": "mushroom",
+        "x": 19.449660724727437,
+        "y": 0.8881851009767269,
+        "z": -1.9717992402147502
+      },
+      {
+        "kind": "mushroom",
+        "x": 12.359633421432228,
+        "y": 0.8712256781750475,
+        "z": -16.7410645945929
+      },
+      {
+        "kind": "mushroom",
+        "x": -19.018501173797997,
+        "y": 0.7301868429676979,
+        "z": -9.270717258448713
+      },
+      {
+        "kind": "mushroom",
+        "x": -8.877840458368883,
+        "y": 0.8219325488175382,
+        "z": -12.351060041110031
+      }
+    ],
+    "pathCentres": [
+      {
+        "x": 0.3,
+        "z": 8.6
+      },
+      {
+        "x": -0.2533985905294664,
+        "z": 6.9398042284116
+      },
+      {
+        "x": -0.8067971810589327,
+        "z": 5.279608456823201
+      },
+      {
+        "x": -0.5521635142912726,
+        "z": 3.5869142768082956
+      },
+      {
+        "x": -0.13388018182706574,
+        "z": 1.8876382386724546
+      },
+      {
+        "x": 0.2844031506371413,
+        "z": 0.18836220053661368
+      },
+      {
+        "x": 0.6979594754412967,
+        "z": -1.5110528413596431
+      },
+      {
+        "x": 0.3802513863931159,
+        "z": -3.2319716570372883
+      },
+      {
+        "x": 0.06254329734493502,
+        "z": -4.952890472714935
+      },
+      {
+        "x": -0.2551647917032457,
+        "z": -6.673809288392581
+      },
+      {
+        "x": -0.4276166690806549,
+        "z": -8.394818168650973
+      },
+      {
+        "x": -0.11204289858885175,
+        "z": -10.116129644060809
+      },
+      {
+        "x": 0.2035308719029516,
+        "z": -11.837441119470645
+      },
+      {
+        "x": 0.519104642394755,
+        "z": -13.558752594880481
+      },
+      {
+        "x": 0.5638639811364266,
+        "z": -15.300896679088643
+      },
+      {
+        "x": 0.5152716134658084,
+        "z": -17.0502219152309
+      }
+    ],
+    "scenery": {
+      "cat": {
+        "x": -5.7,
+        "y": 2.0736,
+        "z": 2.9,
+        "rotY": 0.1
+      },
+      "crows": [
+        {
+          "x": 7.249999999999999,
+          "y": 2.25,
+          "z": -20.4,
+          "rotY": 0.7118241720367223,
+          "seed": 1
+        },
+        {
+          "x": -6.249999999999999,
+          "y": 2.25,
+          "z": -20.4,
+          "rotY": 0.511476925900206,
+          "seed": 2
+        },
+        {
+          "x": -10.849999999999998,
+          "y": 2.25,
+          "z": -20.4,
+          "rotY": -0.5793344356119633,
+          "seed": 3
+        },
+        {
+          "x": -15.2,
+          "y": 3.7439999999999998,
+          "z": -12.4,
+          "rotY": 0.48284163186326634,
+          "seed": 4
+        },
+        {
+          "x": 3.0999999999999996,
+          "y": 3.6959999999999997,
+          "z": -22.3,
+          "rotY": -0.7189445564523339,
+          "seed": 5
+        }
+      ],
+      "owl": {
+        "x": -9.3,
+        "y": 3.0900000000000003,
+        "z": -5,
+        "rotY": 0.2,
+        "branch": [
+          -10.8,
+          2.64,
+          -7.2,
+          -9.200000000000001,
+          2.94,
+          -4.800000000000001
+        ]
+      },
+      "spiders": [
+        {
+          "x": -12.100000000000001,
+          "topY": 3.8016,
+          "z": -5.5,
+          "drop": 1.5,
+          "seed": 1
+        },
+        {
+          "x": -11.250000000000002,
+          "topY": 3.7016,
+          "z": -5.2,
+          "drop": 2.1,
+          "seed": 2
+        },
+        {
+          "x": -10.400000000000002,
+          "topY": 3.6016,
+          "z": -4.9,
+          "drop": 1.1,
+          "seed": 3
+        }
+      ],
+      "mounds": [
+        {
+          "x": 3.2,
+          "z": 1.6,
+          "rotY": 3.999492305675522,
+          "scale": 1,
+          "seed": 0
+        },
+        {
+          "x": -3.5,
+          "z": -5.2,
+          "rotY": 6.212112722555176,
+          "scale": 1,
+          "seed": 1
+        },
+        {
+          "x": 3.7,
+          "z": -9.8,
+          "rotY": 0.4844191620219499,
+          "scale": 1,
+          "seed": 2
+        }
+      ],
+      "cauldron": {
+        "x": 6.4,
+        "y": 1.05,
+        "z": 0.09999999999999998
+      },
+      "openCoffin": {
+        "x": -7.1499999999999995,
+        "z": -7.4,
+        "rotY": 0.5
+      },
+      "wisps": [
+        {
+          "x": -11.006811537081376,
+          "y": 1.5787303727352993,
+          "z": -15.848716380307451,
+          "seed": 1
+        },
+        {
+          "x": 6.882262344192713,
+          "y": 1.4635391572257503,
+          "z": -12.545498616294935,
+          "seed": 2
+        },
+        {
+          "x": -15.436435952130704,
+          "y": 2.3414530499605464,
+          "z": -3.6811447688378394,
+          "seed": 3
+        },
+        {
+          "x": 9.72844770234078,
+          "y": 0.9741960876621305,
+          "z": -5.55767584964633,
+          "seed": 4
+        },
+        {
+          "x": -8.387798774754629,
+          "y": 1.2931251696776598,
+          "z": -15.001055400352925,
+          "seed": 5
+        },
+        {
+          "x": 9.15016665821895,
+          "y": 1.8197868885705246,
+          "z": -3.978005785495043,
+          "seed": 6
+        },
+        {
+          "x": -13.586724670324475,
+          "y": 1.9026454529957846,
+          "z": -15.874708174029365,
+          "seed": 7
+        },
+        {
+          "x": 5.706093064043671,
+          "y": 0.8325582231860608,
+          "z": -11.457636081147939,
+          "seed": 8
+        },
+        {
+          "x": -15.488543584477156,
+          "y": 0.9993524042423814,
+          "z": 5.558988542528823,
+          "seed": 9
+        },
+        {
+          "x": 11.176009032409638,
+          "y": 1.0711461927741766,
+          "z": -13.081741728587076,
+          "seed": 10
+        },
+        {
+          "x": -16.789458572911098,
+          "y": 1.0369079997530206,
+          "z": 2.146232698811218,
+          "seed": 11
+        },
+        {
+          "x": 9.819631503010168,
+          "y": 1.1123549015726892,
+          "z": -15.405331974150613,
+          "seed": 12
+        },
+        {
+          "x": -15.306558579346163,
+          "y": 1.1109713023994117,
+          "z": -16.532957613701,
+          "seed": 13
+        },
+        {
+          "x": 13.414311205921695,
+          "y": 0.7181934277061373,
+          "z": -11.656609166413546,
+          "seed": 14
+        }
+      ],
+      "cobwebs": [
+        {
+          "x": 10.377365086134523,
+          "y": 0.95,
+          "z": -18.595703137572855,
+          "w": 2.7419958863873033,
+          "h": 1.5,
+          "rotY": 0
+        },
+        {
+          "x": 7.339137947466224,
+          "y": 0.95,
+          "z": -17.292223261669278,
+          "w": 3.6239736835192873,
+          "h": 1.5,
+          "rotY": 0
+        },
+        {
+          "x": -6.648985790088773,
+          "y": 0.95,
+          "z": -16.933768671529833,
+          "w": 1.6399653824977576,
+          "h": 1.5,
+          "rotY": 0
+        },
+        {
+          "x": 10.555418005026876,
+          "y": 0.95,
+          "z": -12.531410562165549,
+          "w": 4.2322359338589015,
+          "h": 1.5,
+          "rotY": 0
+        }
+      ]
+    },
+    "ghostSpots": [
+      {
+        "x": -5.2,
+        "y": 1.7,
+        "z": -5.8
+      },
+      {
+        "x": 6.4,
+        "y": 1.9,
+        "z": -9.5
+      },
+      {
+        "x": -2.2,
+        "y": 1.5,
+        "z": -13.5
+      }
+    ],
+    "cryptDoor": {
+      "x": 7.30411047146329,
+      "y": 1.3,
+      "z": -23.010233369722865,
+      "rotY": -0.17268149161800544
+    }
+  }
+}

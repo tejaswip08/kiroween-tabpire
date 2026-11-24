@@ -4,6 +4,9 @@ import { QUALITY } from '../../../lib/scene/config';
 import { usePageVisible, useReducedMotion } from './motion';
 import { useCursorTracker } from './portraits/cursor';
 import { PortraitView } from './portraits/PortraitView';
+import type { ThemeId } from '../../../lib/themes';
+import { DEFAULT_THEME } from '../../../lib/themes';
+import { SceneThemeContext, sceneThemeFor } from './scene/themeColors';
 import { useCardSlots } from './portraits/useCardSlots';
 import { fpsStore } from './fpsStore';
 import { clearPortraitsReady } from './portraitReady';
@@ -40,7 +43,7 @@ function RedrawOnScroll() {
  * below the cards; each card has a hole where its View shows. Views that are far off screen are
  * not mounted, and drei skips drawing the ones that are just off it.
  */
-export default function PortraitLayer() {
+export default function PortraitLayer({ themeId = DEFAULT_THEME }: { themeId?: ThemeId }) {
   const slots = useCardSlots();
   const reduced = useReducedMotion();
   const visible = usePageVisible();
@@ -66,9 +69,11 @@ export default function PortraitLayer() {
     >
       <PortraitStats />
       {reduced && <RedrawOnScroll />}
-      {slots.map((s) => (
-        <PortraitView key={s.id} slot={s} />
-      ))}
+      <SceneThemeContext.Provider value={sceneThemeFor(themeId)}>
+        {slots.map((s) => (
+          <PortraitView key={s.id} slot={s} />
+        ))}
+      </SceneThemeContext.Provider>
     </Canvas>
   );
 }

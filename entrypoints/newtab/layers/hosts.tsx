@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
 import type { SceneInputs } from '../../../lib/scene/meaning';
+import { DEFAULT_THEME, type ThemeId } from '../../../lib/themes';
 import { clearPortraitsReady } from './portraitReady';
 import { LayerBoundary } from './LayerBoundary';
 import { useWebgl } from './useWebgl';
@@ -34,14 +35,14 @@ function useLayerGate(): { show: boolean; lost: boolean; epoch: number } {
 }
 
 /** The full-window graveyard behind the page. Hidden from screen readers, takes no clicks. */
-export function SceneLayerHost({ inputs }: { inputs: SceneInputs }) {
+export function SceneLayerHost({ inputs, themeId = DEFAULT_THEME }: { inputs: SceneInputs; themeId?: ThemeId }) {
   const { show, lost, epoch } = useLayerGate();
   if (!show) return null;
   return (
     <div className="scene-host" aria-hidden="true" data-testid="scene-host" data-lost={lost}>
       <LayerBoundary resetKey={epoch}>
         <Suspense fallback={null}>
-          <SceneLayer key={epoch} inputs={inputs} />
+          <SceneLayer key={epoch} inputs={inputs} themeId={themeId} />
         </Suspense>
       </LayerBoundary>
     </div>
@@ -49,7 +50,7 @@ export function SceneLayerHost({ inputs }: { inputs: SceneInputs }) {
 }
 
 /** The shared canvas that draws every card's vampire. It sits below the cards. */
-export function PortraitLayerHost() {
+export function PortraitLayerHost({ themeId = DEFAULT_THEME }: { themeId?: ThemeId }) {
   const { show, lost, epoch } = useLayerGate();
   useEffect(() => {
     // While the context is lost (or the layer is gone), every card shows its emblem again.
@@ -60,7 +61,7 @@ export function PortraitLayerHost() {
     <div className="portrait-host" aria-hidden="true" data-testid="portrait-host" data-lost={lost}>
       <LayerBoundary resetKey={epoch} onFail={clearPortraitsReady}>
         <Suspense fallback={null}>
-          <PortraitLayer key={epoch} />
+          <PortraitLayer key={epoch} themeId={themeId} />
         </Suspense>
       </LayerBoundary>
     </div>

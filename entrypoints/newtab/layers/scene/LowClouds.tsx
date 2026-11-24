@@ -4,8 +4,9 @@ import { Color, InstancedBufferAttribute, InstancedMesh, PlaneGeometry, ShaderMa
 import { LOW_CLOUD_MOON_FADE_DEG, lowCloudPuffs } from '../../../../lib/scene/depth';
 import { LOOK } from '../../../../lib/scene/config';
 import { MOON_KEEP_OUT_DEG } from '../../../../lib/scene/sky';
-import { C } from './colors';
+import { sceneColorsFor } from './colors';
 import { useDisplay } from './display';
+import { useColorSync } from './themeColors';
 
 const vertex = /* glsl */ `
 attribute vec4 aA; attribute vec4 aB; attribute vec4 aC;
@@ -75,9 +76,9 @@ export function LowClouds() {
         uMoon: { value: new Vector3() },
         uKeep: { value: MOON_KEEP_OUT_DEG },
         uKeepFade: { value: LOW_CLOUD_MOON_FADE_DEG },
-        uFogColor: { value: C.fog },
+        uFogColor: { value: sceneColorsFor('crypt').fog.clone() },
         uFogDensity: { value: LOOK.fogDensity },
-        uBody: { value: new Color('#2a1648') },
+        uBody: { value: sceneColorsFor('crypt').lowCloud.clone() },
       },
       transparent: true,
       depthWrite: false,
@@ -88,6 +89,11 @@ export function LowClouds() {
     m.renderOrder = -55;
     return m;
   }, [puffs]);
+  useColorSync((c) => {
+    const u = (mesh.material as ShaderMaterial).uniforms;
+    (u.uFogColor!.value as Color).copy(c.fog);
+    (u.uBody!.value as Color).copy(c.lowCloud);
+  });
   useFrame(() => {
     const u = (mesh.material as ShaderMaterial).uniforms;
     u.uTime!.value = display.time;

@@ -3,6 +3,7 @@
 import { browser, fake } from '../../lib/fakeBrowser';
 import { fnv1a32 } from '../../lib/hunger';
 import { KEYS } from '../../lib/store';
+import { clearCachedTheme } from '../../lib/themeCache';
 import type { CryptEntry, Haunt, LogEntry, Stats } from '../../lib/store';
 
 const MIN = 60 * 1000;
@@ -155,7 +156,9 @@ export function seedDemo(now: number): void {
 
 /** Clears the fake, waits one tick so late writes from the old page land first, then seeds again. */
 export async function resetDemo(now: number): Promise<void> {
-  fake.clearData();
+  fake.clearData(); // also removes the saved theme, so the default crypt applies
+  clearCachedTheme();
+  if (typeof document !== 'undefined') document.documentElement.dataset.theme = 'crypt';
   await Promise.resolve();
   seedDemo(now);
 }

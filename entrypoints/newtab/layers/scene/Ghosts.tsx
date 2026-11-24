@@ -1,10 +1,10 @@
 import { useFrame } from '@react-three/fiber';
 import { useMemo } from 'react';
-import { FrontSide, InstancedMesh, LatheGeometry, Matrix4, ShaderMaterial, Vector2 } from 'three';
+import { Color, FrontSide, InstancedMesh, LatheGeometry, Matrix4, ShaderMaterial, Vector2 } from 'three';
 import { LOOK } from '../../../../lib/scene/config';
-import { layout } from '../../../../lib/scene/layout';
-import { C } from './colors';
+import { sceneColorsFor } from './colors';
 import { useDisplay } from './display';
+import { useColorSync, useSceneTheme } from './themeColors';
 
 const HEIGHT = 2.0;
 /** Two ghosts are always out; a Crypt with items shows a third. */
@@ -68,12 +68,14 @@ void main() {
   gl_FragColor = vec4(col, alpha);
 }`;
 
+const GHOST_BODY = 0.95;
 /**
  * Cute mint-green ghosts with hollow eyes, floating over the graves. Two are always out, and a Crypt
  * with items shows a third. They bob and sway, and always turn to face the camera.
  */
 export function Ghosts() {
   const display = useDisplay();
+  const { scene } = useSceneTheme();
   const mesh = useMemo(() => {
     const mat = new ShaderMaterial({
       vertexShader: vertex,
@@ -81,8 +83,8 @@ export function Ghosts() {
       uniforms: {
         uTime: { value: 0 },
         uCount: { value: MIN_GHOSTS },
-        uBody: { value: C.ghost.clone().multiplyScalar(0.95) },
-        uRim: { value: C.ghost.clone().multiplyScalar(LOOK.glow.ghostRim) },
+        uBody: { value: sceneColorsFor('crypt').ghost.clone().multiplyScalar(GHOST_BODY) },
+        uRim: { value: sceneColorsFor('crypt').ghost.clone().multiplyScalar(LOOK.glow.ghostRim) },
       },
       transparent: true,
       depthWrite: false,
@@ -91,14 +93,19 @@ export function Ghosts() {
     });
     const m = new InstancedMesh(ghostGeometry(), mat, MAX_GHOSTS);
     const mat4 = new Matrix4();
-    layout().ghostSpots.slice(0, MAX_GHOSTS).forEach((g, i) => {
+    scene.layout.ghostSpots.slice(0, MAX_GHOSTS).forEach((g, i) => {
       mat4.makeTranslation(g.x, g.y - HEIGHT / 2 + 0.4, g.z);
       m.setMatrixAt(i, mat4);
     });
     m.frustumCulled = false;
     m.renderOrder = 4;
     return m;
-  }, []);
+  }, [scene.layout.ghostSpots]);
+  useColorSync((c) => {
+    const u = (mesh.material as ShaderMaterial).uniforms;
+    (u.uBody!.value as Color).copy(c.ghost).multiplyScalar(GHOST_BODY);
+    (u.uRim!.value as Color).copy(c.ghost).multiplyScalar(LOOK.glow.ghostRim);
+  });
   useFrame(() => {
     const u = (mesh.material as ShaderMaterial).uniforms;
     u.uTime!.value = display.time;

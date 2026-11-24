@@ -1,3 +1,4 @@
+import '../../entrypoints/newtab/bootTheme';
 import { createRoot } from 'react-dom/client';
 import { capabilities } from '../../lib/capabilities';
 import '../../entrypoints/newtab/styles';

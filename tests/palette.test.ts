@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { ACCENT, COLD, COLD_HUE_RANGE, WARM, WARM_HUE_RANGE, hueOf } from '../lib/scene/palette';
+import { themeById } from '../lib/themes';
 import { mulberry32 } from '../lib/scene/rng';
 
 describe('hueOf', () => {
@@ -41,6 +42,10 @@ describe('scene palette', () => {
 
   it('has a red moon', () => {
     const h = hueOf(ACCENT.moon);
+    expect(h > 340 || h < 10).toBe(true);
+  });
+  it('has a red moon in the Blood Moon palette', () => {
+    const h = hueOf(themeById('bloodmoon').scene.moon);
     expect(h > 340 || h < 10).toBe(true);
   });
 });

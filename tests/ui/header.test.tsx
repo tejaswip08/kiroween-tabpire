@@ -11,7 +11,7 @@ afterEach(cleanup);
 const setup = (over: Partial<Parameters<typeof Header>[0]> = {}) => {
   const onDawn = vi.fn();
   render(
-    <Header vampires={12} starving={0} staked={1} coffined={2} estimatedMb={1460} reclaimedMb={245} dawnCount={3} dawnBusy={false} onDawn={onDawn} {...over} />,
+    <Header vampires={12} starving={0} staked={1} coffined={2} estimatedMb={1460} reclaimedMb={245} dawnCount={3} dawnBusy={false} onDawn={onDawn} themeId="crypt" onTheme={vi.fn()} {...over} />,
   );
   return { onDawn };
 };
@@ -52,13 +52,18 @@ describe('header stats panel', () => {
 });
 
 describe('header buttons', () => {
-  it('disables Themes with "Coming soon"', async () => {
+  it('enables Themes, with a tooltip, and a click opens the themes dialog', async () => {
     setup();
     const btn = screen.getByRole('button', { name: 'Themes' });
-    expect(btn.getAttribute('aria-disabled')).toBe('true');
+    expect(btn.getAttribute('aria-disabled')).toBeNull();
+    expect(btn.getAttribute('aria-haspopup')).toBe('dialog');
+    expect(btn.getAttribute('aria-expanded')).toBe('false');
     const tip = document.getElementById(btn.getAttribute('aria-describedby')!)!;
-    expect(tip.textContent).toBe('Coming soon');
-    await userEvent.click(btn); // does nothing, and does not throw
+    expect(tip.textContent).toBe('Change how Tabpire looks: six themes.');
+    expect(screen.queryByRole('dialog')).toBeNull();
+    await userEvent.click(btn);
+    expect(btn.getAttribute('aria-expanded')).toBe('true');
+    expect(screen.getByRole('dialog', { name: 'Themes' })).toBeTruthy();
   });
   it('opens the Blood Bank page in a new tab', async () => {
     setup();

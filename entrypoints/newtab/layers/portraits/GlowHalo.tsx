@@ -3,6 +3,15 @@ import { useMemo, useRef } from 'react';
 import { AdditiveBlending, type Mesh, Vector3 } from 'three';
 import type { PortraitRef } from './shared';
 
+/**
+ * The three halo colours. They stay on the Crypt values in every theme: no theme data reaches this file.
+ * Each is [r, g, b] before the multiplier (values above 1 are for the additive blend).
+ */
+export const HALO_COLORS = {
+  starving: { color: [1.8, 0.1, 0.12], scale: 1 },
+  dawn: { color: [3.0, 1.0, 0.25], scale: 0.7 },
+  whiteHot: { color: [3.0, 2.2, 1.6], scale: 0.7 },
+} as const;
 const vertex = /* glsl */ `
 varying vec2 vUv;
 void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`;
@@ -34,9 +43,9 @@ export function GlowHalo({ state }: { state: PortraitRef }) {
     const level = Math.max(red * 0.55, dawn * 1.1, flash * 1.3);
     mesh.current.visible = level > 0.01;
     uniforms.uLevel.value = level;
-    if (dawn > red && dawn > flash) uniforms.uColor.value.set(3.0, 1.0, 0.25).multiplyScalar(0.7);
-    else if (flash > red) uniforms.uColor.value.set(3.0, 2.2, 1.6).multiplyScalar(0.7);
-    else uniforms.uColor.value.set(1.8, 0.1, 0.12);
+    if (dawn > red && dawn > flash) uniforms.uColor.value.set(...HALO_COLORS.dawn.color).multiplyScalar(HALO_COLORS.dawn.scale);
+    else if (flash > red) uniforms.uColor.value.set(...HALO_COLORS.whiteHot.color).multiplyScalar(HALO_COLORS.whiteHot.scale);
+    else uniforms.uColor.value.set(...HALO_COLORS.starving.color).multiplyScalar(HALO_COLORS.starving.scale);
   });
   return (
     <mesh ref={mesh} position={[0, 0.78, -0.4]} visible={false} renderOrder={-5}>

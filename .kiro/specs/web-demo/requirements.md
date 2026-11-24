@@ -63,7 +63,7 @@ Scope notes, based on the code as it stands today:
 #### Acceptance Criteria
 
 1. THE Fake_Browser SHALL implement every `browser` member that `lib/` and the Crypt_Page, Blood_Bank_Page and Popup_Page call: `tabs` (get, getCurrent, query, update, remove, discard, create and the tab events), `storage.local` (get, set) with `storage.onChanged`, `alarms` (create, onAlarm), `search` (query), `runtime` (getURL, onInstalled, onStartup), `windows.update` and `action` (setBadgeText, setBadgeBackgroundColor).
-2. THE Fake_Browser SHALL keep all data in memory and SHALL NOT write to `localStorage`, `sessionStorage`, IndexedDB or cookies.
+2. THE Fake_Browser SHALL keep all data in memory and SHALL NOT write to `localStorage`, `sessionStorage`, IndexedDB or cookies. The one exception is the Sky_Cache of the themes spec (`lib/themeCache.ts`: one Theme_Id in `localStorage`, outside the Fake_Browser), which is a documented exception to this rule.
 3. WHEN `storage.local.set` changes a key, THE Fake_Browser SHALL fire `storage.onChanged` listeners with the new value.
 4. WHERE automatic events are switched on (the Demo switches them on, the unit tests keep firing events by hand), WHEN `tabs.remove`, `tabs.discard`, `tabs.create` or `tabs.update` changes a tab, THE Fake_Browser SHALL fire the matching tab event.
 5. THE Fake_Browser SHALL expose the failure switches and the call log that `tests/helpers/fakeBrowser.ts` offers today, so the existing tests pass without changes to their assertions. `tests/helpers/fakeBrowser.ts` stays as a re-export of the shared module.

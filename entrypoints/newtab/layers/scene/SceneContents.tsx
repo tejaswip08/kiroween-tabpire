@@ -2,7 +2,7 @@ import { useFrame, useThree } from '@react-three/fiber';
 import { useEffect, useMemo } from 'react';
 import { FogExp2 } from 'three';
 import { LOOK } from '../../../../lib/scene/config';
-import { C } from './colors';
+import { sceneColorsFor } from './colors';
 import { useDisplay } from './display';
 import { Cat } from './Cat';
 import { CauldronFx } from './CauldronFx';
@@ -19,6 +19,7 @@ import { Clouds } from './Clouds';
 import { Effects } from './Effects';
 import { Props } from './Props';
 import { Embers } from './Embers';
+import { SceneWeather } from './Weather';
 import { Ghosts } from './Ghosts';
 import { Glows } from './Glows';
 import { Ground } from './Ground';
@@ -27,11 +28,15 @@ import { Mist } from './Mist';
 import { Moon } from './Moon';
 import { Sky } from './Sky';
 import { Witch } from './Witch';
+import { useColorSync } from './themeColors';
 
 /** Depth fog in the cold fog colour. Its density follows the estimated memory in use (70 to 130 percent). */
-function Fog() {
+export function Fog() {
   const display = useDisplay();
-  const fog = useMemo(() => new FogExp2(C.fog, LOOK.fogDensity), []);
+  const fog = useMemo(() => new FogExp2(sceneColorsFor('crypt').fog.clone(), LOOK.fogDensity), []);
+  useColorSync((c) => {
+    fog.color.copy(c.fog);
+  });
   const scene = useThree((s) => s.scene);
   useEffect(() => {
     scene.fog = fog;
@@ -73,6 +78,7 @@ export function SceneContents() {
       <Glows />
       <Mist />
       <Embers />
+      <SceneWeather />
       <Effects />
     </>
   );

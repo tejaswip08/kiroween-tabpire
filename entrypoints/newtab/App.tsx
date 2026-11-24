@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { dawnTargets, type VampireState } from '../../lib/hunger';
 import { filterByState, toggleFilter } from '../../lib/legend';
 import { emitSceneEvent } from '../../lib/scene/bus';
@@ -20,6 +20,7 @@ import { cardTitle, type CardAction } from './components/TabCard';
 import { Toasts } from './components/Toasts';
 import { announceAction, markActionExit, markDawnExits } from './hooks/exitMarks';
 import { useCrypt } from './components/useCrypt';
+import { useTheme } from './components/useTheme';
 import { prefersReducedMotion } from './hooks/useExitingCards';
 import { useToasts } from './hooks/useToasts';
 import { FpsReadout } from './layers/FpsReadout';
@@ -43,13 +44,21 @@ async function runCardAction(card: Card, action: CardAction): Promise<ActionResu
 
 export function App() {
   const data = useCrypt();
+  const { themeId, setTheme, saveFailed } = useTheme();
   const { toasts, push, dismiss } = useToasts();
+  const lastSaveFailed = useRef(saveFailed);
   const [busyIds, setBusyIds] = useState<ReadonlySet<number>>(new Set());
   const [dawnBusy, setDawnBusy] = useState(false);
   const [filter, setFilter] = useState<VampireState | null>(null);
   const running = useRef(new Set<number>());
   const dawnRunning = useRef(false);
   const { reload } = data;
+
+  useEffect(() => {
+    if (saveFailed === lastSaveFailed.current) return;
+    lastSaveFailed.current = saveFailed;
+    push({ kind: 'error', text: 'Could not save your theme. It will reset next time.' });
+  }, [saveFailed, push]);
 
   const onAction = useCallback(
     async (card: Card, action: CardAction) => {
@@ -160,8 +169,8 @@ export function App() {
 
   return (
     <>
-      <PortraitLayerHost />
-      <SceneLayerHost inputs={sceneInputs} />
+      <PortraitLayerHost themeId={themeId} />
+      <SceneLayerHost inputs={sceneInputs} themeId={themeId} />
       <div className="page">
         <Header
           vampires={data.cards.length}
@@ -173,6 +182,8 @@ export function App() {
           dawnCount={dawnCount}
           dawnBusy={dawnBusy}
           onDawn={onDawn}
+          themeId={themeId}
+          onTheme={setTheme}
         />
         <main className="main">
           <SearchBox

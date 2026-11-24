@@ -1,10 +1,10 @@
 import { useFrame } from '@react-three/fiber';
 import { useMemo } from 'react';
-import { AdditiveBlending, InstancedBufferAttribute, InstancedMesh, Matrix4, PlaneGeometry, Quaternion, ShaderMaterial, Vector3 } from 'three';
+import { AdditiveBlending, InstancedBufferAttribute, InstancedMesh, Matrix4, PlaneGeometry, Quaternion, type Color, ShaderMaterial, Vector3 } from 'three';
 import { wispGlow, wispOffset } from '../../../../lib/scene/critters';
-import { layout } from '../../../../lib/scene/layout';
-import { C } from './colors';
+import { sceneColorsFor } from './colors';
 import { useDisplay } from './display';
+import { useColorSync, useSceneTheme } from './themeColors';
 
 const vertex = /* glsl */ `
 attribute float aGlow;
@@ -33,16 +33,18 @@ const sc = new Vector3();
 const off = { x: 0, y: 0, z: 0 };
 
 /** Small blue-green lights that drift in slow loops between the graves and glow softly. One draw call. */
+const WISP_LEVEL = 2.2;
 export function Wisps() {
   const display = useDisplay();
-  const wisps = useMemo(() => layout().scenery.wisps, []);
+  const { scene } = useSceneTheme();
+  const wisps = useMemo(() => scene.layout.scenery.wisps, [scene.layout.scenery.wisps]);
   const mesh = useMemo(() => {
     const geo = new PlaneGeometry(1, 1);
     geo.setAttribute('aGlow', new InstancedBufferAttribute(new Float32Array(wisps.length).fill(1), 1));
     const mat = new ShaderMaterial({
       vertexShader: vertex,
       fragmentShader: fragment,
-      uniforms: { uColor: { value: C.wisp.clone().multiplyScalar(2.2) } },
+      uniforms: { uColor: { value: sceneColorsFor('crypt').wisp.clone().multiplyScalar(WISP_LEVEL) } },
       transparent: true,
       depthWrite: false,
       blending: AdditiveBlending,
@@ -53,6 +55,9 @@ export function Wisps() {
     m.renderOrder = 7;
     return m;
   }, [wisps]);
+  useColorSync((c) => {
+    ((mesh.material as ShaderMaterial).uniforms.uColor!.value as Color).copy(c.wisp).multiplyScalar(WISP_LEVEL);
+  });
   useFrame(() => {
     const t = display.reduced ? 0 : display.time;
     const glow = mesh.geometry.getAttribute('aGlow') as InstancedBufferAttribute;

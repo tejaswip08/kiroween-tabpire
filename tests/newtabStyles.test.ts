@@ -14,7 +14,7 @@ describe('newtab styles module', () => {
     const imports = [...styles.matchAll(/^import '([^']+)';/gm)].map((m) => m[1]);
     expect(imports[0]).toBe('@fontsource/grenze-gotisch/latin-800.css');
     expect(imports.slice(5)).toEqual(
-      ['tokens', 'base', 'controls', 'header', 'search', 'haunts', 'cards', 'states', 'layers', 'toasts', 'fps'].map(
+      ['tokens', 'base', 'controls', 'header', 'search', 'haunts', 'cards', 'states', 'layers', 'toasts', 'fps', 'themePicker'].map(
         (n) => `./styles/${n}.css`,
       ),
     );

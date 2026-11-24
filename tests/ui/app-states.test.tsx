@@ -116,3 +116,14 @@ describe('when the tabs cannot be read', () => {
     await waitFor(() => expect(screen.getByText('Blood reclaimed').closest('div')!.textContent).toContain('~760 MB'));
   });
 });
+
+describe('theme save failure', () => {
+  it('shows a notice when the theme cannot be saved', async () => {
+    render(<App />);
+    await screen.findByText('Nothing is draining memory');
+    fake.failStorageSet.add('tabpire:theme');
+    await userEvent.click(screen.getByRole('button', { name: 'Themes' }));
+    await userEvent.click(within(screen.getByRole('dialog')).getByText('Frozen Cemetery'));
+    expect(await screen.findByText('Could not save your theme. It will reset next time.')).toBeTruthy();
+  });
+});

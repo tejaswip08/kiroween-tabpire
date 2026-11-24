@@ -2,9 +2,9 @@ import { useFrame } from '@react-three/fiber';
 import { useMemo, useRef } from 'react';
 import type { Group } from 'three';
 import { catTailAngle } from '../../../../lib/scene/critters';
-import { layout } from '../../../../lib/scene/layout';
 import { at, ball, cone, mergePieces } from './critterGeo';
 import { useDisplay } from './display';
+import { useSceneTheme } from './themeColors';
 
 const FUR: [number, number, number] = [0.02, 0.016, 0.03];
 const EYE: [number, number, number] = [3.4, 2.5, 0.15];
@@ -14,7 +14,8 @@ const EYE: [number, number, number] = [3.4, 2.5, 0.15];
  */
 export function Cat() {
   const display = useDisplay();
-  const cat = useMemo(() => layout().scenery.cat, []);
+  const { scene } = useSceneTheme();
+  const cat = useMemo(() => scene.layout.scenery.cat, [scene.layout.scenery.cat]);
   const tail = useRef<Group>(null);
   const body = useMemo(
     () =>

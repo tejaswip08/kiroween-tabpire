@@ -1,0 +1,152 @@
+/* Themes panel. Tokens only. */
+
+.themes-anchor {
+  position: relative;
+  display: inline-block;
+}
+
+.theme-picker {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 30;
+  box-sizing: border-box;
+  width: min(360px, 100vw - 24px);
+  max-width: calc(100vw - 24px);
+  padding: 10px;
+  border-radius: var(--radius-card);
+  color: var(--ink);
+  background: linear-gradient(180deg, var(--panel-solid), var(--card-bottom));
+  box-shadow: var(--shadow-panel), 0 0 0 1px var(--card-edge) inset;
+  animation: theme-picker-in 0.16s ease-out;
+}
+
+@keyframes theme-picker-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.theme-list {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.theme-item {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 20px;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 10px;
+  text-align: left;
+  color: var(--ink);
+  background: linear-gradient(180deg, var(--button-top), var(--button-bottom));
+  box-shadow: 0 0 0 1px var(--card-edge) inset;
+  cursor: pointer;
+  transition: transform 0.14s ease;
+}
+
+.theme-item:hover {
+  transform: translateY(-1px);
+}
+
+.theme-item[aria-pressed='true'] {
+  box-shadow: 0 0 0 2px var(--accent-bright) inset;
+}
+
+.theme-item:focus-visible,
+.theme-close:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.theme-swatch {
+  position: relative;
+  display: block;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  box-shadow: 0 0 0 1px var(--card-edge) inset;
+}
+
+.theme-swatch-dot {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px var(--card-edge);
+}
+
+.theme-text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.theme-name {
+  font-family: var(--font-title);
+  font-size: 20px;
+  line-height: 1.1;
+}
+
+.theme-desc {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--ink-dim);
+}
+
+.theme-check {
+  font-family: var(--font-label);
+  font-weight: 600;
+  color: var(--accent-bright);
+  text-align: center;
+}
+
+.theme-close {
+  display: block;
+  margin: 10px 0 0 auto;
+  padding: 6px 16px;
+  border: 0;
+  border-radius: 999px;
+  font-family: var(--font-label);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  background: linear-gradient(180deg, var(--button-top), var(--button-bottom));
+  box-shadow: var(--shadow-button), 0 0 0 1px var(--card-edge) inset;
+  cursor: pointer;
+}
+
+@media (max-width: 560px) {
+  .theme-picker {
+    right: auto;
+    left: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-picker {
+    animation: none;
+  }
+
+  .theme-item {
+    transition: none;
+  }
+
+  .theme-item:hover {
+    transform: none;
+  }
+}

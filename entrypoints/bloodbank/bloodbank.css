@@ -69,7 +69,7 @@
   margin-top: 12px;
   overflow: hidden;
   border-radius: 999px;
-  background: rgba(10, 4, 16, 0.6);
+  background: var(--shade);
 }
 
 .bb-meter > span {

@@ -4,6 +4,7 @@ import { formatMb, rankFor } from '../../lib/hunger';
 import { openCrypt } from '../../lib/tabs';
 import { onStoreChange, store, type CryptEntry, type LogAction, type LogEntry, type Stats } from '../../lib/store';
 import { CountUp } from '../newtab/components/CountUp';
+import { useTheme } from '../newtab/components/useTheme';
 
 const EMPTY: Stats = { staked: 0, coffined: 0, crypted: 0, dawns: 0, mbFreed: 0 };
 const WORDS: Record<LogAction, string> = {
@@ -44,6 +45,7 @@ function Tile({ label, children }: { label: string; children: React.ReactNode })
 }
 
 export function BloodBank() {
+  useTheme(); // data-theme follows the saved choice. No picker and no save notice on this page.
   const { stats, log, crypt } = useBloodBank();
   const rank = rankFor(stats.staked);
   const progress = rank.next === null ? 1 : (stats.staked - rank.from) / (rank.next - rank.from);

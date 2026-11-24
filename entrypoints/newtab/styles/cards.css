@@ -378,7 +378,7 @@
   height: 6px;
   overflow: hidden;
   border-radius: 999px;
-  background: rgba(10, 4, 16, 0.6);
+  background: var(--shade);
   box-shadow: 0 0 0 1px var(--card-edge) inset;
 }
 
@@ -496,7 +496,7 @@
   padding: 14px 16px 12px;
   border-radius: 16px;
   color: var(--ink);
-  background: rgba(12, 7, 20, 0.96);
+  background: var(--popup-fill);
   box-shadow:
     0 0 0 1px var(--card-edge),
     0 14px 36px rgba(0, 0, 0, 0.6);
@@ -560,7 +560,7 @@
 .popup-quote {
   margin-bottom: 8px;
   font-style: italic;
-  color: #ffb3c4;
+  color: var(--quote-ink);
 }
 
 .popup-text {

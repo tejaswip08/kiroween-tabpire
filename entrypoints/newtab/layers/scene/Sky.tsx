@@ -1,8 +1,9 @@
 import { useFrame } from '@react-three/fiber';
 import { useMemo, useRef } from 'react';
 import { BackSide, type Mesh, Vector3 } from 'three';
-import { C } from './colors';
+import { sceneColorsFor } from './colors';
 import { useDisplay } from './display';
+import { useColorSync } from './themeColors';
 
 const vertex = /* glsl */ `
 varying vec3 vDir;
@@ -39,22 +40,31 @@ void main() {
   gl_FragColor = vec4(col, 1.0);
 }`;
 
+const HAZE_LEVEL = 0.45;
+const MOON_GLOW_LEVEL = 0.8;
 /** The sky: a dome that follows the camera's position, so the moon and stars sit at infinity. */
 export function Sky() {
   const display = useDisplay();
   const mesh = useRef<Mesh>(null);
-  const uniforms = useMemo(
-    () => ({
-      uTop: { value: C.skyTop },
-      uMid: { value: C.mid },
-      uHorizon: { value: C.horizon },
-      uHaze: { value: C.haze.clone().multiplyScalar(0.45) },
-      uMoonGlow: { value: C.moon.clone().multiplyScalar(0.8) },
+  const uniforms = useMemo(() => {
+    const c = sceneColorsFor('crypt');
+    return {
+      uTop: { value: c.skyTop.clone() },
+      uMid: { value: c.skyMid.clone() },
+      uHorizon: { value: c.skyHorizon.clone() },
+      uHaze: { value: c.haze.clone().multiplyScalar(HAZE_LEVEL) },
+      uMoonGlow: { value: c.moon.clone().multiplyScalar(MOON_GLOW_LEVEL) },
       uMoonDir: { value: new Vector3() },
       uTime: { value: 0 },
-    }),
-    [],
-  );
+    };
+  }, []);
+  useColorSync((c) => {
+    uniforms.uTop.value.copy(c.skyTop);
+    uniforms.uMid.value.copy(c.skyMid);
+    uniforms.uHorizon.value.copy(c.skyHorizon);
+    uniforms.uHaze.value.copy(c.haze).multiplyScalar(HAZE_LEVEL);
+    uniforms.uMoonGlow.value.copy(c.moon).multiplyScalar(MOON_GLOW_LEVEL);
+  });
   useFrame(({ camera }) => {
     mesh.current?.position.copy(camera.position);
     uniforms.uMoonDir.value.copy(display.moon);

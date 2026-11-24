@@ -3,9 +3,9 @@ import { useMemo } from 'react';
 import { DoubleSide, Vector3 } from 'three';
 import { BUDGET, LOOK } from '../../../../lib/scene/config';
 import { flicker } from '../../../../lib/scene/flicker';
-import { layout } from '../../../../lib/scene/layout';
-import { C } from './colors';
+import { sceneColorsFor } from './colors';
 import { useDisplay } from './display';
+import { useColorSync, useSceneTheme } from './themeColors';
 
 /** Height, scroll direction and speed, and thickness of each mist layer. */
 const LAYERS = [
@@ -49,21 +49,28 @@ void main() {
   gl_FragColor = vec4(col, a * (1.0 + length(tint) * 0.8));
 }`;
 
+const COLD_LEVEL = 1.4;
+const WARM_LEVEL = 0.55;
 /** Four drifting layers of ground mist, thicker with memory, tinted warm near the warm lights. */
 export function Mist() {
   const display = useDisplay();
-  const lights = useMemo(() => layout().lights.slice(0, BUDGET.maxPointLights), []);
+  const { scene } = useSceneTheme();
+  const lights = useMemo(() => scene.layout.lights.slice(0, BUDGET.maxPointLights), [scene.layout.lights]);
   const shared = useMemo(
     () => ({
       uLights: { value: Array.from({ length: 6 }, (_, i) => new Vector3(lights[i]?.x ?? 0, 0, lights[i]?.z ?? 0)) },
       uLevel: { value: [1, 1, 1, 1, 1, 1].map<number>((_, i) => (lights[i] ? 1 : 0)) },
-      uCold: { value: C.fog.clone().multiplyScalar(1.4) },
-      uWarm: { value: C.lantern.clone().multiplyScalar(0.55) },
+      uCold: { value: sceneColorsFor('crypt').fog.clone().multiplyScalar(COLD_LEVEL) },
+      uWarm: { value: sceneColorsFor('crypt').lantern.clone().multiplyScalar(WARM_LEVEL) },
       uFog: { value: 1 },
       uTime: { value: 0 },
     }),
     [lights],
   );
+  useColorSync((c) => {
+    shared.uCold.value.copy(c.fog).multiplyScalar(COLD_LEVEL);
+    shared.uWarm.value.copy(c.lantern).multiplyScalar(WARM_LEVEL);
+  });
   const layers = useMemo(
     () =>
       LAYERS.map((l) => ({

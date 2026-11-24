@@ -1,8 +1,10 @@
 import { useFrame } from '@react-three/fiber';
 import { useMemo } from 'react';
-import { InstancedBufferAttribute, InstancedMesh, PlaneGeometry, ShaderMaterial, Vector3 } from 'three';
+import { Color, InstancedBufferAttribute, InstancedMesh, PlaneGeometry, ShaderMaterial, Vector3 } from 'three';
 import { cloudPuffs } from '../../../../lib/scene/sky';
+import { sceneColorsFor } from './colors';
 import { useDisplay } from './display';
+import { useColorSync } from './themeColors';
 
 const vertex = /* glsl */ `
 attribute vec4 aA; attribute vec4 aB; attribute vec4 aC;
@@ -30,6 +32,7 @@ void main() {
 }`;
 const fragment = /* glsl */ `
 varying vec2 vUv; varying float vShade; varying float vFade;
+uniform vec3 uBody; uniform vec3 uTint;
 void main() {
   vec2 p = (vUv - 0.5) * 2.0;
   float r = length(p);
@@ -38,9 +41,9 @@ void main() {
   r *= 1.0 + 0.10 * sin(ang * 3.0 + vShade * 20.0) + 0.05 * sin(ang * 7.0 + vShade * 9.0);
   float a = smoothstep(1.0, 0.3, r) * 0.34 * vFade;
   // Dark, low-contrast body: a little lighter on top, with a faint rose edge toward the moon (right).
-  vec3 body = vec3(0.045, 0.045, 0.1) + vShade * vec3(0.018, 0.015, 0.03);
+  vec3 body = uBody + vShade * vec3(0.018, 0.015, 0.03);
   body += vec3(0.02, 0.02, 0.04) * smoothstep(-0.2, 0.9, p.y);
-  vec3 col = mix(body, vec3(0.2, 0.07, 0.12), smoothstep(0.1, 1.0, vUv.x) * 0.3);
+  vec3 col = mix(body, uTint, smoothstep(0.1, 1.0, vUv.x) * 0.3);
   gl_FragColor = vec4(col, a);
 }`;
 
@@ -64,7 +67,10 @@ export function Clouds() {
     const mat = new ShaderMaterial({
       vertexShader: vertex,
       fragmentShader: fragment,
-      uniforms: { uTime: { value: 0 }, uMoon: { value: new Vector3() }, uRight: { value: new Vector3() }, uUp: { value: new Vector3() } },
+      uniforms: { uTime: { value: 0 }, uMoon: { value: new Vector3() }, uRight: { value: new Vector3() }, uUp: { value: new Vector3() },
+        uBody: { value: sceneColorsFor('crypt').cloudBody.clone() },
+        uTint: { value: sceneColorsFor('crypt').cloudTint.clone() },
+      },
       transparent: true,
       depthWrite: false,
       fog: false,
@@ -74,6 +80,11 @@ export function Clouds() {
     m.renderOrder = -80;
     return m;
   }, [puffs]);
+  useColorSync((c) => {
+    const u = (mesh.material as ShaderMaterial).uniforms;
+    (u.uBody!.value as Color).copy(c.cloudBody);
+    (u.uTint!.value as Color).copy(c.cloudTint);
+  });
   useFrame(() => {
     const u = (mesh.material as ShaderMaterial).uniforms;
     u.uTime!.value = display.time;

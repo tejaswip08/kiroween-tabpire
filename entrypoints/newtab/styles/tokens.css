@@ -1,6 +1,7 @@
 /*
  * Theme tokens. Every colour and shadow on the page comes from here.
- * Spec 5 adds other [data-theme] blocks. The layout never reads a theme name.
+ * One [data-theme] block per theme. Each equals THEMES[id].surface in lib/themes.ts (tested).
+ * The layout never reads a theme name.
  */
 :root[data-theme='crypt'] {
   /* Sky and page */
@@ -63,4 +64,249 @@
   --shadow-button: 0 1px 0 rgba(255, 255, 255, 0.2) inset, 0 -3px 6px rgba(0, 0, 0, 0.3) inset,
     0 3px 8px rgba(0, 0, 0, 0.45);
   --focus-ring: #ffd9e0;
+
+  /* Tints that were literals in component styles */
+  --shade: rgba(10, 4, 16, 0.6);
+  --popup-fill: rgba(12, 7, 20, 0.96);
+  --quote-ink: #ffb3c4;
+}
+
+/* Pumpkin Patch */
+:root[data-theme='pumpkin'] {
+  --sky-top: #1a0c05;
+  --sky-bottom: #4a220d;
+  --sky-glow: rgba(224, 112, 26, 0.2);
+  --vignette: rgba(0, 0, 0, 0.6);
+  --ink: #fcf0de;
+  --ink-dim: #dcc4a6;
+  --card-top: #3b2213;
+  --card-bottom: #25140a;
+  --card-edge: rgba(255, 255, 255, 0.16);
+  --card-highlight: rgba(255, 255, 255, 0.1);
+  --panel-solid: #34200f;
+  --panel-fill-top: rgba(76, 59, 44, 0.55);
+  --panel-fill-bottom: rgba(37, 20, 10, 0.55);
+  --panel-fill-fallback: rgba(37, 20, 10, 0.92);
+  --button-top: #4f2d17;
+  --button-bottom: #2f180b;
+  --accent: #e0701a;
+  --accent-bright: #ff9a45;
+  --blood-top: #ff4d63;
+  --blood-bottom: #8f1020;
+  --glass: rgba(255, 255, 255, 0.12);
+  --dawn-top: #5a3418;
+  --dawn-bottom: #a8501e;
+  --dawn-glow: #ffd36e;
+  --state-awake: #c4b0ff;
+  --state-starving: #ff7468;
+  --state-asleep: #74bdea;
+  --state-protected: #f6d98a;
+  --badge-1: #c77dff;
+  --badge-2: #ff8fab;
+  --badge-3: #ffb86b;
+  --badge-4: #7bdff2;
+  --badge-5: #95e68a;
+  --badge-6: #f7a8e0;
+  --badge-ink: #1b0e26;
+  --shadow-card-inset: 0 1px 0 var(--card-highlight) inset, 0 -14px 24px rgba(0, 0, 0, 0.28) inset;
+  --shadow-card-outer: 0 2px 2px rgba(0, 0, 0, 0.35), 0 10px 18px rgba(0, 0, 0, 0.4), 0 22px 40px rgba(6, 2, 12, 0.5);
+  --shadow-card: var(--shadow-card-inset), var(--shadow-card-outer);
+  --shadow-panel: 0 1px 0 rgba(255, 255, 255, 0.18) inset, 0 8px 24px rgba(0, 0, 0, 0.4);
+  --shadow-button: 0 1px 0 rgba(255, 255, 255, 0.2) inset, 0 -3px 6px rgba(0, 0, 0, 0.3) inset, 0 3px 8px rgba(0, 0, 0, 0.45);
+  --focus-ring: #ffe2b8;
+  --shade: rgba(26, 12, 5, 0.6);
+  --popup-fill: rgba(26, 12, 5, 0.96);
+  --quote-ink: #ffc58a;
+}
+
+/* Witch's Forest */
+:root[data-theme='forest'] {
+  --sky-top: #04100c;
+  --sky-bottom: #123a30;
+  --sky-glow: rgba(31, 184, 122, 0.2);
+  --vignette: rgba(0, 0, 0, 0.6);
+  --ink: #e9f7ef;
+  --ink-dim: #b4d0c2;
+  --card-top: #1b3a31;
+  --card-bottom: #0f241e;
+  --card-edge: rgba(255, 255, 255, 0.16);
+  --card-highlight: rgba(255, 255, 255, 0.1);
+  --panel-solid: #183229;
+  --panel-fill-top: rgba(52, 75, 67, 0.55);
+  --panel-fill-bottom: rgba(15, 36, 30, 0.55);
+  --panel-fill-fallback: rgba(15, 36, 30, 0.92);
+  --button-top: #244a3f;
+  --button-bottom: #12302a;
+  --accent: #1fb87a;
+  --accent-bright: #5cf0b0;
+  --blood-top: #ff4d63;
+  --blood-bottom: #8f1020;
+  --glass: rgba(255, 255, 255, 0.12);
+  --dawn-top: #1f4a3c;
+  --dawn-bottom: #56762f;
+  --dawn-glow: #ffd36e;
+  --state-awake: #b5aaff;
+  --state-starving: #ff7272;
+  --state-asleep: #6cc0e6;
+  --state-protected: #f0da8c;
+  --badge-1: #c77dff;
+  --badge-2: #ff8fab;
+  --badge-3: #ffb86b;
+  --badge-4: #7bdff2;
+  --badge-5: #95e68a;
+  --badge-6: #f7a8e0;
+  --badge-ink: #1b0e26;
+  --shadow-card-inset: 0 1px 0 var(--card-highlight) inset, 0 -14px 24px rgba(0, 0, 0, 0.28) inset;
+  --shadow-card-outer: 0 2px 2px rgba(0, 0, 0, 0.35), 0 10px 18px rgba(0, 0, 0, 0.4), 0 22px 40px rgba(6, 2, 12, 0.5);
+  --shadow-card: var(--shadow-card-inset), var(--shadow-card-outer);
+  --shadow-panel: 0 1px 0 rgba(255, 255, 255, 0.18) inset, 0 8px 24px rgba(0, 0, 0, 0.4);
+  --shadow-button: 0 1px 0 rgba(255, 255, 255, 0.2) inset, 0 -3px 6px rgba(0, 0, 0, 0.3) inset, 0 3px 8px rgba(0, 0, 0, 0.45);
+  --focus-ring: #d2ffe8;
+  --shade: rgba(4, 16, 12, 0.6);
+  --popup-fill: rgba(4, 16, 12, 0.96);
+  --quote-ink: #9af5c8;
+}
+
+/* Frozen Cemetery */
+:root[data-theme='frost'] {
+  --sky-top: #08111f;
+  --sky-bottom: #2b4a6b;
+  --sky-glow: rgba(61, 143, 224, 0.2);
+  --vignette: rgba(0, 0, 0, 0.6);
+  --ink: #f0f7ff;
+  --ink-dim: #bfd2e6;
+  --card-top: #213a52;
+  --card-bottom: #132231;
+  --card-edge: rgba(255, 255, 255, 0.16);
+  --card-highlight: rgba(255, 255, 255, 0.1);
+  --panel-solid: #1f3750;
+  --panel-fill-top: rgba(58, 79, 101, 0.55);
+  --panel-fill-bottom: rgba(19, 34, 49, 0.55);
+  --panel-fill-fallback: rgba(19, 34, 49, 0.92);
+  --button-top: #2d4d6b;
+  --button-bottom: #193046;
+  --accent: #3d8fe0;
+  --accent-bright: #7cc0ff;
+  --blood-top: #ff4d63;
+  --blood-bottom: #8f1020;
+  --glass: rgba(255, 255, 255, 0.12);
+  --dawn-top: #2d4d78;
+  --dawn-bottom: #5e6e94;
+  --dawn-glow: #ffd36e;
+  --state-awake: #bcb4ff;
+  --state-starving: #ff8282;
+  --state-asleep: #7cc4f2;
+  --state-protected: #f2dc92;
+  --badge-1: #c77dff;
+  --badge-2: #ff8fab;
+  --badge-3: #ffb86b;
+  --badge-4: #7bdff2;
+  --badge-5: #95e68a;
+  --badge-6: #f7a8e0;
+  --badge-ink: #1b0e26;
+  --shadow-card-inset: 0 1px 0 var(--card-highlight) inset, 0 -14px 24px rgba(0, 0, 0, 0.28) inset;
+  --shadow-card-outer: 0 2px 2px rgba(0, 0, 0, 0.35), 0 10px 18px rgba(0, 0, 0, 0.4), 0 22px 40px rgba(6, 2, 12, 0.5);
+  --shadow-card: var(--shadow-card-inset), var(--shadow-card-outer);
+  --shadow-panel: 0 1px 0 rgba(255, 255, 255, 0.18) inset, 0 8px 24px rgba(0, 0, 0, 0.4);
+  --shadow-button: 0 1px 0 rgba(255, 255, 255, 0.2) inset, 0 -3px 6px rgba(0, 0, 0, 0.3) inset, 0 3px 8px rgba(0, 0, 0, 0.45);
+  --focus-ring: #dff0ff;
+  --shade: rgba(8, 17, 31, 0.6);
+  --popup-fill: rgba(8, 17, 31, 0.96);
+  --quote-ink: #a8d4ff;
+}
+
+/* Blood Moon */
+:root[data-theme='bloodmoon'] {
+  --sky-top: #120208;
+  --sky-bottom: #42091a;
+  --sky-glow: rgba(224, 16, 48, 0.2);
+  --vignette: rgba(0, 0, 0, 0.6);
+  --ink: #fcebee;
+  --ink-dim: #dcb3bb;
+  --card-top: #3c1022;
+  --card-bottom: #250813;
+  --card-edge: rgba(255, 255, 255, 0.16);
+  --card-highlight: rgba(255, 255, 255, 0.1);
+  --panel-solid: #341020;
+  --panel-fill-top: rgba(76, 45, 59, 0.55);
+  --panel-fill-bottom: rgba(37, 8, 19, 0.55);
+  --panel-fill-fallback: rgba(37, 8, 19, 0.92);
+  --button-top: #51172c;
+  --button-bottom: #300c19;
+  --accent: #e01030;
+  --accent-bright: #ff4a5e;
+  --blood-top: #ff4d63;
+  --blood-bottom: #8f1020;
+  --glass: rgba(255, 255, 255, 0.12);
+  --dawn-top: #51172c;
+  --dawn-bottom: #a8321e;
+  --dawn-glow: #ffd36e;
+  --state-awake: #c2adff;
+  --state-starving: #ff7a7a;
+  --state-asleep: #74b9e6;
+  --state-protected: #f3d58a;
+  --badge-1: #c77dff;
+  --badge-2: #ff8fab;
+  --badge-3: #ffb86b;
+  --badge-4: #7bdff2;
+  --badge-5: #95e68a;
+  --badge-6: #f7a8e0;
+  --badge-ink: #1b0e26;
+  --shadow-card-inset: 0 1px 0 var(--card-highlight) inset, 0 -14px 24px rgba(0, 0, 0, 0.28) inset;
+  --shadow-card-outer: 0 2px 2px rgba(0, 0, 0, 0.35), 0 10px 18px rgba(0, 0, 0, 0.4), 0 22px 40px rgba(6, 2, 12, 0.5);
+  --shadow-card: var(--shadow-card-inset), var(--shadow-card-outer);
+  --shadow-panel: 0 1px 0 rgba(255, 255, 255, 0.18) inset, 0 8px 24px rgba(0, 0, 0, 0.4);
+  --shadow-button: 0 1px 0 rgba(255, 255, 255, 0.2) inset, 0 -3px 6px rgba(0, 0, 0, 0.3) inset, 0 3px 8px rgba(0, 0, 0, 0.45);
+  --focus-ring: #ffd0d8;
+  --shade: rgba(18, 2, 8, 0.6);
+  --popup-fill: rgba(18, 2, 8, 0.96);
+  --quote-ink: #ff9aa8;
+}
+
+/* Haunted Castle */
+:root[data-theme='castle'] {
+  --sky-top: #0c0e16;
+  --sky-bottom: #2c3040;
+  --sky-glow: rgba(122, 106, 224, 0.2);
+  --vignette: rgba(0, 0, 0, 0.6);
+  --ink: #f3f1ea;
+  --ink-dim: #c6c4b8;
+  --card-top: #2f3445;
+  --card-bottom: #1d2130;
+  --card-edge: rgba(255, 255, 255, 0.16);
+  --card-highlight: rgba(255, 255, 255, 0.1);
+  --panel-solid: #2a2f40;
+  --panel-fill-top: rgba(68, 72, 87, 0.55);
+  --panel-fill-bottom: rgba(29, 33, 48, 0.55);
+  --panel-fill-fallback: rgba(29, 33, 48, 0.92);
+  --button-top: #3d4357;
+  --button-bottom: #262a3a;
+  --accent: #7a6ae0;
+  --accent-bright: #a898ff;
+  --blood-top: #ff4d63;
+  --blood-bottom: #8f1020;
+  --glass: rgba(255, 255, 255, 0.12);
+  --dawn-top: #3d4357;
+  --dawn-bottom: #7a5c3e;
+  --dawn-glow: #ffd36e;
+  --state-awake: #bcaeff;
+  --state-starving: #ff7070;
+  --state-asleep: #72b8e6;
+  --state-protected: #f2d27c;
+  --badge-1: #c77dff;
+  --badge-2: #ff8fab;
+  --badge-3: #ffb86b;
+  --badge-4: #7bdff2;
+  --badge-5: #95e68a;
+  --badge-6: #f7a8e0;
+  --badge-ink: #1b0e26;
+  --shadow-card-inset: 0 1px 0 var(--card-highlight) inset, 0 -14px 24px rgba(0, 0, 0, 0.28) inset;
+  --shadow-card-outer: 0 2px 2px rgba(0, 0, 0, 0.35), 0 10px 18px rgba(0, 0, 0, 0.4), 0 22px 40px rgba(6, 2, 12, 0.5);
+  --shadow-card: var(--shadow-card-inset), var(--shadow-card-outer);
+  --shadow-panel: 0 1px 0 rgba(255, 255, 255, 0.18) inset, 0 8px 24px rgba(0, 0, 0, 0.4);
+  --shadow-button: 0 1px 0 rgba(255, 255, 255, 0.2) inset, 0 -3px 6px rgba(0, 0, 0, 0.3) inset, 0 3px 8px rgba(0, 0, 0, 0.45);
+  --focus-ring: #e4e0ff;
+  --shade: rgba(12, 14, 22, 0.6);
+  --popup-fill: rgba(12, 14, 22, 0.96);
+  --quote-ink: #c4baff;
 }

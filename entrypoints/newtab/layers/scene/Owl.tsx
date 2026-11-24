@@ -2,9 +2,9 @@ import { useFrame } from '@react-three/fiber';
 import { useMemo, useRef } from 'react';
 import type { Group, Mesh } from 'three';
 import { owlEyeOpen, owlHeadYaw } from '../../../../lib/scene/critters';
-import { layout } from '../../../../lib/scene/layout';
 import { at, ball, cone, mergePieces, stickBetween } from './critterGeo';
 import { useDisplay } from './display';
+import { useSceneTheme } from './themeColors';
 
 const BROWN: [number, number, number] = [0.2, 0.12, 0.08];
 const DARK: [number, number, number] = [0.1, 0.06, 0.05];
@@ -21,7 +21,8 @@ const SCALE = 1.8;
  */
 export function Owl() {
   const display = useDisplay();
-  const owl = useMemo(() => layout().scenery.owl, []);
+  const { scene } = useSceneTheme();
+  const owl = useMemo(() => scene.layout.scenery.owl, [scene.layout.scenery.owl]);
   const swivel = useRef<Group>(null);
   const eyes = useRef<Mesh>(null);
   const body = useMemo(() => {

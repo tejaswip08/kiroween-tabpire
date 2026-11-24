@@ -2,9 +2,9 @@ import { useFrame } from '@react-three/fiber';
 import { useMemo } from 'react';
 import { Euler, InstancedMesh, Matrix4, MeshBasicMaterial, Quaternion, Vector3 } from 'three';
 import { crowPose } from '../../../../lib/scene/critters';
-import { layout } from '../../../../lib/scene/layout';
 import { at, ball, cone, mergePieces } from './critterGeo';
 import { useDisplay } from './display';
+import { useSceneTheme } from './themeColors';
 
 const FEATHER: [number, number, number] = [0.025, 0.022, 0.04];
 const WING: [number, number, number] = [0.05, 0.045, 0.08];
@@ -25,7 +25,8 @@ const NECK = new Matrix4().makeTranslation(0, 0.27, 0.11);
  */
 export function Crows() {
   const display = useDisplay();
-  const crows = useMemo(() => layout().scenery.crows, []);
+  const { scene } = useSceneTheme();
+  const crows = useMemo(() => scene.layout.scenery.crows, [scene.layout.scenery.crows]);
   const bodyGeo = useMemo(
     () =>
       mergePieces([

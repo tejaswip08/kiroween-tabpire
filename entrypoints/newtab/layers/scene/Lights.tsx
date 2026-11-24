@@ -3,12 +3,12 @@ import { useMemo, useRef } from 'react';
 import { type DirectionalLight, Object3D, type PointLight } from 'three';
 import { BUDGET, LOOK, QUALITY } from '../../../../lib/scene/config';
 import { flicker } from '../../../../lib/scene/flicker';
-import { layout } from '../../../../lib/scene/layout';
-import { C } from './colors';
+import type { SceneColors } from './colors';
 import { useDisplay } from './display';
+import { useSceneTheme } from './themeColors';
 
 const TARGET = { x: 0, y: 0, z: -14 };
-const colorFor = (kind: string) => (kind === 'jackOLantern' ? C.jack : kind === 'cryptDoor' ? C.door : kind === 'candle' ? C.candle : C.lantern);
+const colorFor = (kind: string, c: SceneColors) => (kind === 'jackOLantern' ? c.jack : kind === 'cryptDoor' ? c.door : kind === 'candle' ? c.candle : c.lantern);
 
 /**
  * Cold light from the moon with shadows, a cold hemisphere fill and a cold rim light, against at
@@ -24,7 +24,8 @@ export function Lights() {
     t.position.set(TARGET.x, TARGET.y, TARGET.z);
     return t;
   }, []);
-  const lights = useMemo(() => layout().lights.slice(0, BUDGET.maxPointLights), []);
+  const { scene, colors } = useSceneTheme();
+  const lights = useMemo(() => scene.layout.lights.slice(0, BUDGET.maxPointLights), [scene.layout.lights]);
   const size = QUALITY.shadowMapSize;
 
   useFrame(() => {
@@ -41,10 +42,10 @@ export function Lights() {
   return (
     <>
       <primitive object={target} />
-      <hemisphereLight args={[C.hemiSky, C.hemiGround, LOOK.hemisphere.intensity]} />
+      <hemisphereLight args={[colors.hemiSky, colors.hemiGround, LOOK.hemisphere.intensity]} />
       <directionalLight
         ref={sun}
-        color={C.moonlight}
+        color={colors.moonlight}
         intensity={LOOK.moonlight.intensity}
         target={target}
         castShadow
@@ -59,8 +60,8 @@ export function Lights() {
         shadow-normalBias={0.04}
       />
       {/* Purple fill from the camera's side, no shadows: lights the faces of everything toward us. */}
-      <directionalLight position={[-8, 14, 30]} color={C.hemiSky} intensity={LOOK.fill.intensity} target={target} />
-      <directionalLight ref={rim} color={C.rim} intensity={LOOK.rim.intensity} target={target} />
+      <directionalLight position={[-8, 14, 30]} color={colors.hemiSky} intensity={LOOK.fill.intensity} target={target} />
+      <directionalLight ref={rim} color={colors.rim} intensity={LOOK.rim.intensity} target={target} />
       {lights.map((l, i) => (
         <pointLight
           key={i}
@@ -68,7 +69,7 @@ export function Lights() {
             points.current[i] = el;
           }}
           position={[l.x, l.y + 0.4, l.z]}
-          color={colorFor(l.kind)}
+          color={colorFor(l.kind, colors)}
           intensity={LOOK.warmLight.intensity}
           distance={LOOK.warmLight.distance}
           decay={LOOK.warmLight.decay}

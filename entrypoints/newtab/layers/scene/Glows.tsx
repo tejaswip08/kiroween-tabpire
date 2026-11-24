@@ -4,11 +4,12 @@ import { AdditiveBlending, InstancedBufferAttribute, InstancedMesh, Matrix4, Pla
 import { LOOK } from '../../../../lib/scene/config';
 import { flicker } from '../../../../lib/scene/flicker';
 import { layout, type WarmSource } from '../../../../lib/scene/layout';
-import { C } from './colors';
+import { sceneColorsFor, type SceneColors } from './colors';
 import { useDisplay } from './display';
+import { useColorSync, useSceneTheme } from './themeColors';
 
-const FLAME_SIZE: Record<WarmSource['kind'], number> = { candle: 0.5, lantern: 1.3, jackOLantern: 1.3, postLantern: 1.4, cryptDoor: 0, mushroom: 0.7, cauldron: 2.4 };
-const POOL_RADIUS: Record<WarmSource['kind'], number> = { candle: 1.6, lantern: 3.4, jackOLantern: 3.2, postLantern: 3.8, cryptDoor: 5.5, mushroom: 1.5, cauldron: 3.6 };
+const FLAME_SIZE: Record<WarmSource['kind'], number> = { candle: 0.5, lantern: 1.3, jackOLantern: 1.3, postLantern: 1.4, cryptDoor: 0, mushroom: 0.7, cauldron: 2.4, torch: 1.3 };
+const POOL_RADIUS: Record<WarmSource['kind'], number> = { candle: 1.6, lantern: 3.4, jackOLantern: 3.2, postLantern: 3.8, cryptDoor: 5.5, mushroom: 1.5, cauldron: 3.6, torch: 3.4 };
 
 const vertex = /* glsl */ `
 attribute vec3 aColor;
@@ -30,6 +31,24 @@ void main() {
   gl_FragColor = vec4(vColor * a, a);
 }`;
 
+const poolLevel = (s: WarmSource) =>
+  s.kind === 'candle' ? 0.22 : s.kind === 'cryptDoor' ? 0.5 : s.kind === 'mushroom' ? 0.3 : s.kind === 'cauldron' ? 0.55 : 0.38;
+const flameLevel = (s: WarmSource) =>
+  s.kind === 'candle' ? LOOK.glow.flame : s.kind === 'jackOLantern' ? LOOK.glow.jack : s.kind === 'mushroom' ? 2.4 : s.kind === 'cauldron' ? 3.2 : LOOK.glow.glass;
+/** The colour of a warm source: the lantern colour for a lantern, a post lantern and a torch. */
+function colorOf(kind: WarmSource['kind'], c: SceneColors) {
+  return kind === 'jackOLantern' ? c.jack : kind === 'candle' ? c.candle : kind === 'cryptDoor' ? c.door : kind === 'mushroom' ? c.mushroom : kind === 'cauldron' ? c.cauldron : c.lantern;
+}
+/** Writes the per-instance colours. Called once at the start and once on a switch, never per frame. */
+function writeColors(mesh: InstancedMesh, sources: WarmSource[], c: SceneColors, level: (s: WarmSource) => number): void {
+  const attr = mesh.geometry.getAttribute('aColor') as InstancedBufferAttribute;
+  sources.forEach((s, i) => {
+    const base = colorOf(s.kind, c);
+    const k = level(s);
+    attr.setXYZ(i, base.r * k, base.g * k, base.b * k);
+  });
+  attr.needsUpdate = true;
+}
 function makeMesh(sources: WarmSource[], billboard: boolean, power: number, level: (s: WarmSource) => number): InstancedMesh {
   const geo = new PlaneGeometry(1, 1);
   if (!billboard) geo.rotateX(-Math.PI / 2);
@@ -45,14 +64,8 @@ function makeMesh(sources: WarmSource[], billboard: boolean, power: number, leve
   const mesh = new InstancedMesh(geo, mat, sources.length);
   mesh.frustumCulled = false;
   mesh.renderOrder = billboard ? 5 : 3;
-  const colors = new Float32Array(sources.length * 3);
-  sources.forEach((s, i) => {
-    const base =
-      s.kind === 'jackOLantern' ? C.jack : s.kind === 'candle' ? C.candle : s.kind === 'cryptDoor' ? C.door : s.kind === 'mushroom' ? C.mushroom : s.kind === 'cauldron' ? C.cauldron : C.lantern;
-    const k = level(s);
-    colors.set([base.r * k, base.g * k, base.b * k], i * 3);
-  });
-  geo.setAttribute('aColor', new InstancedBufferAttribute(colors, 3));
+  geo.setAttribute('aColor', new InstancedBufferAttribute(new Float32Array(sources.length * 3), 3));
+  writeColors(mesh, sources, sceneColorsFor('crypt'), level);
   return mesh;
 }
 
@@ -67,16 +80,15 @@ const sc = new Vector3();
  */
 export function Glows() {
   const display = useDisplay();
-  const sources = useMemo(() => layout().glows, []);
+  const { scene } = useSceneTheme();
+  const sources = useMemo(() => scene.layout.glows, [scene.layout]);
   const flames = useMemo(() => sources.filter((s) => FLAME_SIZE[s.kind] > 0), [sources]);
-  const pools = useMemo(
-    () => makeMesh(sources, false, 2.2, (s) => (s.kind === 'candle' ? 0.22 : s.kind === 'cryptDoor' ? 0.5 : s.kind === 'mushroom' ? 0.3 : s.kind === 'cauldron' ? 0.55 : 0.38)),
-    [sources],
-  );
-  const flameMesh = useMemo(
-    () => makeMesh(flames, true, 2.6, (s) => (s.kind === 'candle' ? LOOK.glow.flame : s.kind === 'jackOLantern' ? LOOK.glow.jack : s.kind === 'mushroom' ? 2.4 : s.kind === 'cauldron' ? 3.2 : LOOK.glow.glass)),
-    [flames],
-  );
+  const pools = useMemo(() => makeMesh(sources, false, 2.2, poolLevel), [sources]);
+  const flameMesh = useMemo(() => makeMesh(flames, true, 2.6, flameLevel), [flames]);
+  useColorSync((c) => {
+    writeColors(pools, sources, c, poolLevel);
+    writeColors(flameMesh, flames, c, flameLevel);
+  });
 
   useFrame(() => {
     const t = display.time;

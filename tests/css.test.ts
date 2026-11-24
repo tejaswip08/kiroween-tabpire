@@ -2,6 +2,7 @@ import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
+import { SURFACE_TOKENS, THEME_IDS, themeById } from '../lib/themes';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const stylesDir = join(root, 'entrypoints', 'newtab', 'styles');
@@ -354,5 +355,86 @@ describe('Blood Bank stylesheet', () => {
     const scroll = rules.find((r) => r.selector === '.bb-scroll')!;
     expect(scroll.decls.find((d) => d.prop === 'overflow')?.value).toBe('auto');
     expect(scroll.decls.find((d) => d.prop === 'min-height')?.value).toBe('0');
+  });
+});
+
+// ---------- theme blocks and colour literals ----------
+const normalise = (v: string) => v.replace(/\s+/g, ' ').trim();
+const tokenRules = sheets.find((s) => s.name === 'tokens.css')!.rules;
+function themeBlock(id: string): Map<string, string> {
+  const rules = tokenRules.filter((r) => r.selector.replace(/\s+/g, '') === `:root[data-theme='${id}']`);
+  expect(rules, `one block for ${id}`).toHaveLength(1);
+  return new Map(rules[0]!.decls.map((d) => [d.prop, normalise(d.value)]));
+}
+
+describe('Feature: themes, theme blocks in tokens.css (Requirement 6.1)', () => {
+  it.each(THEME_IDS)('%s has one block with exactly the SURFACE_TOKENS names', (id) => {
+    const block = themeBlock(id);
+    expect([...block.keys()].sort()).toEqual(SURFACE_TOKENS.map((n) => `--${n}`).sort());
+    expect(block.size).toBe(44);
+  });
+  it('every block has the same property set', () => {
+    const sets = THEME_IDS.map((id) => [...themeBlock(id).keys()].sort().join(','));
+    expect(new Set(sets).size).toBe(1);
+  });
+  it.each(THEME_IDS)('%s solid colours are #rrggbb', (id) => {
+    const solid = ['sky-top', 'sky-bottom', 'ink', 'ink-dim', 'card-top', 'card-bottom', 'panel-solid', 'button-top', 'button-bottom', 'state-awake', 'state-starving', 'state-asleep', 'state-protected', 'badge-ink', 'quote-ink'];
+    for (const n of solid) expect(themeBlock(id).get(`--${n}`), `--${n}`).toMatch(/^#[0-9a-f]{6}$/);
+  });
+  it('the stylesheets hold the old Crypt literals only inside the Crypt block', () => {
+    for (const rule of allRules) {
+      if (rule.sheet === 'tokens.css') continue;
+      for (const d of rule.decls) expect(d.value, `${rule.sheet} ${rule.selector}`).not.toMatch(/rgba\(1[02], ?[47], ?(16|20)|#ffb3c4/i);
+    }
+  });
+});
+
+describe('Feature: themes, no colour literals in component stylesheets (Requirement 6.2)', () => {
+  const bbCss = join(root, 'entrypoints', 'bloodbank', 'bloodbank.css');
+  const pickerCss = files(stylesDir, (n) => n === 'themePicker.css');
+  const component = [
+    ...sheets.filter((s) => s.name !== 'tokens.css').map((s) => ({ name: s.name, rules: s.rules })),
+    { name: 'bloodbank.css', rules: parse(stripComments(readFileSync(bbCss, 'utf8'))) },
+  ];
+  const isBlackOrWhite = (lit: string): boolean => {
+    const l = lit.toLowerCase();
+    if (/^#(000|000000|fff|ffffff)([0-9a-f]{2})?$/.test(l)) return true;
+    if (/^#(000|fff)[0-9a-f]?$/.test(l)) return true;
+    const m = l.match(/^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);
+    return !!m && ((m[1] === '0' && m[2] === '0' && m[3] === '0') || (m[1] === '255' && m[2] === '255' && m[3] === '255'));
+  };
+  it('holds no colour other than black or white (with or without alpha)', () => {
+    for (const sheet of component) {
+      for (const rule of sheet.rules) {
+        for (const d of rule.decls) {
+          const value = d.value.replace(/url\([^)]*\)/g, '');
+          for (const lit of value.match(/#[0-9a-fA-F]{3,8}\b|rgba?\([^)]*\)|hsla?\([^)]*\)/g) ?? []) {
+            expect(isBlackOrWhite(lit), `${sheet.name} ${rule.selector} ${d.prop}: ${lit}`).toBe(true);
+          }
+        }
+      }
+    }
+  });
+  it('includes bloodbank.css in the scan', () => {
+    expect(component.map((c) => c.name)).toContain('bloodbank.css');
+  });
+  it('themePicker.css (when it exists) uses tokens only', () => {
+    for (const path of pickerCss) {
+      for (const rule of parse(stripComments(readFileSync(path, 'utf8')))) {
+        for (const d of rule.decls) expect(d.value, `${rule.selector} ${d.prop}`).not.toMatch(/#[0-9a-fA-F]{3,8}\b|hsla?\(|rgba?\(/);
+      }
+    }
+  });
+  it('uses the theme tokens for the three former literals', () => {
+    const text = ['cards.css', 'header.css'].map((n) => readFileSync(join(stylesDir, n), 'utf8')).join('') + readFileSync(bbCss, 'utf8');
+    for (const t of ['--shade', '--popup-fill', '--quote-ink']) expect(text).toContain(`var(${t})`);
+  });
+});
+
+describe('Feature: themes, Property 7: tokens.css block equals the theme data', () => {
+  it.each(THEME_IDS)('%s block equals THEMES[id].surface', (id) => {
+    const block = themeBlock(id);
+    const surface = themeById(id).surface as Record<string, string>;
+    expect(Object.fromEntries(block)).toEqual(Object.fromEntries(Object.entries(surface).map(([k, v]) => [k, normalise(v)])));
   });
 });

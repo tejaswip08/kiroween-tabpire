@@ -14,7 +14,7 @@ export const GROUND = { minX: -30, maxX: 30, minZ: -40, maxZ: 12, tile: 4 } as c
 export type ModelId = keyof typeof MODELS;
 export type Group =
   | 'ground' | 'path' | 'crypt' | 'gate' | 'fence' | 'tree' | 'oldGrave' | 'newGrave'
-  | 'coffin' | 'candle' | 'lantern' | 'pumpkin' | 'small' | 'critter';
+  | 'coffin' | 'candle' | 'lantern' | 'pumpkin' | 'small' | 'critter' | 'themed';
 
 export interface ModelInfo {
   /** Half size of the footprint on the ground (from the model's bounding box). */
@@ -30,6 +30,11 @@ export interface ModelInfo {
   source: 'kaykit' | 'quaternius' | 'custom' | 'procedural';
   /** Only these mesh names of the file are drawn (for models with extra small parts). */
   parts?: readonly string[];
+  /**
+   * The file's own origin is not at the model's footprint centre or base (for example `forest_rocks`, which is 194 units off).
+   * `collectParts` moves the chosen parts so the footprint centre is at x = 0, z = 0 and the lowest point is at y = 0.
+   */
+  recentre?: true;
 }
 const m = (hx: number, hz: number, h: number, tris: number, shadow = true): ModelInfo => ({ hx, hz, h, tris, shadow, source: 'kaykit' });
 const p_ = (hx: number, hz: number, h: number, tris: number): ModelInfo => ({ hx, hz, h, tris, shadow: false, source: 'procedural' });
@@ -85,6 +90,30 @@ export const MODELS = {
   forest_mushroom_king: { ...q(1.6, 1.0, 3.44, 4561), parts: ['MushroomKing_1', 'MushroomKing_3'] },
   forest_cauldron: { ...q(0.18, 0.15, 0.25, 988, true), parts: ['Cauldron_1', 'Cauldron_2'] },
   post_skull: m(0.41, 1.35, 3.3, 776, false),
+  // Quaternius props for the themes other than the Crypt. Sizes are read from the files (tests/modelSizes.test.ts checks them).
+  // `h` is the highest point above y = 0, or the full height for `recentre` models.
+  farm_barn: q(3.86, 4.11, 7.88, 3770),
+  farm_silo: q(1.83, 1.75, 9.02, 1346),
+  farm_corn: q(0.41, 0.55, 1.99, 734),
+  farm_pumpkin: q(0.75, 0.76, 0.93, 644),
+  farm_fence: q(2.95, 0.083, 1.09, 180),
+  forest_potion_a: q(0.36, 0.36, 1.23, 1510),
+  forest_potion_b: q(0.33, 0.33, 0.95, 1292),
+  forest_rock_large: q(3.84, 3.67, 2.97, 222),
+  forest_rocks: { ...q(3.64, 0.66, 2.15, 2134), recentre: true },
+  frost_pine_a: q(2.9, 2.69, 10.0, 3164),
+  frost_pine_b: q(2.86, 2.61, 7.14, 3503),
+  frost_pines: q(0.89, 0.86, 0.78, 3638),
+  frost_rock: q(1.52, 1.24, 1.85, 244),
+  blood_column: q(0.65, 0.65, 4.08, 532, true),
+  blood_column_round: q(0.7, 0.74, 1.77, 332, true),
+  blood_pedestal: q(0.87, 0.87, 2.33, 1182, true),
+  blood_ruins: { ...q(15.0, 12.2, 3.68, 3434), parts: ['Wall_Overgrown', 'Doors_RoundArch_Covered_2'], recentre: true },
+  castle_fortress: q(1.06, 0.98, 1.3, 9416),
+  castle_wall_towers: q(0.97, 0.16, 0.65, 1415),
+  castle_torch: { ...q(0.34, 0.33, 2.49, 610), recentre: true },
+  castle_banner: q(1.18, 0.11, 3.8, 560),
+  castle_stone_wall: q(0.78, 0.12, 0.44, 184),
   // The small open coffin (public/models/coffin.glb), used for the coffins that follow the data.
   coffin_open: { hx: 0.287, hz: 0.419, h: 0.325, tris: 256, shadow: false, source: 'custom' },
   // Things drawn by the scene's own code. They are in the catalogue so nothing is placed on top of them.
@@ -119,7 +148,7 @@ export interface Placement {
 
 /** A warm light source: used for the (at most 6) real lights and for glow pools. */
 export interface WarmSource {
-  kind: 'cryptDoor' | 'lantern' | 'jackOLantern' | 'candle' | 'postLantern' | 'mushroom' | 'cauldron';
+  kind: 'cryptDoor' | 'lantern' | 'jackOLantern' | 'candle' | 'postLantern' | 'mushroom' | 'cauldron' | 'torch';
   x: number;
   y: number;
   z: number;

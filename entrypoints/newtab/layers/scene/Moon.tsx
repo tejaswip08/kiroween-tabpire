@@ -1,8 +1,10 @@
 import { useFrame } from '@react-three/fiber';
-import { useRef } from 'react';
+import { useMemo, useRef } from 'react';
 import type { Group } from 'three';
 import { MOON } from '../../../../lib/scene/sky';
+import { sceneColorsFor } from './colors';
 import { useDisplay } from './display';
+import { useColorSync } from './themeColors';
 
 const DISTANCE = 300;
 const radiusAt = (deg: number) => DISTANCE * Math.tan((deg * Math.PI) / 180);
@@ -15,6 +17,7 @@ void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(
 // bloom threshold (0.95), so Bloom never picks it up.
 const discFragment = /* glsl */ `
 varying vec2 vUv;
+uniform vec3 uLight; uniform vec3 uDark;
 float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
 float noise(vec2 p) {
   vec2 i = floor(p); vec2 f = fract(p); f = f * f * (3.0 - 2.0 * f);
@@ -40,9 +43,9 @@ void main() {
   float a = 1.0 - smoothstep(1.0 - aa, 1.0, r);
   if (a <= 0.0) discard;
   float z = sqrt(max(1.0 - r * r, 0.0));
-  // Dusty red-orange (#b5442a) to deep rust (#7a2418), in linear colour.
-  vec3 light = vec3(0.462, 0.058, 0.023);
-  vec3 dark = vec3(0.195, 0.018, 0.009);
+  // The body colours come from the theme (uLight to uDark, in linear colour).
+  vec3 light = uLight;
+  vec3 dark = uDark;
   // Patchy darker markings: broad noise with a soft edge, plus fine grain.
   float patches = smoothstep(0.45, 0.62, fbm(p * 2.1 + 5.0));
   float grain = fbm(p * 8.0) - 0.5;
@@ -60,6 +63,14 @@ void main() {
 export function Moon() {
   const display = useDisplay();
   const group = useRef<Group>(null);
+  const uniforms = useMemo(() => {
+    const crypt = sceneColorsFor('crypt');
+    return { uLight: { value: crypt.moonLight.clone() }, uDark: { value: crypt.moonDark.clone() } };
+  }, []);
+  useColorSync((c) => {
+    uniforms.uLight.value.copy(c.moonLight);
+    uniforms.uDark.value.copy(c.moonDark);
+  });
   useFrame(({ camera }) => {
     const g = group.current;
     if (!g) return;
@@ -70,7 +81,7 @@ export function Moon() {
     <group ref={group} renderOrder={-90}>
       <mesh renderOrder={-90}>
         <planeGeometry args={[radiusAt(MOON.discDeg) * 2, radiusAt(MOON.discDeg) * 2]} />
-        <shaderMaterial vertexShader={vertex} fragmentShader={discFragment} transparent depthWrite={false} depthTest={false} toneMapped={false} fog={false} />
+        <shaderMaterial vertexShader={vertex} fragmentShader={discFragment} uniforms={uniforms} transparent depthWrite={false} depthTest={false} toneMapped={false} fog={false} />
       </mesh>
     </group>
   );
