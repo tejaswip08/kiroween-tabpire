@@ -249,6 +249,9 @@ export function AutumnLane({ plan }: { plan: AutumnPlan }) {
       <Stalks stalks={plan.fieldCorn} kind="field" />
       <RusticFence fence={plan.fence} />
       <AutumnTree plan={plan.tree} />
+      {plan.extraTrees?.map((t, i) => (
+        <AutumnTree key={i} plan={t} />
+      ))}
       <TrickOrTreater route={plan.route} />
     </>
   );

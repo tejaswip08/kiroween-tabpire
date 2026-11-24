@@ -3,6 +3,7 @@ import { SCARECROW } from '../../../../../lib/scene/uniqueScenes/pumpkin';
 import type { UniqueSceneSpec } from '../../../../../lib/scene/uniqueScenes/types';
 import { ModelBoundary, SafeModelBatch } from '../ModelBatch';
 import { AutumnLane } from './AutumnLane';
+import { HauntedHouse } from './HauntedHouse';
 import { PumpkinSkeletons } from './PumpkinSkeletons';
 import { Scarecrow } from './Scarecrow';
 import { ThemeGround } from './ThemeGround';
@@ -33,6 +34,7 @@ export function PumpkinPatchScene({ spec }: { spec: UniqueSceneSpec }) {
         </ModelBoundary>
       )}
       {spec.autumn && <AutumnLane plan={spec.autumn} />}
+      <HauntedHouse />
       {spec.autumn && <PumpkinSkeletons fence={spec.autumn.fence} />}
       <Scarecrow x={SCARECROW.x} z={SCARECROW.z} rotY={SCARECROW.rotY} scale={SCARECROW.scale} />
     </>

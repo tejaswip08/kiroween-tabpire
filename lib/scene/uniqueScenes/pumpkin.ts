@@ -1,10 +1,11 @@
 // The Pumpkin Patch: a farm at dusk. The barn is the centrepiece, with the silo and the windmill behind it, corn on
 // both sides like a field, hay bales, a fence along a dirt track, dozens of pumpkins, a few jack-o'-lanterns and a
 // scarecrow. Pure and seeded. Coordinates: x right, y up, z toward the camera (the camera is at z = 16).
-import { MODELS, type ModelId, type Placement, type WarmSource } from '../layout';
+import { MODELS, type Footprint, type ModelId, type Placement, type WarmSource } from '../layout';
 import { WINDMILL_FOOT } from '../windmill';
 import { WEATHER } from '../weather';
-import { LANE, LANE_Z, MOON_SCALE, TREE_FOOTPRINT, bankHeight, buildAutumnPlan, moonSpot, sideOf, smoothPolyline } from './autumn';
+import { LANE, LANE_Z, MOON_SCALE, TREE_FOOTPRINT, bankHeight, buildAutumnPlan, buildTreeVariant, moonSpot, sideOf, smoothPolyline, type TreeSpot } from './autumn';
+import { HILL, HOUSE } from './house';
 import { skeletonFootprints } from './skeletons';
 import { Placer, modelsOf, sampleLine, type UniqueMoon, type UniqueSceneSpec } from './types';
 
@@ -31,6 +32,17 @@ export const WINDMILL = { x: 14, z: -30, rotY: -0.28, scale: 5 };
 /** The scarecrow (drawn by `ScarecrowShape`): standing guard in the pumpkin patch on the right. */
 export const SCARECROW = { x: 7.4, z: 1.2, rotY: -0.35, scale: 1, hx: 0.9, hz: 0.9, h: 3.3 };
 
+/**
+ * Four more autumn trees, each its own size and turn: one beside the haunted house (left of its hill, between the windmill and
+ * the moon), one at the far right edge behind the house, and two small ones in the distance behind the corn field, on the left. Each keeps clear
+ * of the moon, the cards, the controls and the barn (`tests/house.test.ts`).
+ */
+export const EXTRA_TREE_SPOTS: readonly TreeSpot[] = [
+  { x: 19.5, z: -28, scale: 0.58, rotY: 2.4, seed: 4201, clusters: 40 },
+  { x: 31, z: -27, scale: 1.05, rotY: 0.9, seed: 4202, clusters: 64 },
+  { x: -25.5, z: -46, scale: 0.6, rotY: 4.1, seed: 4203, clusters: 36 },
+  { x: -31, z: -49, scale: 0.42, rotY: 5.3, seed: 4204, clusters: 30 },
+];
 /** Upper bounds for the parts the scene draws itself, for the budget test (`tests/uniqueScenes.test.ts` checks the real shapes). */
 export const PUMPKIN_PARTS = {
   scarecrowTris: 320,
@@ -41,6 +53,10 @@ export const PUMPKIN_PARTS = {
   calls: 23,
   /** The skeletons: two hung, one sitting, four rising, a skull for every fence post, the mounds and loose bones (checked in `tests/skeletons.test.ts`). */
   skeletonTris: 15000,
+  /** The haunted house (hill, walls, roof, tower, porch, shutters, panes) and the four extra trees (checked in `tests/house.test.ts`); 3 + 4 x 2 draw calls. */
+  houseTris: 1500,
+  extraTreeTris: 12000,
+  houseCalls: 11,
 };
 
 const JACK: ModelId = 'pumpkin_orange_jackolantern';
@@ -129,6 +145,12 @@ export function buildPumpkinPatch(seed: number): UniqueSceneSpec {
   placer.scatter('farm_pumpkin', 'themed', 8, () => ({ x: between(-2, 6), z: between(-26, -17.5), scale: placer.rng() < 0.5 ? small() : big() }), { margin: 0.05 }, 60);
   placer.scatter('farm_pumpkin', 'themed', 6, () => ({ x: between(8, 13), z: between(-25, -14), scale: placer.rng() < 0.5 ? small() : big() }), { margin: 0.05 }, 60);
 
+  // Kept clear of the field corn only (so no placed prop moves): the haunted house on its hill and the extra trees.
+  const cornClear: Footprint[] = [
+    ...placer.reserved,
+    { x: HOUSE.x, z: HOUSE.z, hx: HILL.rx * HOUSE.scale, hz: HILL.rz * HOUSE.scale, rotY: HOUSE.rotY },
+    ...EXTRA_TREE_SPOTS.map((t) => ({ x: t.x, z: t.z, hx: 1.6 * t.scale, hz: 1.6 * t.scale, rotY: 0 })),
+  ];
   const placements: Placement[] = placer.placements;
   return {
     id: 'pumpkin',
@@ -149,7 +171,10 @@ export function buildPumpkinPatch(seed: number): UniqueSceneSpec {
     weather: WEATHER.leaves,
     layers: { clouds: true, witch: true, bats: 1.6, ghosts: false, mist: true, embers: true },
     // The scarecrow, the ground plane, the track and the windmill's sails (a second draw for the same model).
-    extras: { tris: PUMPKIN_PARTS.scarecrowTris + PUMPKIN_PARTS.groundTris + 2 * centre.length + PUMPKIN_PARTS.autumnTris + PUMPKIN_PARTS.skeletonTris, calls: PUMPKIN_PARTS.calls },
-    autumn: buildAutumnPlan(PUMPKIN_SEED + seed, line, placements, placer.reserved),
+    extras: {
+      tris: PUMPKIN_PARTS.scarecrowTris + PUMPKIN_PARTS.groundTris + 2 * centre.length + PUMPKIN_PARTS.autumnTris + PUMPKIN_PARTS.skeletonTris + PUMPKIN_PARTS.houseTris + PUMPKIN_PARTS.extraTreeTris,
+      calls: PUMPKIN_PARTS.calls + PUMPKIN_PARTS.houseCalls,
+    },
+    autumn: { ...buildAutumnPlan(PUMPKIN_SEED + seed, line, placements, cornClear), extraTrees: EXTRA_TREE_SPOTS.map(buildTreeVariant) },
   };
 }

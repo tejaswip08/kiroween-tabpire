@@ -268,6 +268,79 @@ export function buildTreePlan(seed: number): TreePlan {
   };
 }
 
+// ---------- more autumn trees ----------
+/** Where one more autumn tree stands: its foot on the ground, its size, which way it turns and how many leaf clusters it has. */
+export interface TreeSpot {
+  x: number;
+  z: number;
+  scale: number;
+  rotY: number;
+  seed: number;
+  clusters: number;
+}
+/**
+ * A tree like the big one (a short twisted trunk, four limbs, an egg of orange, red and gold leaves), moved, scaled and turned
+ * to `spot`. Each limb point is nudged and the crown is a different size, so no two look copied. It makes no check against the
+ * screen: the spots are chosen so that it clears the moon, the cards and the controls (`tests/house.test.ts` checks them).
+ */
+export function buildTreeVariant(spot: TreeSpot): TreePlan {
+  const rng = mulberry32(spot.seed);
+  const between = (lo: number, hi: number) => lo + (hi - lo) * rng();
+  const cos = Math.cos(spot.rotY);
+  const sin = Math.sin(spot.rotY);
+  const s = spot.scale;
+  const place = (p: V3, jitter: number): V3 => {
+    const dx = (p[0] - B.x + between(-jitter, jitter)) * s;
+    const dz = (p[2] - B.z + between(-jitter, jitter)) * s;
+    return [spot.x + dx * cos + dz * sin, p[1] * s, spot.z - dx * sin + dz * cos];
+  };
+  const tube = (t: Tube, jitter: number, thin = 1): Tube => ({ points: t.points.map((p, i) => place(p, i === 0 ? 0 : jitter)), radii: t.radii.map((r) => r * s * thin) });
+  const trunk = tube(TRUNK, 0.03);
+  const limbs = LIMBS.map((l) => tube(l, 0.22, between(0.9, 1.1)));
+  const cp = place([CROWN.x, CROWN.y, CROWN.z], 0);
+  const crown = {
+    x: cp[0], y: cp[1], z: cp[2],
+    rx: CROWN.rx * s * between(0.85, 1.2),
+    ry: CROWN.ry * s * between(0.85, 1.15),
+    rz: CROWN.rz * s * between(0.85, 1.2),
+  };
+  const branches: Tube[] = [...limbs];
+  for (const limb of limbs) {
+    for (let k = 0; k < 2; k++) {
+      const t = 0.5 + 0.22 * k + between(-0.05, 0.05);
+      const p = curvePoint(limb.points, t);
+      const out = Math.atan2(p[2] - crown.z, p[0] - crown.x) + between(-0.7, 0.7);
+      const len = between(0.6, 1.0) * s;
+      const mid: V3 = [p[0] + Math.cos(out) * len * 0.5, p[1] + len * 0.3, p[2] + Math.sin(out) * len * 0.5];
+      const tip: V3 = [p[0] + Math.cos(out) * len, p[1] + len * 0.6, p[2] + Math.sin(out) * len];
+      const r0 = radiusAt(limb, t) * 0.55;
+      branches.push({ points: [p, mid, tip], radii: [r0, r0 * 0.6, 0.03 * s] });
+    }
+  }
+  const clusters: LeafCluster[] = [];
+  for (let i = 0; i < 1400 && clusters.length < spot.clusters; i++) {
+    const u = between(-1, 1);
+    const th = between(0, Math.PI * 2);
+    const ring = Math.sqrt(1 - u * u);
+    const shell = between(0.55, 1);
+    if (u < -0.35 && rng() < 0.75) continue;
+    const r = between(0.42, 0.68) * s;
+    const k = rng();
+    const tone: LeafTone = u > 0.45 ? (k < 0.4 ? 'gold' : k < 0.8 ? 'orange' : 'red') : u < -0.2 ? (k < 0.5 ? 'deep' : 'red') : k < 0.5 ? 'red' : k < 0.85 ? 'orange' : 'gold';
+    clusters.push({ x: crown.x + ring * Math.cos(th) * crown.rx * shell, y: crown.y + u * crown.ry * shell, z: crown.z + ring * Math.sin(th) * crown.rz * shell, r, tone, rotY: between(0, Math.PI * 2) });
+  }
+  const knotT = 0.35;
+  const c = curvePoint(trunk.points, knotT);
+  const knotR = radiusAt(trunk, knotT);
+  const face = Math.atan2(0.5 - spot.x, 16 - spot.z);
+  return {
+    base: { x: spot.x, z: spot.z },
+    trunk,
+    branches,
+    clusters,
+    knot: { x: c[0] + Math.sin(face) * knotR * 1.02, y: c[1], z: c[2] + Math.cos(face) * knotR * 1.02, rotY: face, w: 0.13 * s, h: 0.2 * s },
+  };
+}
 // ---------- the trick-or-treater: a little witch ----------
 
 export interface Route {
@@ -379,6 +452,8 @@ export interface AutumnPlan {
   tufts: Tuft[];
   leaves: FallenLeaf[];
   patches: LightPatch[];
+  /** The smaller autumn trees around the haunted house and behind the corn (the big one on the left is `tree`). */
+  extraTrees?: TreePlan[];
 }
 
 /** Where the fence stands, where the jack-o'-lanterns sit at its foot and where the dry corn starts, as distances from the trail's centre line. */
