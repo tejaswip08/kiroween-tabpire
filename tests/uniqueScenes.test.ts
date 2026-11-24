@@ -265,7 +265,7 @@ describe('Pumpkin Patch (the template)', () => {
     expect(new Set(spec.placements.filter((p) => p.model === 'farm_pumpkin').map((p) => p.scale.toFixed(1))).size).toBeGreaterThan(4);
     expect(spec.models).toEqual(expect.arrayContaining(['farm_barn', 'farm_silo', 'farm_windmill', 'farm_corn', 'farm_hay', 'farm_fence', 'farm_pumpkin', 'pumpkin_orange_jackolantern']));
   });
-  it('has a big harvest moon low on the right, a dirt track, earth ground and falling leaves', () => {
+  it('has a big harvest moon low on the right, a dirt track, grass ground and falling leaves', () => {
     expect(PUMPKIN_MOON.scale).toBeGreaterThanOrEqual(1.5);
     for (const aspect of VIEW_ASPECTS) {
       const t = spec.moon.target(aspect);
@@ -274,7 +274,7 @@ describe('Pumpkin Patch (the template)', () => {
       expect(Math.min(Math.abs(t.x - 0.22), Math.abs(t.x - 0.78))).toBeLessThan(0.03);
     }
     expect(spec.path.kind).toBe('dirt');
-    expect(spec.ground.kind).toBe('earth');
+    expect(spec.ground.kind).toBe('grass');
     expect(spec.weather!.kind).toBe('leaves');
     expect(spec.sky).toEqual([]);
   });

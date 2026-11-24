@@ -73,8 +73,8 @@
 
 /* Pumpkin Patch */
 :root[data-theme='pumpkin'] {
-  --sky-top: #1a0c05;
-  --sky-bottom: #4a220d;
+  --sky-top: #2a2466;
+  --sky-bottom: #5a302e;
   --sky-glow: rgba(224, 112, 26, 0.2);
   --vignette: rgba(0, 0, 0, 0.6);
   --ink: #fcf0de;

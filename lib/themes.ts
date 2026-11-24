@@ -325,7 +325,7 @@ const SURFACE_CRYPT: SurfaceTokens = {
 
 const SURFACE_PUMPKIN: SurfaceTokens = {
   '--sky-top': '#2a2466',
-  '--sky-bottom': '#8a4a3a',
+  '--sky-bottom': '#5a302e',
   '--sky-glow': 'rgba(224, 112, 26, 0.2)',
   '--vignette': 'rgba(0, 0, 0, 0.6)',
   '--ink': '#fcf0de',

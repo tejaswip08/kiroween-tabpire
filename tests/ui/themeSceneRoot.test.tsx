@@ -211,6 +211,36 @@ describe('ThemeSceneRoot for the Pumpkin Patch', () => {
   it('keeps the shapes it builds itself within the triangles it declared', () => {
     expect(trianglesOf(buildScarecrow())).toBeLessThanOrEqual(PUMPKIN_PARTS.scarecrowTris);
   });
+  it('draws the autumn lane: the tree, the children, dry corn, the fence, grass, leaves and light, in the draw calls it declared', async () => {
+    const { scene } = await mount(pumpkinRoot);
+    const lane = ['autumn-tree', 'autumn-leaves', 'kid-ghost', 'kid-witch', 'dry-corn', 'rustic-fence', 'grass-banks', 'grass-tufts', 'fallen-leaves', 'light-patches'];
+    for (const n of lane) expect(named(scene, n), n).toBeDefined();
+    const own = ['scarecrow', 'theme-ground', 'theme-path', 'windmill-sails', ...lane];
+    expect(own.length).toBe(PUMPKIN_PARTS.calls);
+  });
+  it('walks the children away down the trail, bobbing, and holds them still under reduced motion', async () => {
+    const moving = await mount(pumpkinRoot);
+    const ghost = named(moving.scene, 'kid-ghost')!.parent!;
+    const zs: number[] = [];
+    for (const t of [4, 8, 12]) {
+      moving.display.time = t;
+      await act(async () => advance(t * 1000, true, moving.store.getState()));
+      zs.push(ghost.position.z);
+    }
+    expect(zs[1]!).toBeLessThan(zs[0]!);
+    expect(zs[2]!).toBeLessThan(zs[1]!);
+    act(() => root?.unmount());
+    const still = await mount(pumpkinRoot, true);
+    const witch = named(still.scene, 'kid-witch')!.parent!;
+    const seen: string[] = [];
+    for (const t of [3, 9]) {
+      still.display.time = t;
+      await act(async () => advance(t * 1000, true, still.store.getState()));
+      seen.push(witch.position.toArray().map((v) => v.toFixed(6)).join(','));
+    }
+    expect(seen[0]).toBe(seen[1]);
+    expect(witch.rotation.z).toBe(0);
+  });
 });
 
 const forestRoot = () => (

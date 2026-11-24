@@ -35,9 +35,9 @@ export const PUMPKIN_PARTS = {
   scarecrowTris: 320,
   groundTris: 2,
   /** The tree, the children, the dry corn, the fence, the grass banks and tufts, the leaves and the light patches (checked in `tests/autumn.test.ts`). */
-  autumnTris: 36000,
+  autumnTris: 26000,
   /** Scarecrow, ground, trail, windmill sails, then the tree (wood and leaves), two children, dry corn, fence, banks, tufts, fallen leaves, light patches. */
-  calls: 15,
+  calls: 14,
 };
 
 const JACK: ModelId = 'pumpkin_orange_jackolantern';

@@ -91,23 +91,26 @@ export const TREE_FOOTPRINT = { x: TREE_BASE.x - 0.4, z: TREE_BASE.z, hx: 1.9, h
 const B = TREE_BASE;
 const at = (x: number, y: number, z: number): V3 => [B.x + x, y, B.z + z];
 
-/** The trunk leans out to the left as it climbs, so its top stays left of the brand (off screen on a narrow window). */
+/**
+ * The trunk leans out to the left as it climbs: its upper part stays left of the brand in every window (off screen on a
+ * narrow one), so the big limbs leave the screen on the left and arch back in over the top.
+ */
 const TRUNK: Tube = {
-  points: [at(0.3, -0.4, 0), at(0.15, 1.3, 0.05), at(-0.45, 2.8, -0.1), at(-1.1, 4.2, -0.2), at(-1.7, 5.6, -0.3), at(-2.2, 7.4, -0.3)],
-  radii: [1.15, 0.92, 0.8, 0.7, 0.62, 0.52],
+  points: [at(0.3, -0.4, 0), at(0.1, 1.3, 0.05), at(-0.5, 2.6, -0.1), at(-1.3, 3.8, -0.2), at(-2.0, 4.9, -0.3), at(-2.7, 6.2, -0.3), at(-3.2, 7.6, -0.3)],
+  radii: [1.15, 0.92, 0.8, 0.72, 0.64, 0.56, 0.48],
 };
 /**
- * The big limbs. The first arches up over the top of the scene toward the centre, above the header; the second reaches
- * up and over to the top-left; the third and fourth hold the low canopy on the left, under the brand.
+ * The big limbs. The first rises off screen and arches over the top of the scene toward the centre, above the header; the
+ * second reaches up and back to the top-left; the third and fourth hold the low canopy on the left, under the brand.
  */
 const LIMBS: Tube[] = [
-  { points: [at(-1.4, 5.0, -0.3), at(0.2, 6.9, -1.4), at(2.6, 8.3, -3.4), at(5.6, 9.1, -6.2), at(9.0, 9.4, -9.6)], radii: [0.5, 0.4, 0.3, 0.19, 0.09] },
-  { points: [at(-1.9, 6.2, -0.3), at(-1.4, 8.0, -1.6), at(-0.6, 9.6, -3.4), at(0.6, 10.8, -5.6)], radii: [0.42, 0.32, 0.2, 0.09] },
-  { points: [at(-0.6, 3.3, -0.1), at(0.4, 3.9, -1.6), at(1.0, 4.2, -3.4), at(1.4, 4.5, -5.4)], radii: [0.36, 0.28, 0.18, 0.08] },
-  { points: [at(-1.0, 3.9, -0.2), at(-1.2, 4.8, -2.6), at(-1.3, 5.3, -5.0), at(-1.6, 5.8, -8.0)], radii: [0.32, 0.25, 0.16, 0.07] },
+  { points: [at(-2.6, 6.0, -0.3), at(-2.0, 8.2, -2.0), at(0.4, 9.3, -4.4), at(4.0, 9.8, -7.6), at(8.0, 9.9, -11)], radii: [0.5, 0.4, 0.3, 0.19, 0.09] },
+  { points: [at(-3.0, 7.0, -0.3), at(-3.2, 8.8, -2.2), at(-2.6, 10.2, -4.6), at(-1.6, 11.2, -7.4)], radii: [0.42, 0.32, 0.2, 0.09] },
+  { points: [at(-1.0, 3.3, -0.15), at(-0.7, 4.2, -1.4), at(0.0, 4.7, -2.6), at(0.7, 5.0, -3.6)], radii: [0.4, 0.3, 0.18, 0.08] },
+  { points: [at(-1.6, 4.3, -0.25), at(-1.9, 5.0, -2.8), at(-2.0, 5.5, -5.6), at(-2.1, 5.9, -9.0)], radii: [0.34, 0.26, 0.16, 0.07] },
 ];
 /** The little branch that peeks in from the top-right corner, from off screen. */
-const CORNER: Tube = { points: [[11.6, 9.0, 4.2], [9.4, 8.0, 3.8], [7.6, 7.4, 3.5], [6.6, 7.0, 3.3]], radii: [0.34, 0.22, 0.12, 0.05] };
+const CORNER: Tube = { points: [[12.6, 9.8, 4.0], [10.8, 9.0, 3.6], [9.4, 8.6, 3.3], [8.4, 8.4, 3.1]], radii: [0.34, 0.22, 0.12, 0.05] };
 
 /** A point on a Catmull-Rom curve through `points`, with t from 0 to 1. */
 export function curvePoint(points: readonly V3[], t: number): V3 {
@@ -221,7 +224,7 @@ export function buildTreePlan(seed: number): TreePlan {
       const tip: V3 = [p[0] + Math.cos(ang) * len, p[1] + len * 0.75, p[2] + Math.sin(ang) * len];
       const r0 = radiusAt(limb, t) * 0.5;
       const twig: Tube = { points: [p, mid, tip], radii: [r0, r0 * 0.6, 0.04] };
-      if (tubeBalls(twig, 6).every((b) => ballBlocks(b.x, b.y, b.z, b.r, false) === null)) branches.push(twig);
+      if (tubeBalls(twig).every((b) => ballBlocks(b.x, b.y, b.z, b.r, false) === null)) branches.push(twig);
     }
     void li;
   });
@@ -233,7 +236,7 @@ export function buildTreePlan(seed: number): TreePlan {
   };
   // Leaves along every limb and twig, and a crown above the trunk.
   for (const tube of branches) {
-    const steps = tube.radii[0]! > 0.2 ? 14 : 4;
+    const steps = tube.radii[0]! > 0.2 ? 10 : 3;
     for (let s = 0; s < steps; s++) {
       const p = curvePoint(tube.points, 0.25 + 0.75 * (s / steps));
       for (let tries = 0; tries < 3; tries++) {
@@ -242,36 +245,41 @@ export function buildTreePlan(seed: number): TreePlan {
       }
     }
   }
-  // Then fill the free parts of the screen: the band under the brand on the left, the left margin, the top edge above the
-  // header (where only the lowest leaves hang into view) and the gaps beside the stats panel.
+  // Then fill the free parts of the screen (fractions at 16:9): the band under the brand on the left, the top edge above the
+  // header (only the lowest leaves hang into view) and the right-hand edge for the corner branch. Every cluster is still
+  // checked in every window, so none sits behind a control or the moon.
   const cam = cameraAt(0, 16 / 9, true);
   const fwd = basis(cam).f;
-  const AREAS: readonly [number, number, number, number, number][] = [
-    // x0, x1, y0, y1, weight (screen fractions at 16:9)
-    [-0.08, 0.3, 0.12, 0.3, 4],
-    [-0.08, 0.12, -0.08, 0.3, 3],
-    [-0.05, 0.7, -0.2, 0.0, 4],
-    [0.3, 0.34, -0.05, 0.12, 1],
-  ];
-  const total = AREAS.reduce((n, a) => n + a[4], 0);
-  for (let i = 0; i < 2400 && clusters.length < 200; i++) {
-    let k = rng() * total;
-    const area = AREAS.find((a) => (k -= a[4]) < 0) ?? AREAS[0]!;
-    const depth = between(6.5, 17);
+  /** A cluster at a screen point and depth. With `edge`, the cluster's lowest point must land in that band (so it shows). */
+  const sample = (list: LeafCluster[], area: readonly [number, number, number, number], depth: readonly [number, number], tones: readonly LeafTone[], edge?: readonly [number, number]) => {
+    const d = between(depth[0], depth[1]);
     const dir = directionAt(between(area[0], area[1]), between(area[2], area[3]), cam);
-    const t = depth / dot(dir, fwd);
+    const t = d / dot(dir, fwd);
     const x = cam.position[0] + dir[0] * t;
     const y = cam.position[1] + dir[1] * t;
     const z = cam.position[2] + dir[2] * t;
-    tryCluster(clusters, x, y, z, depth * between(0.04, 0.085), TONES);
-  }
+    const r = d * between(0.035, 0.075);
+    if (edge) {
+      const sc = ballOnScreen(x, y, z, r, 16 / 9);
+      const bottom = sc ? sc.cy + sc.ry : -1;
+      if (bottom < edge[0] || bottom > edge[1]) return false;
+    }
+    return tryCluster(list, x, y, z, r, tones);
+  };
+  const fill = (n: number, area: readonly [number, number, number, number], depth: readonly [number, number], edge?: readonly [number, number]) => {
+    let added = 0;
+    for (let i = 0; i < n * 60 && added < n; i++) if (sample(clusters, area, depth, TONES, edge)) added++;
+  };
+  fill(80, [-0.15, 0.22, 0.15, 0.31], [6.5, 16]);
+  fill(60, [-0.1, 0.72, -0.2, 0.0], [8, 20], [0.004, 0.05]);
   const cornerClusters: LeafCluster[] = [];
-  for (let s = 0; s < 16; s++) {
-    const p = curvePoint(CORNER.points, 0.1 + 0.9 * (s / 16));
+  for (let s = 0; s < 10; s++) {
+    const p = curvePoint(CORNER.points, 0.1 + 0.9 * (s / 10));
     for (let tries = 0; tries < 8; tries++) {
-      if (tryCluster(cornerClusters, p[0] + between(-0.8, 1.2), p[1] + between(-1.6, 1.0), p[2] + between(-0.5, 0.5), between(0.45, 1.0), CORNER_TONES)) break;
+      if (tryCluster(cornerClusters, p[0] + between(-0.8, 1.2), p[1] + between(-1.2, 0.8), p[2] + between(-0.5, 0.5), between(0.45, 1.0), CORNER_TONES)) break;
     }
   }
+  for (let i = 0; i < 3000 && cornerClusters.length < 34; i++) sample(cornerClusters, [0.84, 1.12, -0.2, 0.3], [9, 15], CORNER_TONES, [0.004, 0.32]);
   const knotT = 0.3;
   const knotCentre = curvePoint(TRUNK.points, knotT);
   const knotR = radiusAt(TRUNK, knotT);
