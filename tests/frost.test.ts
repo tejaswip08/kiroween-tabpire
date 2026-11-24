@@ -160,7 +160,7 @@ describe('the snow mounds', () => {
   it('respect a blocked area', () => {
     const set = moundSet(3, (x) => x > 0);
     for (const m of set) expect(m.x).toBeLessThanOrEqual(0);
-    expect(MOUND_TRIS).toBe(20);
+    expect(MOUND_TRIS).toBe(80);
   });
 });
 
@@ -185,7 +185,9 @@ describe('the aurora', () => {
         expect(auroraCeiling(lo, scale)).toBeGreaterThanOrEqual(0);
       }),
     );
-    expect(AURORA_PEAK).toBeLessThanOrEqual(0.35);
+    // A strong ribbon, but under the Bloom threshold (0.95) so it never blows out.
+    expect(AURORA_PEAK).toBeLessThanOrEqual(0.5);
+    expect(AURORA_PEAK).toBeGreaterThanOrEqual(0.4);
   });
   it('uses the same numbers in its shader, and is a single pass of arithmetic', () => {
     expect(AURORA_FRAGMENT).toContain(`disc * ${AURORA_OFF_DISCS.toFixed(4)}`);
@@ -197,24 +199,25 @@ describe('the aurora', () => {
 });
 
 describe('the Frozen Cemetery spec', () => {
-  it('has the brief: pines both sides, ice boulders, snow, no path, a cold silver moon, icy ghosts, falling snow', () => {
+  it('has the brief: pines both sides, ice boulders, dead trees, snow, a snowy path, a cold silver moon, icy ghosts, falling snow', () => {
     const count = (m: string) => spec.placements.filter((p) => p.model === m).length;
-    expect(count('frost_pine_a') + count('frost_pine_b')).toBeGreaterThanOrEqual(20);
+    expect(count('frost_pine_a') + count('frost_pine_b')).toBeGreaterThanOrEqual(14);
+    expect(count('tree_dead_large')).toBeGreaterThanOrEqual(4);
     expect(count('frost_pines')).toBeGreaterThanOrEqual(2);
     expect(count('frost_rock')).toBeGreaterThanOrEqual(6);
     const pines = spec.placements.filter((p) => p.model.startsWith('frost_pine'));
-    expect(pines.filter((p) => p.x < LAKE.x).length).toBeGreaterThanOrEqual(8);
-    expect(pines.filter((p) => p.x > LAKE.x).length).toBeGreaterThanOrEqual(8);
+    expect(pines.filter((p) => p.x < 0.5).length).toBeGreaterThanOrEqual(6);
+    expect(pines.filter((p) => p.x > 0.5).length).toBeGreaterThanOrEqual(3);
     expect(spec.ground.kind).toBe('snow');
-    expect(spec.path.kind).toBe('none');
-    expect(spec.path.centre).toEqual([]);
+    expect(spec.path.kind).toBe('snow');
+    expect(spec.path.centre.length).toBeGreaterThan(20);
     expect(spec.weather!.kind).toBe('snow');
     expect(spec.layers.ghostTint).toBe(FROST_GHOST_TINT);
     expect(spec.layers.ghosts).toBe(true);
     expect(spec.lights.length).toBeLessThanOrEqual(6);
   });
   it('uses exactly these model files, all with a file', () => {
-    expect([...spec.models].sort()).toEqual(['frost_pine_a', 'frost_pine_b', 'frost_pines', 'frost_rock', 'grave_B', 'gravestone']);
+    expect([...spec.models].sort()).toEqual(['frost_pine_a', 'frost_pine_b', 'frost_pines', 'frost_rock', 'grave_B', 'gravestone', 'tree_dead_large']);
     for (const m of spec.models) expect(hasFile(m)).toBe(true);
   });
   it('puts the moon in open sky at scale about 1', () => {
@@ -232,7 +235,9 @@ describe('the Frozen Cemetery spec', () => {
   });
   it('keeps the triangles of the placements, and of its own parts, inside the plan', () => {
     expect(planTriangles(spec.placements)).toBeLessThanOrEqual(FROST_TRI_LIMIT);
-    expect(spec.extras.tris).toBeLessThan(5000);
+    // Its own parts (chapel, graveyard, creatures, drifts, aurora) are counted in `extras`; the real meshes are measured in the UI test.
+    expect(spec.extras.tris).toBeLessThan(60_000);
+    expect(spec.extras.tris).toBeGreaterThan(FROST_PARTS.partsTris);
     expect(spec.extras.calls).toBe(FROST_PARTS.calls);
   });
   it('is the same scene for the same seed', () => {

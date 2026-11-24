@@ -12,6 +12,7 @@ import type { BloodParts } from './bloodmoonParts';
 import type { CastleParts } from './castleParts';
 import type { AutumnPlan } from './autumn';
 import type { Icicle, Mound } from './frostIce';
+import type { FrostAttached, FrostPlan } from './frostPlan';
 import type { ForestParts } from './forestParts';
 import { moonScreenRadiusScaled } from '../sky';
 import type { WeatherSpec } from '../weather';
@@ -30,7 +31,7 @@ export const CENTRE_INSIDE_X: readonly [number, number] = [0.02, 0.98];
 export const NEAR_MIDDLE_X: readonly [number, number] = [0.12, 0.88];
 
 export type GroundKind = 'earth' | 'grass' | 'moss' | 'snow' | 'rock' | 'flagstone';
-export type PathKind = 'dirt' | 'moss' | 'flagstone' | 'none';
+export type PathKind = 'dirt' | 'moss' | 'flagstone' | 'snow' | 'none';
 export type SkyFeature = 'aurora' | 'lightning';
 
 export interface UniqueMoon {
@@ -115,6 +116,8 @@ export interface UniqueSceneSpec {
   sunk?: Record<string, number>;
   /** The ice of the Frozen Cemetery: the ids of the gravestones in the lake, the icicles under their tops and the snow mounds. */
   ice?: { stones: string[]; icicles: Icicle[]; mounds: Mound[] };
+  /** The Frozen Cemetery's own parts: the chapel, the graveyard, the ice pillars, the wolves and what hangs from the dead trees. */
+  frost?: { plan: FrostPlan; attached: FrostAttached };
   /**
    * Placements that stand on a platform the scene draws itself (the Blood Moon ruins): id to the height of the platform top.
    * Their lowest point is that high above y = 0, not on the ground.

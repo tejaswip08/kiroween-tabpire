@@ -12,12 +12,12 @@ void main() {
   vDir = position;
   gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
 }`;
-// Three soft curtains (green, teal, violet) that wave slowly. Added on top of the sky, behind the moon and the clouds, and faded out
-// around the moon (the same numbers as `auroraClearance`), so the moon disc is never lit by it.
+// A bright green-teal ribbon that waves slowly across the sky, with a fainter blue ribbon above it. Each ribbon is a curtain: sharp and
+// bright at its lower edge, fading upward, with fine vertical rays. Added on top of the sky, behind the moon and the clouds, and faded
+// out around the moon (the same numbers as `auroraClearance`), so the moon disc is never lit by it.
 export const AURORA_FRAGMENT = /* glsl */ `
 varying vec3 vDir;
 uniform float uTime; uniform vec3 uMoonDir; uniform float uMoonScale;
-float smoothBand(float x, float c, float w) { return exp(-pow((x - c) / w, 2.0)); }
 void main() {
   vec3 d = normalize(vDir);
   float az = atan(d.x, -d.z);
@@ -26,12 +26,17 @@ void main() {
   vec3 col = vec3(0.0);
   for (int k = 0; k < 3; k++) {
     float fk = float(k);
-    float centre = ${f(AURORA_ELEVATION[0] + 0.07)} + fk * 0.085 + 0.045 * sin(az * (2.0 + fk) + t * (1.0 + 0.4 * fk) + fk * 2.0);
-    float band = smoothBand(el, centre, 0.045 + 0.012 * fk);
-    // Vertical rays inside the curtain.
-    float rays = 0.65 + 0.35 * sin(az * (19.0 + 7.0 * fk) + t * 2.0 + fk);
-    vec3 tint = k == 0 ? vec3(0.25, 1.0, 0.55) : (k == 1 ? vec3(0.15, 0.85, 0.9) : vec3(0.62, 0.34, 1.0));
-    col += tint * band * rays * (k == 2 ? 0.7 : 1.0);
+    // The waving edge of the curtain: a long slow wave plus a shorter one that travels the other way.
+    float edge = ${f(AURORA_ELEVATION[0] + 0.06)} + fk * 0.09 + 0.07 * sin(az * (1.6 + 0.5 * fk) + t * (1.0 + 0.3 * fk) + fk * 2.0) + 0.025 * sin(az * 5.0 - t * 1.7 + fk);
+    float up = el - edge;
+    // Sharp lower edge, long soft fade upward.
+    float curtain = smoothstep(-0.012, 0.012, up) * exp(-max(up, 0.0) / (0.075 + 0.02 * fk));
+    float rays = 0.62 + 0.38 * sin(az * (26.0 + 8.0 * fk) + t * 2.2 + fk) * (0.6 + 0.4 * sin(az * 7.0 + t * 0.9));
+    // Green at the foot of the curtain, teal higher up; the third ribbon is a cold blue.
+    vec3 foot = k == 2 ? vec3(0.2, 0.55, 1.0) : vec3(0.18, 1.0, 0.5);
+    vec3 head = k == 2 ? vec3(0.4, 0.5, 1.0) : vec3(0.1, 0.8, 0.95);
+    vec3 tint = mix(foot, head, clamp(up * 9.0, 0.0, 1.0));
+    col += tint * curtain * rays * (k == 2 ? 0.55 : (k == 1 ? 0.75 : 1.0));
   }
   col *= smoothstep(${f(AURORA_ELEVATION[0] - 0.05)}, ${f(AURORA_ELEVATION[0] + 0.05)}, el) * (1.0 - smoothstep(${f(AURORA_ELEVATION[1] - 0.1)}, ${f(AURORA_ELEVATION[1])}, el));
   // Off around the moon.

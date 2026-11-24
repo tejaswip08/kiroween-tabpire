@@ -8,7 +8,7 @@ export function icicleMatrix(i: Icicle, out = new Matrix4()): Matrix4 {
   return out.compose(new Vector3(i.x, i.y - i.length / 2, i.z), UP_TO_DOWN, new Vector3(i.radius, i.length, i.radius));
 }
 /** Icicles hang from the gravestones: one instanced cone (five sides, no base), one draw call. */
-export function Icicles({ icicles }: { icicles: readonly Icicle[] }) {
+export function Icicles({ icicles, name = 'icicles' }: { icicles: readonly Icicle[]; name?: string }) {
   const mesh = useMemo(() => {
     const geometry = new ConeGeometry(1, 1, 5, 1, true);
     const material = new MeshStandardMaterial({ color: '#e3f3ff', emissive: '#6ea6d6', emissiveIntensity: 0.45, roughness: 0.25, metalness: 0, flatShading: true });
@@ -18,9 +18,9 @@ export function Icicles({ icicles }: { icicles: readonly Icicle[] }) {
     icicles.forEach((ic, n) => m.setMatrixAt(n, icicleMatrix(ic, tmp)));
     m.instanceMatrix.needsUpdate = true;
     m.frustumCulled = false;
-    m.name = 'icicles';
+    m.name = name;
     return m;
-  }, [icicles]);
+  }, [icicles, name]);
   useEffect(
     () => () => {
       mesh.geometry.dispose();

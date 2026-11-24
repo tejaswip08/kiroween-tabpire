@@ -3,12 +3,15 @@
 import { MODELS, type Placement } from '../layout';
 import { mulberry32 } from '../rng';
 
-/** The frozen lake: a wide flat ellipse in the middle distance, behind the cards band and in front of the far pines. */
-export const LAKE = { x: 0.5, z: -19.5, rx: 12.5, rz: 6.2 } as const;
+/**
+ * The frozen lake: a wide ellipse in the middle distance, left of the path, behind the cards band and in front of the chapel.
+ * It is a thick sheet of ice: its top is `LAKE_Y` above the snow, and the hands and the skull lie below the top.
+ */
+export const LAKE = { x: -4, z: -19.5, rx: 9.5, rz: 5.0 } as const;
 /** Segments of the lake disc, so its triangles are known. */
 export const LAKE_SEGMENTS = 48;
-/** The lake lies this far above the snow, so the two never fight over the depth. */
-export const LAKE_Y = 0.04;
+/** The top of the ice is this far above the snow. Everything under the ice (bones, the dark lake bed) lies between 0 and this. */
+export const LAKE_Y = 1.2;
 
 /** Normalised distance from the lake centre: below 1 is on the ice, 1 is the shore. `margin` widens the lake by that many units. */
 export function lakeDistance(x: number, z: number, margin = 0): number {
@@ -62,18 +65,26 @@ export function icicleSet(stones: readonly Placement[], seed: number, perStone =
   return out;
 }
 
-/** A snow mound: a squashed icosahedron half sunk in the snow. */
+/** A snow mound: a smooth, squashed icosahedron half sunk in the snow. A drift is a long, low mound (`stretch` along x, `squash` for the height). */
 export interface Mound {
   x: number;
   z: number;
   radius: number;
   rotY: number;
+  /** Length along its own x axis, as a multiple of the radius. Missing is 1. */
+  stretch?: number;
+  /** Height as a fraction of the radius. Missing is `MOUND_SQUASH`. */
+  squash?: number;
+  /** Height of its centre. Missing is `MOUND_Y`. */
+  y?: number;
 }
 export const MOUND_COUNT = 40;
 /** Mounds are this much lower than wide. */
-export const MOUND_SQUASH = 0.45;
-/** Triangles of one mound: an icosahedron with no extra detail. */
-export const MOUND_TRIS = 20;
+export const MOUND_SQUASH = 0.34;
+/** The centre of a mound is this far below the snow level, so it rises out of the snow with no edge. */
+export const MOUND_Y = -0.06;
+/** Triangles of one mound: an icosahedron with one level of detail. */
+export const MOUND_TRIS = 80;
 
 /** Half the visible width at a camera depth, as a fraction of the depth, at the narrowest window shape (16:10), kept a little short. */
 const VISIBLE_HALF = 0.55;

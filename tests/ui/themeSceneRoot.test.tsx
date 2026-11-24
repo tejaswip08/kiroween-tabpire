@@ -417,14 +417,14 @@ describe('ThemeSceneRoot for the Frozen Cemetery', () => {
       if ((o as THREE.InstancedMesh).isInstancedMesh && spec.models.includes(o.name as never)) instanced.add(o.name);
     });
     for (const m of spec.models) expect(instanced.has(m), m).toBe(true);
-    for (const n of ['theme-ground', 'frozen-lake', 'icicles', 'snow-mounds', 'aurora']) expect(named(scene, n), n).toBeDefined();
-    expect(named(scene, 'theme-path')).toBeUndefined();
+    for (const n of ['theme-ground', 'theme-path', 'frozen-lake', 'frozen-lake-bed', 'frozen-lake-wall', 'icicles', 'chapel-icicles', 'snow-mounds', 'aurora']) expect(named(scene, n), n).toBeDefined();
     // The ice parts are single meshes: the lake and the aurora one draw call each, the icicles and the mounds one instanced mesh each.
     const icicles = named(scene, 'icicles') as THREE.InstancedMesh;
     const mounds = named(scene, 'snow-mounds') as THREE.InstancedMesh;
     expect(icicles.isInstancedMesh && mounds.isInstancedMesh).toBe(true);
     expect(icicles.count).toBe(spec.ice!.icicles.length);
-    expect(mounds.count).toBe(spec.ice!.mounds.length);
+    // The mounds, the drifts of the plan and the wolves' ridge share one mesh.
+    expect(mounds.count).toBe(spec.ice!.mounds.length + spec.frost!.plan.drifts.length + 1);
     expect(trianglesOf(icicles.geometry)).toBe(ICICLE_TRIS);
     expect(trianglesOf(mounds.geometry)).toBe(MOUND_TRIS);
     expect(trianglesOf((named(scene, 'frozen-lake') as THREE.Mesh).geometry)).toBeLessThanOrEqual(FROST_PARTS.lakeTris);
@@ -440,10 +440,44 @@ describe('ThemeSceneRoot for the Frozen Cemetery', () => {
       if ((o as THREE.Points).isPoints) points++;
     });
     expect(lights).toBe(spec.lights.length);
-    expect(points).toBe(2);
+    expect(lights).toBe(4);
+    // Embers, snow and the frost trail behind the ghosts are the point layers.
+    expect(points).toBe(3);
     expect(scene.fog).not.toBeNull();
     expect(crypt.rendered).toEqual([]);
     for (const n of ['crypt', 'arch_gate', 'fence', 'fence_pillar', 'coffin_open', 'path_A']) expect(named(scene, n), n).toBeUndefined();
+  });
+  it('draws every part it builds itself as instanced meshes or merged shapes, within the draw calls and triangles it declared', async () => {
+    const { scene } = await mount(frostRoot);
+    const spec = sceneThemeFor('frost').scene.unique!;
+    const own = (o: THREE.Object3D) =>
+      /^(frost-|theme-|chapel-icicles|tree-icicles|frozen-lake|icicles|snow-mounds|aurora)/.test(o.name) && !(spec.models as string[]).includes(o.name);
+    // These are counted by their own formulas in `spec.extras.tris`; the rest is `FROST_PARTS.partsTris`.
+    const counted = /^(theme-ground|frozen-lake$|icicles|chapel-icicles|tree-icicles|snow-mounds|aurora)/;
+    let calls = 0;
+    let tris = 0;
+    const kinds = new Set<string>();
+    scene.traverse((o) => {
+      const m = o as THREE.Mesh;
+      if (!(m.isMesh || (o as THREE.Points).isPoints) || !own(o)) return;
+      // A mesh that casts a shadow is drawn twice (the shadow pass).
+      calls += m.castShadow ? 2 : 1;
+      kinds.add(o.name);
+      if (counted.test(o.name)) return;
+      const count = (m as THREE.InstancedMesh).isInstancedMesh ? (m as THREE.InstancedMesh).count : 1;
+      tris += trianglesOf(m.geometry) * count * (m.castShadow ? 2 : 1);
+    });
+    expect(calls).toBeLessThanOrEqual(FROST_PARTS.calls);
+    expect(tris).toBeLessThanOrEqual(FROST_PARTS.partsTris);
+    expect(spec.extras.calls).toBe(FROST_PARTS.calls);
+    // The graveyard, the chapel and the creatures are all there, and they repeat by instancing.
+    for (const n of ['frost-chapel', 'frost-chapel-door', 'frost-stones-slab', 'frost-stones-cross', 'frost-open-graves', 'frost-lanterns', 'frost-ice-pillars', 'frost-pillar-skeletons', 'frost-fence-bars', 'frost-bones', 'frost-broken-hand', 'frost-wolves', 'frost-wolf-howl-head', 'frost-owl', 'frost-footprints', 'frost-wind-snow', 'frost-lake-breath', 'frost-ghost-trail']) {
+      expect(kinds.has(n), n).toBe(true);
+    }
+    for (const n of ['frost-stones-slab', 'frost-stones-cross', 'frost-lanterns', 'frost-fence-bars', 'frost-ice-pillars', 'frost-footprints', 'frost-wind-snow']) {
+      expect((named(scene, n) as THREE.InstancedMesh).isInstancedMesh, n).toBe(true);
+    }
+    expect((named(scene, 'frost-stones-slab') as THREE.InstancedMesh).count + (named(scene, 'frost-stones-cross') as THREE.InstancedMesh).count).toBe(spec.frost!.plan.stones.length);
   });
   it('draws falling snow for its weather', async () => {
     const { scene } = await mount(frostRoot);
@@ -499,6 +533,36 @@ describe('ThemeSceneRoot for the Frozen Cemetery', () => {
     await act(async () => advance(9000, true, still.store.getState()));
     expect(lake2.uniforms.uTime!.value).toBe(0);
     expect(aurora2.uniforms.uTime!.value).toBe(0);
+  });
+  it('waves, pulses and gusts with time, and holds all of it still under reduced motion', async () => {
+    const live = await mount(frostRoot);
+    const wind = () => (named(live.scene, 'frost-wind-snow') as THREE.InstancedMesh).material as THREE.ShaderMaterial;
+    const lake = (named(live.scene, 'frozen-lake') as THREE.Mesh).material as THREE.ShaderMaterial;
+    const door = (named(live.scene, 'frost-chapel-door') as THREE.Mesh).material as THREE.ShaderMaterial;
+    const neck = () => named(live.scene, 'frost-wolf-howl-head')!.parent!;
+    // 3 seconds into a gust, 5 seconds into the howl (head up).
+    live.display.time = 3;
+    await act(async () => advance(3000, true, live.store.getState()));
+    expect(wind().uniforms.uGust!.value).toBeGreaterThan(0.9);
+    expect(neck().rotation.z).toBeGreaterThan(0.3);
+    expect(lake.uniforms.uPulse!.value).not.toBe(0.6);
+    expect(door.uniforms.uPulse!.value).not.toBe(0.7);
+    live.display.time = 14;
+    await act(async () => advance(14000, true, live.store.getState()));
+    expect(wind().uniforms.uGust!.value).toBe(0);
+    expect(neck().rotation.z).toBeCloseTo(-0.2, 9);
+    act(() => root?.unmount());
+    root = undefined;
+    const still = await mount(frostRoot, true);
+    still.display.time = 3;
+    await act(async () => advance(3000, true, still.store.getState()));
+    const wind2 = (named(still.scene, 'frost-wind-snow') as THREE.InstancedMesh).material as THREE.ShaderMaterial;
+    expect(wind2.uniforms.uGust!.value).toBe(0);
+    expect(wind2.uniforms.uTravel!.value).toBe(0);
+    expect(named(still.scene, 'frost-wolf-howl-head')!.parent!.rotation.z).toBeCloseTo(-0.2, 9);
+    expect(((named(still.scene, 'frozen-lake') as THREE.Mesh).material as THREE.ShaderMaterial).uniforms.uPulse!.value).toBe(0.6);
+    expect(((named(still.scene, 'frost-chapel-door') as THREE.Mesh).material as THREE.ShaderMaterial).uniforms.uPulse!.value).toBe(0.7);
+    expect(((named(still.scene, 'frost-ghost-trail') as THREE.Points).material as THREE.ShaderMaterial).uniforms.uTime!.value).toBe(0);
   });
   it('hangs each icicle tip down from its point, and keeps its own shapes within the triangles it declared', () => {
     const m = icicleMatrix({ x: 2, y: 5, z: -3, length: 1, radius: 0.1 });

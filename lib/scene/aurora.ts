@@ -1,17 +1,17 @@
-// The aurora of the Frozen Cemetery: faint green, teal and violet bands in the night sky. Pure numbers shared by the shader and
+// The aurora of the Frozen Cemetery: a strong green-teal ribbon (with a fainter blue one) slowly waving across the night sky. Pure numbers shared by the shader and
 // the tests. The bands never light the moon disc: they fade out around it (`auroraClearance`).
 import { MOON } from './sky';
 
-/** Brightest an aurora pixel may add to the sky (before the clearance around the moon). Faint on purpose. */
-export const AURORA_PEAK = 0.3;
+/** Brightest an aurora pixel may add to the sky (before the clearance around the moon). Strong, but kept under the Bloom threshold. */
+export const AURORA_PEAK = 0.46;
 /** Within this many moon-disc radii of the moon the aurora is fully off. */
 export const AURORA_OFF_DISCS = 2.5;
 /** From this many moon-disc radii on, the aurora is at full strength. */
 export const AURORA_FULL_DISCS = 6;
 /** How fast the bands drift (radians of phase per second). Slow. */
-export const AURORA_SPEED = 0.05;
-/** Bands live between these elevations (y of the sky direction). The visible sky above the horizon is about 0 to 0.4. */
-export const AURORA_ELEVATION: readonly [number, number] = [0.1, 0.5];
+export const AURORA_SPEED = 0.08;
+/** Bands live between these elevations (y of the sky direction). The visible sky above the horizon is about 0 to 0.25. */
+export const AURORA_ELEVATION: readonly [number, number] = [0.0, 0.4];
 
 const smooth = (a: number, b: number, x: number): number => {
   const t = Math.min(1, Math.max(0, (x - a) / (b - a)));

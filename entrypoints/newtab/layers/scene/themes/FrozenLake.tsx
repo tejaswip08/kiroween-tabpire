@@ -1,8 +1,10 @@
 import { useFrame } from '@react-three/fiber';
 import { useEffect, useMemo } from 'react';
-import { CircleGeometry, Color, DoubleSide, ShaderMaterial, UniformsLib, UniformsUtils, Vector3 } from 'three';
+import { CircleGeometry, Color, CylinderGeometry, DoubleSide, MeshStandardMaterial, ShaderMaterial, UniformsLib, UniformsUtils, Vector3 } from 'three';
 import { LAKE, LAKE_SEGMENTS, LAKE_Y } from '../../../../../lib/scene/uniqueScenes/frostIce';
+import type { FrostPlan } from '../../../../../lib/scene/uniqueScenes/frostPlan';
 import { useDisplay } from '../display';
+import { icePulse } from './frostParts';
 import { useColorSync } from '../themeColors';
 
 const vertex = /* glsl */ `
@@ -21,7 +23,7 @@ void main() {
 const fragment = /* glsl */ `
 varying vec2 vP; varying vec3 vWorld;
 uniform float uTime; uniform vec3 uMoonDir; uniform vec3 uMoonColor;
-uniform vec3 uIceNear; uniform vec3 uIceFar; uniform vec3 uRim;
+uniform vec3 uIceNear; uniform vec3 uIceFar; uniform vec3 uRim; uniform float uPulse; uniform vec3 uSpots[6]; uniform vec3 uGlow;
 #include <fog_pars_fragment>
 vec2 hash2(vec2 p) {
   p = vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3)));
@@ -47,18 +49,26 @@ float crack(vec2 p) {
 }
 void main() {
   float r = length(vP);
-  // Soft gradient: paler and brighter toward the far shore, deeper blue in the middle.
+  // Dark glassy ice: deep navy, a little lighter toward the far shore.
   vec3 col = mix(uIceNear, uIceFar, smoothstep(0.9, -0.9, vP.y));
-  col = mix(col, uIceNear * 0.8, 0.3 * (1.0 - smoothstep(0.0, 0.8, r)));
-  // Faint cracks at two sizes, only in some patches.
+  // White cracks at two sizes, bright, in most patches.
   vec2 w = vWorld.xz;
-  float patch = smoothstep(0.35, 0.7, noise(w * 0.16 + 3.0));
-  float c1 = 1.0 - smoothstep(0.0, 0.07, crack(w * 0.22));
-  float c2 = 1.0 - smoothstep(0.0, 0.1, crack(w * 0.6 + 7.0));
-  col = mix(col, vec3(0.86, 0.95, 1.0), (c1 * 0.38 + c2 * 0.18) * (0.35 + 0.65 * patch));
+  float patch = smoothstep(0.25, 0.6, noise(w * 0.16 + 3.0));
+  float c1 = 1.0 - smoothstep(0.0, 0.05, crack(w * 0.24));
+  float c2 = 1.0 - smoothstep(0.0, 0.07, crack(w * 0.7 + 7.0));
+  float cracks = (c1 * 0.95 + c2 * 0.5) * (0.4 + 0.6 * patch);
+  col = mix(col, vec3(0.9, 0.97, 1.0), clamp(cracks, 0.0, 1.0));
+  // The slow pulse of light under the ice: a pale blue glow round every bone, brightest in the cracks.
+  float under = 0.0;
+  for (int i = 0; i < 6; i++) {
+    vec3 s = uSpots[i];
+    float d = length(w - s.xy) / max(s.z, 0.001);
+    under += s.z > 0.0 ? exp(-d * d * 1.6) : 0.0;
+  }
+  col += uGlow * under * (0.25 + 0.75 * uPulse) * (0.55 + 0.9 * cracks);
   // A soft sheen that slowly moves across the ice.
   float band = sin(dot(w, vec2(0.21, 0.11)) + uTime * 0.25) * 0.5 + 0.5;
-  col += uMoonColor * smoothstep(0.7, 1.0, band) * 0.07 * (0.5 + 0.5 * noise(w * 0.5));
+  col += uMoonColor * smoothstep(0.7, 1.0, band) * 0.06 * (0.5 + 0.5 * noise(w * 0.5));
   // The moon's streak: the view ray bounced off the flat ice, compared with the moon's direction.
   vec3 v = normalize(vWorld - cameraPosition);
   vec3 rf = vec3(v.x, abs(v.y), v.z);
@@ -70,10 +80,11 @@ void main() {
   float streak = exp(-da * da / (2.0 * 0.03 * 0.03)) * exp(-de * de / (2.0 * 0.16 * 0.16));
   float wide = exp(-da * da / (2.0 * 0.12 * 0.12)) * exp(-de * de / (2.0 * 0.22 * 0.22));
   col += uMoonColor * (streak * 0.7 * glints + wide * 0.1);
-  // A frosted rim at the shore, and a soft edge into the snow.
-  col = mix(col, uRim, smoothstep(0.84, 1.0, r) * 0.7);
-  float alpha = 1.0 - smoothstep(0.94, 1.0, r);
-  gl_FragColor = vec4(col, alpha);
+  // A frosted rim at the shore.
+  col = mix(col, uRim, smoothstep(0.88, 1.0, r) * 0.6);
+  // Glass: see-through in the middle (so the bones show), more solid toward the shore and where the cracks are.
+  float alpha = clamp(0.6 + 0.3 * smoothstep(0.4, 1.0, r) + 0.25 * cracks, 0.0, 1.0);
+  gl_FragColor = vec4(col, alpha * (1.0 - smoothstep(0.985, 1.0, r)));
   #include <fog_fragment>
 }`;
 
@@ -82,9 +93,18 @@ void main() {
  * Its shader paints the ice, the cracks, the sheen and the moonlight streak. The sheen moves with `display.time`, which stays
  * at 0 under reduced motion, so the ice then stands still.
  */
-export function FrozenLake() {
+export function FrozenLake({ plan }: { plan?: FrostPlan }) {
   const display = useDisplay();
   const geometry = useMemo(() => new CircleGeometry(1, LAKE_SEGMENTS).rotateX(-Math.PI / 2), []);
+  // The dark lake bed (opaque, just above the snow) and the wall of ice round the shore (the ice is as thick as `LAKE_Y`).
+  const bed = useMemo(() => new CircleGeometry(1, LAKE_SEGMENTS).rotateX(-Math.PI / 2), []);
+  const wall = useMemo(() => new CylinderGeometry(1, 1, LAKE_Y, LAKE_SEGMENTS, 1, true), []);
+  const bedMaterial = useMemo(() => new MeshStandardMaterial({ color: '#050c1a', emissive: '#0a1d38', emissiveIntensity: 0.6, roughness: 1 }), []);
+  const wallMaterial = useMemo(() => new MeshStandardMaterial({ color: '#7fb4e4', emissive: '#16467c', emissiveIntensity: 0.7, roughness: 0.2, flatShading: true }), []);
+  const spots = useMemo(() => {
+    const list = plan ? [...plan.hands.map((h) => [h.x, h.z, 2.6]), [plan.skull.x, plan.skull.z, 3.0], [plan.broken.x, plan.broken.z, 3.0]] : [];
+    return Array.from({ length: 6 }, (_, i) => new Vector3(list[i]?.[0] ?? 0, list[i]?.[1] ?? 0, list[i]?.[2] ?? 0));
+  }, [plan]);
   const material = useMemo(
     () =>
       new ShaderMaterial({
@@ -96,9 +116,12 @@ export function FrozenLake() {
             uTime: { value: 0 },
             uMoonDir: { value: new Vector3(0.5, 0.2, -0.8) },
             uMoonColor: { value: new Color('#e8f4ff') },
-            uIceNear: { value: new Color('#7fb2d8') },
-            uIceFar: { value: new Color('#cfe8f8') },
-            uRim: { value: new Color('#eef6ff') },
+            uIceNear: { value: new Color('#071a33') },
+            uIceFar: { value: new Color('#12345c') },
+            uRim: { value: new Color('#9ec8ee') },
+            uPulse: { value: 0.6 },
+            uGlow: { value: new Color('#2f8cff') },
+            uSpots: { value: [] as Vector3[] },
           },
         ]),
         transparent: true,
@@ -111,7 +134,17 @@ export function FrozenLake() {
       }),
     [],
   );
-  useEffect(() => () => geometry.dispose(), [geometry]);
+  material.uniforms.uSpots!.value = spots;
+  useEffect(
+    () => () => {
+      geometry.dispose();
+      bed.dispose();
+      wall.dispose();
+      bedMaterial.dispose();
+      wallMaterial.dispose();
+    },
+    [geometry, bed, wall, bedMaterial, wallMaterial],
+  );
   useEffect(() => () => material.dispose(), [material]);
   // The moon's colour follows the theme.
   useColorSync((c) => {
@@ -121,6 +154,14 @@ export function FrozenLake() {
     // Under reduced motion the ice stands still.
     material.uniforms.uTime!.value = display.reduced ? 0 : display.time;
     (material.uniforms.uMoonDir!.value as Vector3).copy(display.moon);
+    // The pulse of light under the ice stands still under reduced motion.
+    material.uniforms.uPulse!.value = icePulse(display.time, display.reduced);
   });
-  return <mesh geometry={geometry} material={material} position={[LAKE.x, LAKE_Y, LAKE.z]} scale={[LAKE.rx, 1, LAKE.rz]} renderOrder={1} name="frozen-lake" />;
+  return (
+    <>
+      <mesh geometry={bed} material={bedMaterial} position={[LAKE.x, 0.03, LAKE.z]} scale={[LAKE.rx * 0.995, 1, LAKE.rz * 0.995]} receiveShadow name="frozen-lake-bed" />
+      <mesh geometry={wall} material={wallMaterial} position={[LAKE.x, LAKE_Y / 2, LAKE.z]} scale={[LAKE.rx, 1, LAKE.rz]} receiveShadow name="frozen-lake-wall" />
+      <mesh geometry={geometry} material={material} position={[LAKE.x, LAKE_Y, LAKE.z]} scale={[LAKE.rx, 1, LAKE.rz]} renderOrder={1} name="frozen-lake" />
+    </>
+  );
 }
