@@ -132,15 +132,15 @@ const SCENE_CRYPT: ScenePalette = {
 
 const SCENE_PUMPKIN: ScenePalette = {
   candle: WARM.candle, lantern: WARM.lantern, jack: WARM.jackOLantern, door: WARM.cryptDoor,
-  skyTop: '#2a2466',
-  skyMid: '#7a3f6e',
-  skyHorizon: '#e0752a',
+  skyTop: '#1c1748',
+  skyMid: '#5e2a52',
+  skyHorizon: '#c9561f',
   haze: '#c9703a',
-  fog: '#6b3a3e',
+  fog: '#4a2632',
   farSilhouette: '#3a1e2c',
   groundBase: '#7d8a34',
   groundTint: '#f0e6b4',
-  hemiSky: '#e6c8d8',
+  hemiSky: '#c8a8c8',
   hemiGround: '#6a4a22',
   rim: '#ffb070',
   moonlight: '#ffd9a0',
@@ -326,7 +326,7 @@ const SURFACE_CRYPT: SurfaceTokens = {
 };
 
 const SURFACE_PUMPKIN: SurfaceTokens = {
-  '--sky-top': '#2a2466',
+  '--sky-top': '#1c1748',
   '--sky-bottom': '#5a302e',
   '--sky-glow': 'rgba(224, 112, 26, 0.2)',
   '--vignette': 'rgba(0, 0, 0, 0.6)',

@@ -5,6 +5,7 @@ import { MODELS, type ModelId, type Placement, type WarmSource } from '../layout
 import { WINDMILL_FOOT } from '../windmill';
 import { WEATHER } from '../weather';
 import { LANE, LANE_Z, MOON_SCALE, TREE_FOOTPRINT, bankHeight, buildAutumnPlan, moonSpot, sideOf, smoothPolyline } from './autumn';
+import { skeletonFootprints } from './skeletons';
 import { Placer, modelsOf, sampleLine, type UniqueMoon, type UniqueSceneSpec } from './types';
 
 /** Added to the caller's seed, so this theme has its own random stream. */
@@ -35,9 +36,11 @@ export const PUMPKIN_PARTS = {
   scarecrowTris: 320,
   groundTris: 2,
   /** The tree, the little witch, the dry and field corn, the fence, the grass banks and tufts, the leaves and the light patches (checked in `tests/autumn.test.ts`). */
-  autumnTris: 31000,
-  /** Scarecrow, ground, trail, windmill sails, then the tree (wood and leaves), the witch, dry corn, field corn, fence, banks, tufts, fallen leaves, light patches. */
-  calls: 14,
+  autumnTris: 30500,
+  /** Scarecrow, ground, trail, windmill sails, then the tree (wood and leaves), the witch, dry corn, field corn, fence, banks, tufts, fallen leaves, light patches; then the skeletons (hung, sitting, rising and the skulls, two each for bone and eyes) and the boneyard. */
+  calls: 23,
+  /** The skeletons: two hung, one sitting, four rising, a skull for every fence post, the mounds and loose bones (checked in `tests/skeletons.test.ts`). */
+  skeletonTris: 15000,
 };
 
 const JACK: ModelId = 'pumpkin_orange_jackolantern';
@@ -59,6 +62,8 @@ export function buildPumpkinPatch(seed: number): UniqueSceneSpec {
   placer.reserve({ x: SCARECROW.x, z: SCARECROW.z, hx: SCARECROW.hx, hz: SCARECROW.hz, rotY: SCARECROW.rotY });
   // The big tree stands in the left foreground: its trunk and roots are kept clear.
   placer.reserve(TREE_FOOTPRINT);
+  // The skeletons: posts, dirt mounds and loose bones (drawn by `PumpkinSkeletons`).
+  for (const f of skeletonFootprints()) placer.reserve(f);
 
   // A warm lantern glow at the barn door.
   const door = { kind: 'lantern' as const, x: barn.x + 0.4, y: 2.1, z: barn.z + MODELS.farm_barn.hz * barn.scale + 0.6 };
@@ -142,9 +147,9 @@ export function buildPumpkinPatch(seed: number): UniqueSceneSpec {
     // No floating ghosts in the Pumpkin Patch: the little witch walking the lane is its only figure.
     ghostSpots: [],
     weather: WEATHER.leaves,
-    layers: { clouds: true, witch: true, bats: 1, ghosts: false, mist: true, embers: true },
+    layers: { clouds: true, witch: true, bats: 1.6, ghosts: false, mist: true, embers: true },
     // The scarecrow, the ground plane, the track and the windmill's sails (a second draw for the same model).
-    extras: { tris: PUMPKIN_PARTS.scarecrowTris + PUMPKIN_PARTS.groundTris + 2 * centre.length + PUMPKIN_PARTS.autumnTris, calls: PUMPKIN_PARTS.calls },
+    extras: { tris: PUMPKIN_PARTS.scarecrowTris + PUMPKIN_PARTS.groundTris + 2 * centre.length + PUMPKIN_PARTS.autumnTris + PUMPKIN_PARTS.skeletonTris, calls: PUMPKIN_PARTS.calls },
     autumn: buildAutumnPlan(PUMPKIN_SEED + seed, line, placements, placer.reserved),
   };
 }

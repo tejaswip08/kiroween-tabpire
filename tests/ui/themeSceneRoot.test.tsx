@@ -65,6 +65,7 @@ import { buildPlatform, buildScarecrow, trianglesOf } from '../../entrypoints/ne
 import { sceneState } from '../../lib/scene/meaning';
 import { moonDirection } from '../../lib/scene/sky';
 import { PUMPKIN_MOON, PUMPKIN_PARTS } from '../../lib/scene/uniqueScenes/pumpkin';
+import { BASE_SKULLS } from '../../lib/scene/uniqueScenes/skeletons';
 import { FOREST_MOON, cauldronFxAt } from '../../lib/scene/uniqueScenes/forest';
 import { FOREST_PARTS, SWAY_AMPLITUDE, bob, scarecrowSway } from '../../lib/scene/uniqueScenes/forestParts';
 import { buildWitchScarecrow } from '../../entrypoints/newtab/layers/scene/themes/forestShapes';
@@ -223,8 +224,42 @@ describe('ThemeSceneRoot for the Pumpkin Patch', () => {
     });
     expect(ghostLayer).toBe(false);
     for (const n of lane) expect(named(scene, n), n).toBeDefined();
-    const own = ['scarecrow', 'theme-ground', 'theme-path', 'windmill-sails', ...lane];
+    const skeletons = ['skeleton-hung', 'skeleton-sitting', 'skeleton-rising', 'skeleton-skulls'];
+    for (const n of [...skeletons, 'skeleton-boneyard']) expect(named(scene, n), n).toBeDefined();
+    // Each skeleton mesh draws twice (bone and glowing eyes).
+    const own = ['scarecrow', 'theme-ground', 'theme-path', 'windmill-sails', ...lane, ...skeletons, ...skeletons, 'skeleton-boneyard'];
     expect(own.length).toBe(PUMPKIN_PARTS.calls);
+  });
+  it('raises the skeletons with hunger, adds a skull per staked tab, and stops their sway under reduced motion', async () => {
+    const { scene, display, store } = await mount(pumpkinRoot);
+    const rising = named(scene, 'skeleton-rising') as THREE.InstancedMesh;
+    const skulls = named(scene, 'skeleton-skulls') as THREE.InstancedMesh;
+    const m = new THREE.Matrix4();
+    const yAt = () => {
+      rising.getMatrixAt(0, m);
+      return m.elements[13]!;
+    };
+    display.emberRate = 0.15;
+    display.newGraves = 0;
+    await act(async () => advance(1000, true, store.getState()));
+    const calm = yAt();
+    expect(skulls.count).toBe(BASE_SKULLS);
+    display.emberRate = 1;
+    display.newGraves = 3;
+    await act(async () => advance(1000, true, store.getState()));
+    expect(yAt()).toBeGreaterThan(calm + 0.5);
+    expect(skulls.count).toBe(BASE_SKULLS + 3);
+    act(() => root?.unmount());
+    const still = await mount(pumpkinRoot, true);
+    const hung = named(still.scene, 'skeleton-hung') as THREE.InstancedMesh;
+    const seen: string[] = [];
+    for (const t of [2, 7]) {
+      still.display.time = t;
+      await act(async () => advance(t * 1000, true, still.store.getState()));
+      hung.getMatrixAt(0, m);
+      seen.push(m.elements.map((v) => v.toFixed(6)).join(','));
+    }
+    expect(seen[0]).toBe(seen[1]);
   });
   it('walks the little witch away down the trail, bobbing, and holds her still under reduced motion', async () => {
     const moving = await mount(pumpkinRoot);
