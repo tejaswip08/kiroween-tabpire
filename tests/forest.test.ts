@@ -14,7 +14,7 @@ import { MODELS, type Placement } from '../lib/scene/layout';
 import { themeScene } from '../lib/scene/themeLayout';
 import { UNIQUE_SCENES } from '../lib/scene/uniqueScenes';
 import {
-  FOREST_MOON, HERO, JACK, LAYERS, PLACEMENT_TRI_LIMIT, TRAIL_HALF_WIDTH, TREE_LEAN, buildWitchsForest, cauldronFxAt, planTriangles,
+  FOREST_MOON, FOREST_MOON_DEPTH, HERO, JACK, LAYERS, PLACEMENT_TRI_LIMIT, TRAIL_HALF_WIDTH, TREE_LEAN, buildWitchsForest, cauldronFxAt, planTriangles,
 } from '../lib/scene/uniqueScenes/forest';
 import {
   BOB_HEIGHT, CAULDRON, FIRE, FLAME_COUNT, FLAME_TRIS, FOREST_PARTS, GRAVES, GHOSTS, PLANT_TRIS, SCARECROWS, SWAY_AMPLITUDE, SCARY_COUNT, SCARY_TREE_TRIS, SCARY_VARIANTS, THORN_COUNT, THORN_TRIS,
@@ -436,6 +436,15 @@ describe('the moon, and no clouds or Crypt sky life', () => {
     expect(spec.layers.bats).toBe(0);
     expect(spec.layers.mist).toBe(true);
     expect(spec.weather!.kind).toBe('fireflies');
+    // It stands behind the near and middle trees and in front of the back row that fades into the fog.
+    for (const aspect of VIEW_ASPECTS) {
+      const depth = (t: Placement) => onScreen(aspect, t.x, 0, t.z).depth;
+      const back = trees.filter((t) => t.z < -26);
+      expect(back.length).toBeGreaterThan(3);
+      for (const t of back) expect(depth(t), t.id).toBeGreaterThan(FOREST_MOON_DEPTH + 3);
+      expect(trees.filter((t) => depth(t) < FOREST_MOON_DEPTH).length).toBeGreaterThanOrEqual(8);
+      expect(forest.scary.every((t) => onScreen(aspect, t.x, 0, t.z).depth < FOREST_MOON_DEPTH + 6)).toBe(true);
+    }
     const m = hue(themeById('forest').scene.moon);
     expect(m.r).toBeGreaterThan(m.g * 2);
   });

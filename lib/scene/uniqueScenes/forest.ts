@@ -14,6 +14,11 @@ import { Placer, modelsOf, sampleLine, solidFootprint, type UniqueMoon, type Uni
 export { CAULDRON, FIRE };
 /** Added to the caller's seed, so this theme has its own random stream. */
 export const FOREST_SEED = 7211;
+/**
+ * How far (view depth) the moon stands in the forest: behind the near and middle trees, in front of the trees that fade into
+ * the fog at the back (they start at about 43), so the dark branches cross it and the fogged wall never hides it.
+ */
+export const FOREST_MOON_DEPTH = 38;
 /** A big blood-red moon in the upper right, behind the branches and the green mist. */
 export const FOREST_MOON: UniqueMoon = {
   target: () => ({ x: 0.82, y: 0.2 }),

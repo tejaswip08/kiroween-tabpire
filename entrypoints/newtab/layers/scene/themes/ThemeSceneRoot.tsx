@@ -10,6 +10,7 @@ import { Glows } from '../Glows';
 import { Lights } from '../Lights';
 import { Mist } from '../Mist';
 import { Moon } from '../Moon';
+import { FOREST_MOON_DEPTH } from '../../../../../lib/scene/uniqueScenes/forest';
 import { Sky } from '../Sky';
 import { SceneWeather } from '../Weather';
 import { Witch } from '../Witch';
@@ -29,7 +30,7 @@ export function ThemeSceneRoot({ id }: { id: ThemeId }) {
   return (
     <>
       <Sky />
-      {layers.moon !== false && <Moon behind={id === 'forest'} />}
+      {layers.moon !== false && <Moon behind={id === 'forest' ? FOREST_MOON_DEPTH : undefined} />}
       <SkyFeatures features={spec.sky} lightningSeed={spec.castle?.lightningSeed} />
       {layers.clouds && <Clouds />}
       {layers.witch && <Witch />}

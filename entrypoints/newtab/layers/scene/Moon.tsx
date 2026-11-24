@@ -1,6 +1,6 @@
 import { useFrame } from '@react-three/fiber';
 import { useMemo, useRef } from 'react';
-import type { Group } from 'three';
+import { type Group, Vector3 } from 'three';
 import { MOON } from '../../../../lib/scene/sky';
 import { sceneColorsFor } from './colors';
 import { useDisplay } from './display';
@@ -59,15 +59,22 @@ void main() {
   col *= mix(mix(0.4, 0.85, uCrisp), 1.0, pow(z, 0.5));
   gl_FragColor = vec4(col, a);
 }`;
-/** The moon: a plain Mars-like disc with no face and no halo. It always faces the camera at the moon direction.
- * With `behind` the disc is drawn in the opaque pass (hard edge), before every prop, so trees and branches cover it. Without it
- * the disc is blended on top of the opaque props, which the Crypt's clear sky never shows. */
-export function Moon({ behind = false }: { behind?: boolean } = {}) {
+const forward = new Vector3();
+/**
+ * The moon: a plain Mars-like disc with no face. It always faces the camera at the moon direction, far away.
+ *
+ * With `behind` (a view depth in world units) the moon stands in the scene instead: the disc is placed at that depth, the same
+ * size on screen, and drawn with the depth test and depth writes. Everything nearer (the dark trees and their branches) covers
+ * it; everything farther (the trees fading into the fog) is hidden behind it.
+ * Without `behind` it stays at infinity and is drawn as before.
+ */
+export function Moon({ behind }: { behind?: number } = {}) {
+  const placed = behind !== undefined;
   const display = useDisplay();
   const group = useRef<Group>(null);
   const uniforms = useMemo(() => {
     const crypt = sceneColorsFor('crypt');
-    return { uLight: { value: crypt.moonLight.clone() }, uDark: { value: crypt.moonDark.clone() }, uCrisp: { value: 0 }, uCut: { value: behind ? 0.5 : 0 } };
+    return { uLight: { value: crypt.moonLight.clone() }, uDark: { value: crypt.moonDark.clone() }, uCrisp: { value: 0 }, uCut: { value: placed ? 0.5 : 0 } };
   }, []);
   useColorSync((c) => {
     uniforms.uLight.value.copy(c.moonLight);
@@ -79,15 +86,18 @@ export function Moon({ behind = false }: { behind?: boolean } = {}) {
     uniforms.uCrisp.value = crisp;
     const g = group.current;
     if (!g) return;
-    g.position.copy(camera.position).addScaledVector(display.moon, DISTANCE);
+    // At a view depth the moon is that far along the camera's forward axis, scaled down so it keeps its size on screen.
+    camera.getWorldDirection(forward);
+    const along = placed ? behind / Math.max(0.2, display.moon.dot(forward)) : DISTANCE;
+    g.position.copy(camera.position).addScaledVector(display.moon, along);
     g.quaternion.copy(camera.quaternion);
-    g.scale.setScalar(display.moonScale);
+    g.scale.setScalar(display.moonScale * (along / DISTANCE));
   });
   return (
     <group ref={group} renderOrder={-90}>
       <mesh renderOrder={-90}>
         <planeGeometry args={[radiusAt(MOON.discDeg) * 2, radiusAt(MOON.discDeg) * 2]} />
-        <shaderMaterial vertexShader={vertex} fragmentShader={discFragment} uniforms={uniforms} transparent={!behind} depthWrite={false} depthTest={false} toneMapped={false} fog={false} />
+        <shaderMaterial vertexShader={vertex} fragmentShader={discFragment} uniforms={uniforms} transparent={!placed} depthWrite={placed} depthTest={placed} toneMapped={false} fog={false} />
       </mesh>
     </group>
   );
