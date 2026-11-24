@@ -1,6 +1,7 @@
 import { createContext, useContext } from 'react';
 import { Vector3 } from 'three';
 import type { SceneState } from '../../../../lib/scene/meaning';
+import { moonDirection, moonDirectionAt, tangentBasis } from '../../../../lib/scene/sky';
 
 /**
  * What the scene shows right now. One mutable object, updated once per frame by the
@@ -33,10 +34,16 @@ export interface SceneDisplay {
   moon: Vector3;
   moonRight: Vector3;
   moonUp: Vector3;
+  /** The shown theme's moon: where it should appear on screen for a window shape, or null for the Crypt's moon. */
+  moonTarget: ((aspect: number) => { x: number; y: number }) | null;
+  /** Size of the moon disc, 1 is the Crypt's. */
+  moonScale: number;
   /** Raised each time the window shape changes, so parts can refresh what depends on it. */
   shapeVersion: number;
   /** Set when props change, so the shadows refresh at once. */
   shadowDirty: boolean;
+  /** Brightness of the lightning in the sky, 0 (none) to 1. Only the Haunted Castle sets it; the sky, the clouds and the lights read it. */
+  flash: number;
 }
 
 export function createDisplay(target: SceneState, reduced: boolean): SceneDisplay {
@@ -60,9 +67,24 @@ export function createDisplay(target: SceneState, reduced: boolean): SceneDispla
     moon: new Vector3(0.5, 0.2, -0.8),
     moonRight: new Vector3(1, 0, 0),
     moonUp: new Vector3(0, 1, 0),
+    moonTarget: null,
+    moonScale: 1,
     shapeVersion: 0,
     shadowDirty: true,
+    flash: 0,
   };
+}
+
+/** Points the moon (direction and the right and up directions around it) for a window shape, as the shown theme wants it. */
+export function aimMoon(display: SceneDisplay, aspect: number): void {
+  const dir = display.moonTarget ? moonDirectionAt(display.moonTarget(aspect), aspect) : moonDirection(aspect);
+  const { right, up } = tangentBasis(dir);
+  display.aspect = aspect;
+  display.moon.set(dir[0], dir[1], dir[2]);
+  display.moonRight.set(right[0], right[1], right[2]);
+  display.moonUp.set(up[0], up[1], up[2]);
+  display.shapeVersion++;
+  display.shadowDirty = true;
 }
 
 export const DisplayContext = createContext<SceneDisplay | null>(null);

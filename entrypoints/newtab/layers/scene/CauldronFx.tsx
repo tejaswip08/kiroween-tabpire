@@ -1,5 +1,5 @@
 import { useFrame } from '@react-three/fiber';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { AdditiveBlending, CircleGeometry, type Color, Mesh, ShaderMaterial } from 'three';
 import { sceneColorsFor } from './colors';
 import { useDisplay } from './display';
@@ -28,12 +28,20 @@ void main() {
  * comes from the scene's glows.
  */
 const LIQUID_LEVEL = 2.6;
-export function CauldronFx() {
+/** Where the liquid is drawn instead of at the Crypt's cauldron (the Witch's Forest): the centre of the surface and its radius. */
+export interface CauldronFxAt {
+  x: number;
+  y: number;
+  z: number;
+  radius: number;
+}
+export function CauldronFx({ at }: { at?: CauldronFxAt }) {
   const display = useDisplay();
   const { scene } = useSceneTheme();
   const pot = useMemo(() => scene.layout.scenery.cauldron, [scene.layout.scenery.cauldron]);
+  const radius = at?.radius ?? RADIUS;
   const liquid = useMemo(() => {
-    const g = new CircleGeometry(RADIUS, 32);
+    const g = new CircleGeometry(radius, 32);
     g.rotateX(-Math.PI / 2);
     const m = new ShaderMaterial({
       vertexShader: liquidVertex,
@@ -47,7 +55,16 @@ export function CauldronFx() {
     const mesh = new Mesh(g, m);
     mesh.renderOrder = 6;
     return mesh;
-  }, []);
+  }, [radius]);
+  // The Crypt's liquid lives as long as the Crypt scene, as before. A liquid placed with `at` is freed when it goes.
+  const placed = at !== undefined;
+  useEffect(() => {
+    if (!placed) return undefined;
+    return () => {
+      liquid.geometry.dispose();
+      (liquid.material as ShaderMaterial).dispose();
+    };
+  }, [placed, liquid]);
   useColorSync((c) => {
     ((liquid.material as ShaderMaterial).uniforms.uColor!.value as Color).copy(c.cauldron).multiplyScalar(LIQUID_LEVEL);
   });
@@ -56,7 +73,7 @@ export function CauldronFx() {
     (liquid.material as ShaderMaterial).uniforms.uTime!.value = t;
   });
   return (
-    <group position={[pot.x, pot.y - 0.1, pot.z]}>
+    <group position={at ? [at.x, at.y, at.z] : [pot.x, pot.y - 0.1, pot.z]}>
       <primitive object={liquid} />
     </group>
   );

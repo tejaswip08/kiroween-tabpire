@@ -9,7 +9,11 @@ import {
 import { DOOR_CLEARANCE, themeScene } from '../lib/scene/themeLayout';
 import { THEMES, THEME_IDS, themeById, type ThemeId } from '../lib/themes';
 import { WEATHER } from '../lib/scene/weather';
-const OTHERS = THEME_IDS.filter((t) => t !== 'crypt');
+import { UNIQUE_SCENES } from '../lib/scene/uniqueScenes';
+// The themes that are still built from a copy of the Crypt layout. A theme in UNIQUE_SCENES is its own scene and is
+// checked by tests/uniqueScenes.test.ts; the properties below are about the copy, so they skip it.
+const OTHERS = THEME_IDS.filter((t) => t !== 'crypt' && !UNIQUE_SCENES[t]);
+const MOVED = THEME_IDS.filter((t) => t !== 'crypt' && UNIQUE_SCENES[t]);
 const BASE_GROUPS: Placement['group'][] = ['path', 'gate', 'crypt', 'fence', 'newGrave', 'coffin', 'candle'];
 const seeds = fc.constantFrom(LAYOUT_SEED, 7, 99, 2024);
 const themed = (p: Placement) => p.group === 'themed';
@@ -27,8 +31,27 @@ const baseFor = (seed: number) => {
   return b;
 };
 
+describe('themes that are their own scene do not reuse the Crypt base', () => {
+  it.each(MOVED)('%s has no base placement, no base lights and no Crypt door', (id) => {
+    const out = themeScene(id).layout;
+    const base = layout();
+    const baseIds = new Set(base.placements.map((p) => p.id));
+    for (const p of out.placements) expect(baseIds.has(p.id), p.id).toBe(false);
+    for (const p of out.placements) expect(BASE_GROUPS, p.id).not.toContain(p.group);
+    expect(out.lights).not.toBe(base.lights);
+    expect(out.scenery).not.toBe(base.scenery);
+    expect(out.pathCentres).not.toBe(base.pathCentres);
+    expect(out.ghostSpots).not.toBe(base.ghostSpots);
+    expect(out.lights.every((l) => l.kind !== 'cryptDoor')).toBe(true);
+  });
+  it('the moved themes and the others together are the five themes', () => {
+    expect([...MOVED, ...OTHERS].sort()).toEqual(THEME_IDS.filter((t) => t !== 'crypt').sort());
+  });
+});
+
 describe('Property 10: theme layouts never disturb the base', () => {
-  it('keeps the base groups and the pinned trees unchanged for any seed', () => {
+  // Every theme is its own scene now, so no theme is built from a copy of the Crypt and the copy properties have nothing to check.
+  it.skipIf(OTHERS.length === 0)('keeps the base groups and the pinned trees unchanged for any seed', () => {
     fc.assert(
       fc.property(seeds, fc.constantFrom(...OTHERS), (seed, id) => {
         const base = baseFor(seed);
@@ -71,7 +94,7 @@ describe('Property 10: theme layouts never disturb the base', () => {
 });
 
 describe('Property 11: themed props fit the yard', () => {
-  it('places every themed prop inside the ground, clear of everything else, the path, the crypt door and the moon', () => {
+  it.skipIf(OTHERS.length === 0)('places every themed prop inside the ground, clear of everything else, the path, the crypt door and the moon', () => {
     fc.assert(
       fc.property(seeds, fc.constantFrom(...OTHERS), (seed, id) => {
         const s = themeScene(id, seed);
@@ -163,16 +186,15 @@ describe('Property 12: theme layouts are deterministic and complete', () => {
 
 describe('per-theme counts (design table)', () => {
   // Each entry: model, the number the table asks for, and the least that must be placed (some rules may find fewer spots).
-  const WANT: Record<Exclude<ThemeId, 'crypt'>, [string, number, number][]> = {
+  const WANT: Partial<Record<Exclude<ThemeId, 'crypt'>, [string, number, number][]>> = {
     pumpkin: [['farm_barn', 1, 1], ['farm_silo', 1, 1], ['farm_corn', 8, 6], ['farm_pumpkin', 6, 4], ['farm_fence', 3, 2]],
     forest: [['forest_mushroom_king', 2, 1], ['forest_potion_a', 1, 1], ['forest_potion_b', 1, 1], ['forest_rock_large', 2, 1], ['forest_rocks', 1, 1]],
     frost: [['frost_pine_a', 1, 1], ['frost_pine_b', 1, 1], ['frost_pines', 1, 1], ['frost_rock', 3, 2]],
     bloodmoon: [['blood_ruins', 1, 1], ['blood_column', 4, 3], ['blood_column_round', 3, 2], ['blood_pedestal', 2, 1]],
-    castle: [['castle_fortress', 1, 1], ['castle_wall_towers', 2, 1], ['castle_torch', 4, 3], ['castle_banner', 1, 1], ['castle_stone_wall', 2, 1]],
   };
   it.each(OTHERS)('%s places the design counts within tolerance', (id) => {
     const ps = themeScene(id).layout.placements;
-    for (const [model, want, least] of WANT[id as keyof typeof WANT]) {
+    for (const [model, want, least] of WANT[id as keyof typeof WANT] ?? []) {
       const n = ps.filter((p) => p.model === model && themed(p)).length;
       // Frozen Cemetery also swaps up to two trees for the pines.
       const extra = id === 'frost' && model.startsWith('frost_pine_') ? 2 : 0;
@@ -186,12 +208,12 @@ describe('per-theme counts (design table)', () => {
     const swapped = out.filter((p) => p.model.startsWith('frost_pine_') && layout().placements.some((b) => b.group === 'tree' && b.x === p.x && b.z === p.z));
     expect(swapped.length).toBeLessThanOrEqual(2);
   });
-  it('the castle has one glow and one weather anchor per lit torch, and no extra point lights', () => {
+  it('the castle has one weather anchor per torch (its own scene, see tests/castle.test.ts), and no other theme has any', () => {
     const s = themeScene('castle');
     const torches = s.layout.placements.filter((p) => p.model === 'castle_torch');
     expect(s.anchors).toHaveLength(torches.length);
     expect(s.layout.glows.filter((g) => g.kind === 'torch')).toHaveLength(torches.length);
-    expect(s.layout.lights).toBe(layout().lights);
+    expect(s.layout.lights).not.toBe(layout().lights);
     for (const id of THEME_IDS) if (id !== 'castle') expect(themeScene(id).anchors).toEqual([]);
   });
   it('returns the weather spec of the theme', () => {

@@ -65,9 +65,9 @@ void main() {
 /**
  * A flock of small 3D bats: a round body, ears, and two jointed wings with scalloped edges that beat up and
  * down. They fly loose loops around a drifting centre, bank into turns and are lit by the moon. One draw call.
- * A few are always out, and the tabs saved to the Crypt add more, up to 24.
+ * A few are always out, and the tabs saved to the Crypt add more, up to 24. `boost` scales the flock.
  */
-export function Bats() {
+export function Bats({ boost = 1 }: { boost?: number } = {}) {
   const display = useDisplay();
   const mesh = useMemo(() => {
     const geo = makeInstancedBat(CAPS.bats);
@@ -96,7 +96,8 @@ export function Bats() {
   useFrame(() => {
     const u = (mesh.material as ShaderMaterial).uniforms;
     u.uTime!.value = display.time;
-    u.uCount!.value = Math.max(7, display.bats);
+    // A unique theme may ask for a bigger flock (`boost` above 1), up to the 24 bats the mesh holds.
+    u.uCount!.value = boost === 1 ? Math.max(7, display.bats) : Math.min(CAPS.bats, Math.max(7, display.bats) * boost);
     (u.uMoon!.value as Vector3).copy(display.moon);
     if (lastShape.v !== display.shapeVersion) {
       lastShape.v = display.shapeVersion;

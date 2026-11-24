@@ -81,9 +81,14 @@ describe('the scene under another theme', () => {
     expect(before.length).toBeGreaterThan(6);
     const fogBefore = scene.fog as THREE.FogExp2;
     expect(near(fogBefore.color, sceneColorsFor('crypt').fog)).toBe(true);
-    const ids = before.map((m) => m.uuid);
-    const objects = before.map((m) => m.uniforms);
-    const uniformObjs = before.map((m) => Object.values(m.uniforms));
+    // Frost is a unique scene: its clouds are laid out for its own moon size and the Crypt's wisps (uColor) are not in it, so those
+    // two are built again. Every other layer keeps its mesh, material and uniform objects.
+    const rebuilt = (m: Mat) => 'uTint' in m.uniforms || Object.keys(m.uniforms).join() === 'uColor';
+    const kept = before.filter((m) => !rebuilt(m));
+    expect(kept.length).toBe(before.length - 2);
+    const ids = kept.map((m) => m.uuid);
+    const objects = kept.map((m) => m.uniforms);
+    const uniformObjs = kept.map((m) => Object.values(m.uniforms));
     const meshes: THREE.Object3D[] = [];
     scene.traverse((o) => meshes.push(o));
     const crypt = sceneColorsFor('crypt');
@@ -94,7 +99,7 @@ describe('the scene under another theme', () => {
       root!.render(<Scene id="frost" />);
     });
     const frost = sceneColorsFor('frost');
-    const after = shaderMaterials(scene);
+    const after = shaderMaterials(scene).filter((m) => ids.includes(m.uuid));
     expect(after.map((m) => m.uuid)).toEqual(ids);
     after.forEach((m, i) => {
       expect(m.uniforms).toBe(objects[i]);
@@ -102,7 +107,11 @@ describe('the scene under another theme', () => {
     });
     const meshesAfter: THREE.Object3D[] = [];
     scene.traverse((o) => meshesAfter.push(o));
-    expect(meshesAfter).toEqual(meshes);
+    // The meshes of the layers that stay are the same objects (the ghosts move to the new spots on the same mesh).
+    for (const o of meshes) {
+      const m = (o as THREE.Mesh).material as Mat | undefined;
+      if (!m || !('uniforms' in m) || !rebuilt(m)) expect(meshesAfter).toContain(o);
+    }
     expect(scene.fog).toBe(fogBefore);
     expect(near(fogBefore.color, frost.fog)).toBe(true);
     // The values moved to the frost colours.
@@ -110,9 +119,10 @@ describe('the scene under another theme', () => {
     expect(near(sky.uniforms.uMid!.value, frost.skyMid)).toBe(true);
     const moon = after.find((m) => 'uLight' in m.uniforms)!;
     expect(near(moon.uniforms.uLight!.value, frost.moonLight)).toBe(true);
-    const clouds = after.find((m) => 'uTint' in m.uniforms)!;
+    const afterAll = shaderMaterials(scene);
+    const clouds = afterAll.find((m) => 'uTint' in m.uniforms)!;
     expect(near(clouds.uniforms.uBody!.value, frost.cloudBody)).toBe(true);
-    const low = after.find((m) => 'uFogColor' in m.uniforms)!;
+    const low = afterAll.find((m) => 'uFogColor' in m.uniforms)!;
     expect(near(low.uniforms.uBody!.value, frost.lowCloud)).toBe(true);
     // The shared colour sets are not changed.
     expect(near(sceneColorsFor('crypt').skyTop, crypt.skyTop)).toBe(true);

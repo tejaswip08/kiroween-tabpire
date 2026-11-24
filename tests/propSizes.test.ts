@@ -8,7 +8,9 @@ import { loadGlbGeometry } from './helpers/glb';
 import { bakeSkinned, collectParts, compose } from '../entrypoints/newtab/layers/scene/ModelBatch';
 import { MODELS, modelInfo, type ModelId, type Placement } from '../lib/scene/layout';
 import { themeScene } from '../lib/scene/themeLayout';
-import { THEME_IDS } from '../lib/themes';
+import { UNIQUE_SCENES } from '../lib/scene/uniqueScenes';
+import { MAX_SINK } from '../lib/scene/uniqueScenes/frostIce';
+import { THEME_IDS, type ThemeId } from '../lib/themes';
 
 const scenes = new Map<ModelId, Promise<Object3D>>();
 const sceneOf = (id: ModelId) => {
@@ -40,7 +42,29 @@ describe('Quaternius props are drawn at their catalogue size', () => {
       const reach = 2 * Math.hypot(info.hx, info.hz) * p.scale * 1.15 + 0.1;
       expect(b.max.x - b.min.x, `${theme} ${p.id} width`).toBeLessThanOrEqual(reach);
       expect(b.max.z - b.min.z, `${theme} ${p.id} depth`).toBeLessThanOrEqual(reach);
-      expect(b.max.y, `${theme} ${p.id} top`).toBeLessThanOrEqual(info.h * p.scale * 1.15 + 0.1);
+      // A prop on a platform the scene draws itself (the Blood Moon ruins) stands that much higher.
+      const raised = themeScene(theme).unique?.raised?.[p.id] ?? 0;
+      expect(b.max.y - raised, `${theme} ${p.id} top`).toBeLessThanOrEqual(info.h * p.scale * 1.15 + 0.1);
+    }
+  }, 60_000);
+});
+
+// Rule 5 of the unique scenes: every model's lowest point sits on the ground (from its bounding box after scaling).
+describe('Quaternius props of the unique themes stand on the ground', () => {
+  it.each(Object.keys(UNIQUE_SCENES) as ThemeId[])('%s', async (theme) => {
+    const placed = themeScene(theme).layout.placements.filter((p) => MODELS[p.model].source === 'quaternius');
+    expect(placed.length).toBeGreaterThan(0);
+    // One box per model and scale is enough: the lowest point does not depend on where the prop stands.
+    for (const p of placed) {
+      const b = await worldBox(p);
+      const spec = themeScene(theme).unique!;
+      // A prop on a platform the scene draws itself stands on its top. A flagged leaning prop (a sunk column) goes into the
+      // ground by its lean, which `spec.sunk` bounds by MAX_SINK.
+      const raised = spec.raised?.[p.id] ?? 0;
+      const lowest = spec.sunk?.[p.id] === undefined ? b.min.y - raised : b.min.y;
+      const floor = spec.sunk?.[p.id] === undefined ? -0.05 : -(MAX_SINK + 0.05);
+      expect(lowest, `${theme} ${p.id} (${p.model}) lowest point ${b.min.y.toFixed(3)}`).toBeGreaterThanOrEqual(floor);
+      expect(lowest, `${theme} ${p.id} (${p.model}) lowest point ${b.min.y.toFixed(3)}`).toBeLessThanOrEqual(0.05);
     }
   }, 60_000);
 });

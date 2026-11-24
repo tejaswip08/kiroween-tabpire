@@ -3,8 +3,7 @@ import { useEffect, useMemo } from 'react';
 import { onSceneEvent } from '../../../../lib/scene/bus';
 import { LOOK } from '../../../../lib/scene/config';
 import { approach, sceneState, type SceneInputs } from '../../../../lib/scene/meaning';
-import { moonDirection, tangentBasis } from '../../../../lib/scene/sky';
-import type { SceneDisplay } from './display';
+import { aimMoon, type SceneDisplay } from './display';
 
 const EASE = LOOK.stateEaseRate;
 /** A number within this of its target snaps to it, so easing ends and frames can be saved. */
@@ -27,14 +26,7 @@ export function SceneDriver({ inputs, display }: { inputs: SceneInputs; display:
   // The moon sits where the window leaves room for it, so its direction depends on the shape.
   useEffect(() => {
     const aspect = size.width > 0 && size.height > 0 ? size.width / size.height : 16 / 9;
-    const dir = moonDirection(aspect);
-    const { right, up } = tangentBasis(dir);
-    display.aspect = aspect;
-    display.moon.set(dir[0], dir[1], dir[2]);
-    display.moonRight.set(right[0], right[1], right[2]);
-    display.moonUp.set(up[0], up[1], up[2]);
-    display.shapeVersion++;
-    display.shadowDirty = true;
+    aimMoon(display, aspect);
     invalidate();
   }, [size.width, size.height, display, invalidate]);
 

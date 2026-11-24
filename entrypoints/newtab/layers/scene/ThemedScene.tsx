@@ -4,6 +4,9 @@ import type { ThemeId } from '../../../../lib/themes';
 import { themeFiles } from './preloadThemes';
 import { SceneContents } from './SceneContents';
 import { SceneThemeContext, sceneThemeFor } from './themeColors';
+import { MoonAim } from './themes/MoonAim';
+import { THEME_SCENES } from './themes';
+import { ThemeSceneRoot } from './themes/ThemeSceneRoot';
 
 /**
  * How a theme switch keeps the old scene on screen until the new one is ready (Requirement 11.9).
@@ -66,7 +69,8 @@ export function useThemeGate(themeId: ThemeId, load: ThemeLoader, enabled = true
 
 /**
  * The scene of the Active_Theme. The theme data changes only when the new scene can be drawn, in one commit,
- * so the canvas is never empty. There is no cross-fade, so reduced motion gets the same hard cut.
+ * so the canvas is never empty. A unique theme (one in `THEME_SCENES`) loads its files inside the same Suspense, so it
+ * keeps the old scene on screen exactly as the others do. There is no cross-fade, so reduced motion gets the same hard cut.
  */
 export function ThemedScene({
   themeId,
@@ -84,5 +88,12 @@ export function ThemedScene({
   const gated = useThemeGate(themeId, load, mode === 'gate');
   const shown = mode === 'gate' ? gated : deferred;
   const value = useMemo(() => sceneThemeFor(shown), [shown]);
-  return <SceneThemeContext value={value}>{scene ?? <SceneContents />}</SceneThemeContext>;
+  // The Crypt, and a theme that has no scene of its own yet, draw the Crypt scene. A unique theme draws its own.
+  const own = shown !== 'crypt' && THEME_SCENES[shown] !== undefined;
+  return (
+    <SceneThemeContext value={value}>
+      <MoonAim id={shown} />
+      {scene ?? (own ? <ThemeSceneRoot id={shown} /> : <SceneContents />)}
+    </SceneThemeContext>
+  );
 }

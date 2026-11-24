@@ -8,6 +8,8 @@ import {
   layout, FLAT_GROUPS, type Group, type Layout, type ModelId, type Placement, type WarmSource,
 } from './layout';
 import { mulberry32 } from './rng';
+import { UNIQUE_SCENES } from './uniqueScenes';
+import { layoutOf, type UniqueSceneSpec } from './uniqueScenes/types';
 
 export interface ThemeScene {
   /** Same type as `buildLayout()` returns. For the Crypt it is `layout()` itself. */
@@ -17,6 +19,8 @@ export interface ThemeScene {
   /** Torch tops, where the castle embers rise. */
   readonly anchors: { x: number; y: number; z: number }[];
   readonly weather: WeatherSpec | null;
+  /** The spec of a unique theme scene (its ground, path, moon, layers and extras). Missing for the Crypt and for themes not moved yet. */
+  readonly unique?: UniqueSceneSpec;
 }
 
 /** One seed per theme. The base stream (`LAYOUT_SEED`) is never used here. */
@@ -77,6 +81,12 @@ export function themeScene(id: ThemeId, seed: number = LAYOUT_SEED): ThemeScene 
 
 function build(id: ThemeId, seed: number): ThemeScene {
   const theme = themeById(id);
+  // A unique theme is its own scene: its spec gives the layout, the model files, the anchors and the weather.
+  const unique = id === 'crypt' ? undefined : UNIQUE_SCENES[id];
+  if (unique) {
+    const spec = unique(seed);
+    return { layout: layoutOf(spec), models: spec.models, anchors: spec.anchors, weather: spec.weather, unique: spec };
+  }
   const base = seed === LAYOUT_SEED ? layout() : buildLayout(seed);
   const weather = theme.weather ? WEATHER[theme.weather] : null;
   if (id === 'crypt') return { layout: base, models: modelsOf(base.placements), anchors: [], weather };

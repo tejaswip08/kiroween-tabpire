@@ -5,7 +5,7 @@
 import { _roots, createRoot, extend } from '@react-three/fiber';
 import * as THREE from 'three';
 import fc from 'fast-check';
-import { act, Suspense, useLayoutEffect } from 'react';
+import { act, Suspense, useLayoutEffect, type ReactNode } from 'react';
 import { renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -45,6 +45,8 @@ const ctl = vi.hoisted(() => {
   };
 });
 
+// A unique theme draws the shared layers, and the post-processing composer needs a real GL context.
+vi.mock('../../entrypoints/newtab/layers/scene/Effects', () => ({ Effects: () => null }));
 vi.mock('@react-three/drei', () => {
   const one = (url: string) => {
     const e = ctl.entry(url);
@@ -63,10 +65,12 @@ import { createDisplay, DisplayContext } from '../../entrypoints/newtab/layers/s
 import { resetModelWarnings } from '../../entrypoints/newtab/layers/scene/ModelBatch';
 import { themeFiles } from '../../entrypoints/newtab/layers/scene/preloadThemes';
 import { Props } from '../../entrypoints/newtab/layers/scene/Props';
+import { ThemeSceneRoot } from '../../entrypoints/newtab/layers/scene/themes/ThemeSceneRoot';
 import { THEME_SWITCH, ThemedScene, useThemeGate, type ThemeLoader } from '../../entrypoints/newtab/layers/scene/ThemedScene';
 import { sceneThemeFor, useSceneTheme } from '../../entrypoints/newtab/layers/scene/themeColors';
 import { sceneState } from '../../lib/scene/meaning';
-import { MODELS } from '../../lib/scene/layout';
+import { MODELS, modelFile } from '../../lib/scene/layout';
+import { UNIQUE_SCENES } from '../../lib/scene/uniqueScenes';
 import { THEME_IDS, type ThemeId } from '../../lib/themes';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -102,6 +106,12 @@ const TestScene = (
     <Props />
   </>
 );
+/** The scene of the unique-theme tests: a unique theme draws its own scene root, the others draw the marker scene. */
+function UniqueOrProbe() {
+  const { id } = useSceneTheme();
+  return id in UNIQUE_SCENES ? <ThemeSceneRoot id={id} /> : TestScene;
+}
+let sceneNode: ReactNode = TestScene;
 
 /** The gate's loader in the tests: resolves when every file of the theme has settled, a failed file included. */
 const loads: ThemeId[] = [];
@@ -118,7 +128,7 @@ function element(id: ThemeId, mode: Mode) {
   return (
     <DisplayContext.Provider value={display}>
       <Suspense fallback={<mesh name="fallback" />}>
-        <ThemedScene themeId={id} mode={mode} load={testLoader} scene={TestScene} />
+        <ThemedScene themeId={id} mode={mode} load={testLoader} scene={sceneNode} />
       </Suspense>
     </DisplayContext.Provider>
   );
@@ -159,6 +169,8 @@ const onlyIn = (a: ThemeId, b: ThemeId): string[] => {
 const swallow = (e: ErrorEvent) => e.preventDefault();
 beforeEach(() => {
   window.addEventListener('error', swallow);
+  sceneNode = TestScene;
+  vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(null as never);
   ctl.reset();
   mounted.length = 0;
   loads.length = 0;
@@ -282,6 +294,61 @@ describe.each<Mode>(['deferred', 'gate'])('a theme switch with %s', (mode) => {
       { numRuns: 12 },
     );
   }, 60_000);
+});
+
+describe.each<Mode>(['deferred', 'gate'])('a unique theme switch with %s', (mode) => {
+  const names = (): Set<string> => {
+    const out = new Set<string>();
+    sceneRoot().traverse((o) => out.add(o.name));
+    return out;
+  };
+  it('loads exactly the files of its spec, so the gate and the idle preload fetch them', () => {
+    const spec = sceneThemeFor('pumpkin').scene.unique!;
+    expect(themeFiles('pumpkin')).toEqual(spec.models.map(modelFile));
+    expect(themeFiles('pumpkin').length).toBeGreaterThan(5);
+  });
+  it('keeps the old scene until every file of the unique scene has loaded, then shows the whole scene', async () => {
+    sceneNode = <UniqueOrProbe />;
+    await mount('crypt', mode);
+    expect(snapshot().markers).toEqual(['marker-crypt']);
+    const before = snapshot();
+
+    ctl.state.holds = new Set(onlyIn('pumpkin', 'crypt'));
+    await show('pumpkin', mode);
+    for (let i = 0; i < 3; i++) {
+      const during = snapshot();
+      expect(during.markers).toEqual(['marker-crypt']);
+      expect([...during.meshes].sort()).toEqual([...before.meshes].sort());
+      expect(names().has('windmill-sails')).toBe(false);
+      await flush();
+    }
+
+    ctl.release();
+    await flush();
+    const after = snapshot();
+    expect(after.markers).toEqual([]);
+    for (const n of ['windmill-sails', 'scarecrow', 'theme-ground']) expect(names().has(n), n).toBe(true);
+    for (const m of drawn('pumpkin').filter((m) => m !== 'farm_windmill')) expect(after.meshes.has(m), m).toBe(true);
+    // The Crypt's props are gone.
+    for (const m of drawn('crypt').filter((m) => !sceneModels('pumpkin').includes(m))) expect(after.meshes.has(m), m).toBe(false);
+  });
+  it('still completes when one file of the unique scene fails', async () => {
+    sceneNode = <UniqueOrProbe />;
+    await mount('crypt', mode);
+    const farmOnly = onlyIn('pumpkin', 'crypt');
+    const broken = themeFiles('pumpkin').find((u) => u.endsWith('farm_corn.glb'))!;
+    ctl.state.holds = new Set(farmOnly);
+    ctl.state.fails.add(broken);
+    await show('pumpkin', mode);
+    expect(snapshot().markers).toEqual(['marker-crypt']);
+    ctl.release();
+    await flush();
+    const after = snapshot();
+    expect(after.markers).toEqual([]);
+    expect(after.meshes.has('farm_corn')).toBe(false);
+    expect(after.meshes.has('farm_barn')).toBe(true);
+    expect(names().has('scarecrow')).toBe(true);
+  });
 });
 
 describe('useThemeGate', () => {

@@ -47,7 +47,7 @@ describe('sceneColorsFor', () => {
       const keys = Object.keys(themeById(id).scene).sort();
       const set = sceneColorsFor(id);
       expect(Object.keys(set).sort()).toEqual(keys);
-      for (const k of keys) expect(set[k as keyof typeof set].isColor).toBe(true);
+      for (const k of keys) expect(set[k as keyof typeof set]!.isColor).toBe(true);
       expect(sceneColorsFor(id)).toBe(set);
     }
   });

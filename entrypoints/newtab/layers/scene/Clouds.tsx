@@ -1,10 +1,11 @@
 import { useFrame } from '@react-three/fiber';
 import { useMemo } from 'react';
 import { Color, InstancedBufferAttribute, InstancedMesh, PlaneGeometry, ShaderMaterial, Vector3 } from 'three';
+import { FLASH_BOOST } from '../../../../lib/scene/lightning';
 import { cloudPuffs } from '../../../../lib/scene/sky';
 import { sceneColorsFor } from './colors';
 import { useDisplay } from './display';
-import { useColorSync } from './themeColors';
+import { useColorSync, useSceneTheme } from './themeColors';
 
 const vertex = /* glsl */ `
 attribute vec4 aA; attribute vec4 aB; attribute vec4 aC;
@@ -32,7 +33,7 @@ void main() {
 }`;
 const fragment = /* glsl */ `
 varying vec2 vUv; varying float vShade; varying float vFade;
-uniform vec3 uBody; uniform vec3 uTint;
+uniform vec3 uBody; uniform vec3 uTint; uniform float uFlash; uniform vec3 uFlashColor;
 void main() {
   vec2 p = (vUv - 0.5) * 2.0;
   float r = length(p);
@@ -44,13 +45,17 @@ void main() {
   vec3 body = uBody + vShade * vec3(0.018, 0.015, 0.03);
   body += vec3(0.02, 0.02, 0.04) * smoothstep(-0.2, 0.9, p.y);
   vec3 col = mix(body, uTint, smoothstep(0.1, 1.0, vUv.x) * 0.3);
+  // Lightning lights the clouds up a little (a brightness change only; zero for every theme but the castle).
+  col += uFlashColor * uFlash;
   gl_FragColor = vec4(col, a);
 }`;
 
 /** Dark, soft clouds made of nine overlapping puffs each, drifting slowly. One draw call. */
 export function Clouds() {
   const display = useDisplay();
-  const puffs = useMemo(() => cloudPuffs(), []);
+  // A bigger moon (a unique theme) pushes the lanes above and below it further away, so no cloud crosses it.
+  const moonScale = useSceneTheme().scene.unique?.moon.scale ?? 1;
+  const puffs = useMemo(() => cloudPuffs(moonScale), [moonScale]);
   const mesh = useMemo(() => {
     const geo = new PlaneGeometry(1, 1);
     const a = new Float32Array(puffs.length * 4);
@@ -70,6 +75,8 @@ export function Clouds() {
       uniforms: { uTime: { value: 0 }, uMoon: { value: new Vector3() }, uRight: { value: new Vector3() }, uUp: { value: new Vector3() },
         uBody: { value: sceneColorsFor('crypt').cloudBody.clone() },
         uTint: { value: sceneColorsFor('crypt').cloudTint.clone() },
+        uFlash: { value: 0 },
+        uFlashColor: { value: new Color(...FLASH_BOOST.cloud) },
       },
       transparent: true,
       depthWrite: false,
@@ -88,6 +95,7 @@ export function Clouds() {
   useFrame(() => {
     const u = (mesh.material as ShaderMaterial).uniforms;
     u.uTime!.value = display.time;
+    u.uFlash!.value = display.flash ?? 0;
     (u.uMoon!.value as Vector3).copy(display.moon);
     (u.uRight!.value as Vector3).copy(display.moonRight);
     (u.uUp!.value as Vector3).copy(display.moonUp);

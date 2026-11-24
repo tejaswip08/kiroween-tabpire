@@ -4,6 +4,7 @@ import { Component, useEffect, useMemo, type ReactNode } from 'react';
 import {
   Box3, BufferAttribute, type BufferGeometry, Color, Euler, InstancedMesh, Matrix4, type Material, Mesh, type MeshStandardMaterial, type Object3D, Quaternion, type SkinnedMesh, Texture, Vector3,
 } from 'three';
+import { mergeVertices } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { MODELS, modelFile, modelInfo, type Group, type ModelId, type Placement } from '../../../../lib/scene/layout';
 import { useDisplay, type SceneDisplay } from './display';
 
@@ -142,6 +143,58 @@ export function collectParts(root: Object3D, tint = false, glow = false, only?: 
 
 // ----- Frozen Cemetery: pale blue-white pines, snow on top (Requirement 9.3) -----
 
+/** The farm pumpkin: its body is the orange part. It is shaded smooth with darker ribs (`shadePumpkin`). */
+export const isFarmPumpkin = (id: string): boolean => id === 'farm_pumpkin';
+const RIB_LIGHT = new Color('#f58a2a');
+const RIB_DARK = new Color('#a8420e');
+/**
+ * Smooth orange shading for the farm pumpkin. The file stores every triangle with its own flat normal, which shows as a
+ * checkerboard of light and dark facets. This welds the corners, smooths the normals, and paints each corner by how far its
+ * surface turns away from the pumpkin's axis (ribs facing out stay orange, the grooves between them go darker), and a little
+ * darker toward the bottom. The shared file material is never changed: the body gets a copy. The copies are in `owned`.
+ */
+export function shadePumpkin(parts: readonly Part[]): { parts: Part[]; owned: Owned } {
+  const owned: Owned = { materials: [], geometries: [] };
+  const c = new Color();
+  const out = parts.map((p) => {
+    if ((p.material as MeshStandardMaterial).name !== 'Orange') return p;
+    const stripped = p.geometry.clone();
+    stripped.deleteAttribute('normal');
+    stripped.deleteAttribute('uv');
+    const geometry = mergeVertices(stripped, 1e-4);
+    stripped.dispose();
+    geometry.computeVertexNormals();
+    geometry.computeBoundingBox();
+    const pos = geometry.getAttribute('position');
+    const nrm = geometry.getAttribute('normal');
+    const box = geometry.boundingBox!;
+    const span = Math.max(box.max.y - box.min.y, 1e-6);
+    const colors = new Float32Array(pos.count * 3);
+    for (let i = 0; i < pos.count; i++) {
+      const x = pos.getX(i);
+      const z = pos.getZ(i);
+      const nx = nrm.getX(i);
+      const nz = nrm.getZ(i);
+      const r = Math.hypot(x, z) || 1;
+      const n = Math.hypot(nx, nz) || 1;
+      // 1 on a rib's crest (the surface faces straight out), lower in a groove (it faces sideways).
+      const facing = (x * nx + z * nz) / (r * n);
+      const rib = Math.min(1, Math.max(0, (facing - 0.55) / 0.4));
+      const low = Math.min(1, Math.max(0, (pos.getY(i) - box.min.y) / span / 0.5));
+      c.copy(RIB_DARK).lerp(RIB_LIGHT, 0.3 + 0.7 * rib).multiplyScalar(0.72 + 0.28 * low);
+      colors.set([c.r, c.g, c.b], i * 3);
+    }
+    geometry.setAttribute('color', new BufferAttribute(colors, 3));
+    const material = (p.material as MeshStandardMaterial).clone();
+    material.color.set('#ffffff');
+    material.vertexColors = true;
+    material.roughness = 0.55;
+    owned.materials.push(material);
+    owned.geometries.push(geometry);
+    return { geometry, material, local: p.local };
+  });
+  return { parts: out, owned };
+}
 export const isFrost = (id: string): boolean => id.startsWith('frost_');
 
 export const FROST = {
@@ -225,12 +278,49 @@ export function tintFrost(parts: readonly Part[], trunks: boolean): { parts: Par
   return { parts: out, owned };
 }
 
+/**
+ * A scene's own look for a model, so the same file can look different from the Crypt's copy of it: which mesh parts to draw
+ * (the bare bark of a tree without its leaf clumps) and a colour that multiplies the texture (a near-black silhouette).
+ */
+export interface ModelLook {
+  only?: readonly string[];
+  color: string;
+  emissive?: string;
+  emissiveIntensity?: number;
+}
+/** A copy of each material with the look's colours. The geometry and textures are shared with the file; the copies are in `owned`. */
+export function tintLook(parts: readonly Part[], look: ModelLook): { parts: Part[]; owned: Owned } {
+  const owned: Owned = { materials: [], geometries: [] };
+  const mats = new Map<Material, Material>();
+  const out = parts.map((p) => {
+    let material = mats.get(p.material);
+    if (!material) {
+      material = p.material.clone();
+      const std = material as MeshStandardMaterial;
+      std.color?.set(look.color);
+      if (look.emissive) std.emissive?.set(look.emissive);
+      if (look.emissiveIntensity !== undefined && 'emissiveIntensity' in std) std.emissiveIntensity = look.emissiveIntensity;
+      mats.set(p.material, material);
+      owned.materials.push(material);
+    }
+    return { geometry: p.geometry, material, local: p.local };
+  });
+  return { parts: out, owned };
+}
 /** The instanced meshes of one model: one per mesh part, every placement of the model in each. */
-export function buildBatches(id: ModelId, root: Object3D, placements: readonly Placement[]): { batches: Batch[]; owned: Owned } {
+export function buildBatches(id: ModelId, root: Object3D, placements: readonly Placement[], look?: ModelLook): { batches: Batch[]; owned: Owned } {
   const info = modelInfo(id);
-  let parts = collectParts(root, id.startsWith('path_'), id.startsWith('forest_mushroom'), info.parts, info.recentre === true);
+  let parts = collectParts(root, id.startsWith('path_'), id.startsWith('forest_mushroom'), look?.only ?? info.parts, info.recentre === true);
   let owned: Owned = { materials: [], geometries: [] };
-  if (isFrost(id)) {
+  if (look) {
+    const t = tintLook(parts, look);
+    parts = t.parts;
+    owned = t.owned;
+  } else if (isFarmPumpkin(id)) {
+    const t = shadePumpkin(parts);
+    parts = t.parts;
+    owned = t.owned;
+  } else if (isFrost(id)) {
     const t = tintFrost(parts, id.startsWith('frost_pine'));
     parts = t.parts;
     owned = t.owned;
@@ -290,7 +380,7 @@ const warned = new Set<string>();
 export const resetModelWarnings = (): void => warned.clear();
 
 /** One model's boundary: a file that fails to load logs its name once and draws nothing. The rest of the scene stays. */
-class ModelBoundary extends Component<{ id: ModelId; children: ReactNode }, { failed: boolean }> {
+export class ModelBoundary extends Component<{ id: ModelId; children: ReactNode }, { failed: boolean }> {
   override state = { failed: false };
   static getDerivedStateFromError() {
     return { failed: true };
@@ -307,14 +397,14 @@ class ModelBoundary extends Component<{ id: ModelId; children: ReactNode }, { fa
 }
 
 /** One model of a theme's props, instanced. Suspends while the file loads. */
-export function ModelBatch({ id, placements }: { id: ModelId; placements: readonly Placement[] }) {
+export function ModelBatch({ id, placements, look }: { id: ModelId; placements: readonly Placement[]; look?: ModelLook }) {
   const display = useDisplay();
   const gltf = useGLTF(modelFile(id), false, true);
   const built = useMemo(() => {
     const root = Array.isArray(gltf) ? gltf[0]!.scene : gltf.scene;
-    const { batches, owned } = buildBatches(id, root, placements);
+    const { batches, owned } = buildBatches(id, root, placements, look);
     return { batches, owned, dynamic: dynamicOf(batches) };
-  }, [gltf, id, placements]);
+  }, [gltf, id, placements, look]);
   useEffect(() => () => disposeBatches(built.batches, built.owned), [built]);
   const last = useMemo<LastCounts>(() => ({ newGraves: -1, coffins: -1, candles: -1 }), []);
   useFrame(() => stepDynamic(built.dynamic, display, last));
@@ -333,10 +423,10 @@ export function ModelBatch({ id, placements }: { id: ModelId; placements: readon
  * keeps the old scene on screen until every file of the new theme has loaded, instead of committing the new
  * scene with its props missing (Requirement 11.1, 11.3).
  */
-export function SafeModelBatch({ id, placements }: { id: ModelId; placements: readonly Placement[] }) {
+export function SafeModelBatch({ id, placements, look }: { id: ModelId; placements: readonly Placement[]; look?: ModelLook }) {
   return (
     <ModelBoundary id={id}>
-      <ModelBatch id={id} placements={placements} />
+      <ModelBatch id={id} placements={placements} look={look} />
     </ModelBoundary>
   );
 }

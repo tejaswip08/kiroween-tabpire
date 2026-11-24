@@ -6,6 +6,7 @@ import { MODELS, buildLayout, modelFile, modelInfo, type ModelId } from '../lib/
 import { EXTRAS } from '../lib/scene/depth';
 import { themeScene } from '../lib/scene/themeLayout';
 import { weatherDraws, weatherTriangles } from '../lib/scene/weather';
+import type { UniqueSceneSpec } from '../lib/scene/uniqueScenes/types';
 import { THEME_IDS, type ThemeId } from '../lib/themes';
 
 const ROOT = join(__dirname, '..', 'public', 'models');
@@ -135,20 +136,36 @@ describe('vampire budget', () => {
   });
 });
 
-/** The plan of one theme: triangles (shadow pass and two per weather particle) and draw calls. */
+/** Draw calls of the shared layers a unique theme turns on (the sky, the moon, the glows and the post passes are always on). */
+function sharedDraws(u: UniqueSceneSpec): number {
+  const o = OTHER_DRAWS;
+  return (
+    o.skyDome + o.moon + o.glowPools + o.flameGlows + o.postPasses +
+    (u.layers.clouds ? o.clouds : 0) + (u.layers.witch ? o.witch : 0) + (u.layers.bats > 0 ? o.bats : 0) +
+    (u.layers.ghosts ? o.ghosts : 0) + (u.layers.mist ? o.mist : 0) + (u.layers.embers ? o.embers : 0)
+  );
+}
+
+/**
+ * The plan of one theme: triangles (shadow pass and two per weather particle) and draw calls. The Crypt and the themes
+ * not yet moved count the Crypt's extras and every shared layer. A unique theme counts its placements (with the shadow
+ * pass), its own `extras`, the shared layers it turns on and its weather.
+ */
 function plan(id: ThemeId) {
-  const { layout: lay, weather } = themeScene(id);
+  const { layout: lay, weather, unique } = themeScene(id);
   const counts = new Map<ModelId, number>();
   for (const p of lay.placements) counts.set(p.model, (counts.get(p.model) ?? 0) + 1);
-  let tris = Object.values(EXTRAS).reduce((sum, e) => sum + e.tris, 0) + weatherTriangles(weather);
-  let draws = Object.values(OTHER_DRAWS).reduce((a, b) => a + b, 0) + Object.values(EXTRAS).reduce((a, e) => a + e.calls, 0) + weatherDraws(weather);
+  let tris = (unique ? unique.extras.tris : Object.values(EXTRAS).reduce((sum, e) => sum + e.tris, 0)) + weatherTriangles(weather);
+  let draws =
+    (unique ? sharedDraws(unique) + unique.extras.calls : Object.values(OTHER_DRAWS).reduce((a, b) => a + b, 0) + Object.values(EXTRAS).reduce((a, e) => a + e.calls, 0)) +
+    weatherDraws(weather);
   for (const [m, n] of counts) {
     const t = MODELS[m].tris * n;
     tris += t + (MODELS[m].shadow ? t : 0);
     const parts = modelInfo(m).parts?.length ?? measured.get(m)!.parts;
     draws += parts + (MODELS[m].shadow ? parts : 0);
   }
-  return { lay, weather, counts, tris, draws };
+  return { lay, weather, counts, tris, draws, unique };
 }
 
 describe.each(THEME_IDS)('budget of theme %s (Property 13)', (id) => {
@@ -174,6 +191,28 @@ describe.each(THEME_IDS)('budget of theme %s (Property 13)', (id) => {
   });
   it('lists every model with a file in its model list', () => {
     expect([...themeScene(id).models].sort()).toEqual([...counts.keys()].filter(hasFile).sort());
+  });
+});
+
+describe.each(THEME_IDS.filter((id) => themeScene(id).unique))('the plan of unique theme %s', (id) => {
+  const { unique, tris, draws, counts, weather } = plan(id);
+  it('counts its placements with the shadow pass, its extras, the shared layers it turns on and its weather', () => {
+    let props = 0;
+    for (const [m, n] of counts) props += MODELS[m].tris * n * (MODELS[m].shadow ? 2 : 1);
+    expect(props).toBeGreaterThan(0);
+    expect(tris).toBe(props + unique!.extras.tris + weatherTriangles(weather));
+    const parts = [...counts.keys()].reduce((sum, m) => sum + (modelInfo(m).parts?.length ?? measured.get(m)!.parts) * (MODELS[m].shadow ? 2 : 1), 0);
+    expect(draws).toBe(parts + sharedDraws(unique!) + unique!.extras.calls + weatherDraws(weather));
+  });
+  it('never counts the Crypt village and critters', () => {
+    const cryptExtras = Object.values(EXTRAS).reduce((sum, e) => sum + e.tris, 0);
+    expect(unique!.extras.tris).toBeLessThan(cryptExtras);
+  });
+  it('stays within the budgets', () => {
+    expect(tris).toBeLessThanOrEqual(BUDGET.sceneTriangles);
+    expect(draws).toBeLessThanOrEqual(BUDGET.sceneDrawCalls);
+    expect(unique!.lights.length).toBeLessThanOrEqual(BUDGET.maxPointLights);
+    expect(weather!.count).toBeLessThanOrEqual(2000);
   });
 });
 

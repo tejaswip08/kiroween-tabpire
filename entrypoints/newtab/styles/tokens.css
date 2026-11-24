@@ -121,9 +121,9 @@
 
 /* Witch's Forest */
 :root[data-theme='forest'] {
-  --sky-top: #04100c;
-  --sky-bottom: #123a30;
-  --sky-glow: rgba(31, 184, 122, 0.2);
+  --sky-top: #2a0808;
+  --sky-bottom: #1f4530;
+  --sky-glow: rgba(255, 90, 28, 0.22);
   --vignette: rgba(0, 0, 0, 0.6);
   --ink: #e9f7ef;
   --ink-dim: #b4d0c2;

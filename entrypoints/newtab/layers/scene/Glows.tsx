@@ -95,7 +95,7 @@ export function Glows() {
     sources.forEach((s, i) => {
       const k = s.kind === 'candle' && s.slot !== undefined ? Math.min(1, Math.max(0, display.candles - s.slot)) : 1;
       const f = flicker(t, i + 11, display.reduced);
-      const r = POOL_RADIUS[s.kind] * k * (0.94 + 0.06 * f);
+      const r = POOL_RADIUS[s.kind] * (s.size ?? 1) * k * (0.94 + 0.06 * f);
       p.set(s.x, 0.06, s.z);
       sc.set(r, 1, r);
       pools.setMatrixAt(i, m4.compose(p, q, sc));
@@ -104,7 +104,7 @@ export function Glows() {
     flames.forEach((s, i) => {
       const k = s.kind === 'candle' && s.slot !== undefined ? Math.min(1, Math.max(0, display.candles - s.slot)) : 1;
       const f = flicker(t, i + 3, display.reduced);
-      const size = FLAME_SIZE[s.kind] * k * f;
+      const size = FLAME_SIZE[s.kind] * (s.size ?? 1) * k * f;
       p.set(s.x, s.y, s.z);
       sc.set(size, size, size);
       flameMesh.setMatrixAt(i, m4.compose(p, q, sc));

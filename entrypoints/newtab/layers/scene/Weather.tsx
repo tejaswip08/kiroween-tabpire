@@ -31,9 +31,14 @@ void main() {
     base = 14.0;
   #elif defined(KIND_LEAVES)
     float t = fract(ph + uTime * (0.02 + aSeed.w * 0.012));
-    p = vec3(x + sin(uTime * 0.6 + ph * 40.0) * 3.0 + t * 4.0, 14.0 * (1.0 - t), z + cos(uTime * 0.5 + ph * 30.0) * 2.0);
+    // Most leaves come off the big tree's canopy at the left and drift down over the lane; the rest fall over the whole yard.
+    float canopy = step(aSeed.w, 0.65);
+    float lx = mix(x, -11.0 + aSeed.x * 15.0, canopy);
+    float lz = mix(z, -4.0 + aSeed.y * 12.0, canopy);
+    float top = mix(14.0, 9.0, canopy);
+    p = vec3(lx + sin(uTime * 0.6 + ph * 40.0) * 2.0 + t * 3.0, top * (1.0 - t), lz + cos(uTime * 0.5 + ph * 30.0) * 1.5);
     angle = ph * 6.2832 + uTime * (0.8 + aSeed.w);
-    base = 18.0; alpha = 1.0;
+    base = 22.0; alpha = 1.0;
   #else
     float k = floor(aSeed.x * uAnchorCount * 0.9999);
     vec3 a = uAnchors[int(k)];

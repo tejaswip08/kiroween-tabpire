@@ -21,10 +21,22 @@ export function moonDirection(aspect: number): Vec3 {
   return directionAt(t.x, t.y, cameraAt(0, aspect, true));
 }
 
+/** Direction of a moon that should appear at screen position `target`, for a window shape. */
+export function moonDirectionAt(target: { x: number; y: number }, aspect: number): Vec3 {
+  return directionAt(target.x, target.y, cameraAt(0, aspect, true));
+}
+
 /** Radius of the moon's disc and halo as a fraction of the window height. */
 export function moonScreenRadius(aspect: number): { disc: number; halo: number } {
   const tanH = Math.tan((fovForAspect(aspect) * Math.PI) / 360);
   const r = (deg: number) => Math.tan((deg * Math.PI) / 180) / tanH / 2;
+  return { disc: r(MOON.discDeg), halo: r(MOON.haloDeg) };
+}
+
+/** Radius of a moon drawn `scale` times as big as the Crypt's, as a fraction of the window height. */
+export function moonScreenRadiusScaled(aspect: number, scale: number): { disc: number; halo: number } {
+  const tanH = Math.tan((fovForAspect(aspect) * Math.PI) / 360);
+  const r = (deg: number) => Math.tan((deg * scale * Math.PI) / 180) / tanH / 2;
   return { disc: r(MOON.discDeg), halo: r(MOON.haloDeg) };
 }
 
@@ -120,9 +132,9 @@ export const PUFFS_PER_CLOUD = 9;
  * Nine soft puffs for every cloud: a row of broad flat puffs for the base and rounder humps
  * above them, tallest in the middle. The scene draws them overlapping into one cloud shape.
  */
-export function cloudPuffs(): CloudPuff[] {
+export function cloudPuffs(moonScale = 1): CloudPuff[] {
   const out: CloudPuff[] = [];
-  CLOUD_LANES.forEach((lane, li) => {
+  cloudLanesFor(moonScale).forEach((lane, li) => {
     lane.clouds.forEach((c, ci) => {
       for (let k = 0; k < PUFFS_PER_CLOUD; k++) {
         const f = k / (PUFFS_PER_CLOUD - 1) - 0.5;
@@ -146,6 +158,22 @@ export function cloudPuffs(): CloudPuff[] {
     });
   });
   return out;
+}
+/**
+ * The cloud lanes for a moon `scale` times as big as the Crypt's. The lanes above and below the moon move away from it
+ * so no cloud comes closer than `MOON_KEEP_OUT_DEG * scale`; the lanes to its left end further left. A scale of 1 or less
+ * returns `CLOUD_LANES` itself, so the Crypt is unchanged.
+ */
+export function cloudLanesFor(scale: number): readonly Lane[] {
+  if (scale <= 1) return CLOUD_LANES;
+  const keep = MOON_KEEP_OUT_DEG * scale;
+  return CLOUD_LANES.map((lane) => {
+    const b = Math.max(...lane.clouds.map((c) => c.b));
+    const a = Math.max(...lane.clouds.map((c) => c.a));
+    if (lane.uMax < -20) return { ...lane, uMax: Math.min(lane.uMax, -(keep + a + 2)) };
+    const need = keep + b * 1.2 + 1;
+    return Math.abs(lane.v) >= need ? lane : { ...lane, v: Math.sign(lane.v) * need };
+  });
 }
 export const CLOUD_COUNT = CLOUD_LANES.reduce((n, l) => n + l.clouds.length, 0);
 /** Smallest distance from the moon's centre to a point on the cloud's outline. */

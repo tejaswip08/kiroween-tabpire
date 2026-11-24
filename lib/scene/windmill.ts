@@ -4,6 +4,10 @@
 
 /** The body reaches to z = 0.30 and the sails start at z = 0.36 (model space, after its node transform). */
 export const FRONT_Z = 0.335;
+/** The sails are a round plane around this point (model space). Front triangles outside this circle (the door, the steps and
+ * the posts at the foot of the tower) belong to the body: if they turned with the sails they would fly around as loose debris. */
+export const SAIL_CENTRE = { x: 0, y: 0.92 };
+export const SAIL_RADIUS = 0.69;
 
 export interface Split {
   /** Triangle corners (three indices per triangle). */
@@ -20,7 +24,10 @@ export function splitBlades(positions: ArrayLike<number>, index: ArrayLike<numbe
     const a = at(t);
     const b = at(t + 1);
     const c = at(t + 2);
-    const inFront = (positions[a * 3 + 2]! + positions[b * 3 + 2]! + positions[c * 3 + 2]!) / 3 > frontZ;
+    const z = (positions[a * 3 + 2]! + positions[b * 3 + 2]! + positions[c * 3 + 2]!) / 3;
+    const x = (positions[a * 3]! + positions[b * 3]! + positions[c * 3]!) / 3;
+    const y = (positions[a * 3 + 1]! + positions[b * 3 + 1]! + positions[c * 3 + 1]!) / 3;
+    const inFront = z > frontZ && y > 0.31 && Math.hypot(x - SAIL_CENTRE.x, y - SAIL_CENTRE.y) < SAIL_RADIUS;
     (inFront ? blades : body).push(a, b, c);
   }
   return { blades, body };
@@ -37,3 +44,6 @@ export function hubOf(positions: ArrayLike<number>, corners: number[]): { x: num
   }
   return { x: (minX + maxX) / 2, y: (minY + maxY) / 2, z: (minZ + maxZ) / 2 };
 }
+
+/** How far the windmill body's lowest point is below y = 0 in the file (model space). A placement lifts the model by this times its scale. */
+export const WINDMILL_FOOT = 0.0278;

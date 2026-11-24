@@ -14,7 +14,7 @@ export const GROUND = { minX: -30, maxX: 30, minZ: -40, maxZ: 12, tile: 4 } as c
 export type ModelId = keyof typeof MODELS;
 export type Group =
   | 'ground' | 'path' | 'crypt' | 'gate' | 'fence' | 'tree' | 'oldGrave' | 'newGrave'
-  | 'coffin' | 'candle' | 'lantern' | 'pumpkin' | 'small' | 'critter' | 'themed';
+  | 'coffin' | 'candle' | 'lantern' | 'pumpkin' | 'small' | 'critter' | 'themed' | 'centre';
 
 export interface ModelInfo {
   /** Half size of the footprint on the ground (from the model's bounding box). */
@@ -96,6 +96,10 @@ export const MODELS = {
   farm_silo: q(1.83, 1.75, 9.02, 1346),
   farm_corn: q(0.41, 0.55, 1.99, 734),
   farm_pumpkin: q(0.75, 0.76, 0.93, 644),
+  // The hay bale is tiny in its file (0.12 wide), so it is placed at a scale of 6 to 8. The windmill's box includes its sails (hx);
+  // its body sits 0.028 below y = 0 in the file, so a placement lifts it by `WINDMILL_FOOT` times its scale.
+  farm_hay: q(0.0605, 0.0624, 0.179, 488),
+  farm_windmill: q(0.668, 0.471, 1.583, 1712),
   farm_fence: q(2.95, 0.083, 1.09, 180),
   forest_potion_a: q(0.36, 0.36, 1.23, 1510),
   forest_potion_b: q(0.33, 0.33, 0.95, 1292),
@@ -114,6 +118,8 @@ export const MODELS = {
   castle_torch: { ...q(0.34, 0.33, 2.49, 610), recentre: true },
   castle_banner: q(1.18, 0.11, 3.8, 560),
   castle_stone_wall: q(0.78, 0.12, 0.44, 184),
+  // The wall flag hangs below its own origin (y from -2.31 to 0.05), so it is `recentre`d: the lowest point of the cloth to y = 0, the footprint centre to x = 0, z = 0.
+  castle_wall_flag: { ...q(0.563, 0.161, 2.354, 349), recentre: true },
   // The small open coffin (public/models/coffin.glb), used for the coffins that follow the data.
   coffin_open: { hx: 0.287, hz: 0.419, h: 0.325, tris: 256, shadow: false, source: 'custom' },
   // Things drawn by the scene's own code. They are in the catalogue so nothing is placed on top of them.
@@ -154,6 +160,8 @@ export interface WarmSource {
   z: number;
   /** For candles: which candle slot this flame belongs to. */
   slot?: number;
+  /** Makes the flame and the pool of light smaller or bigger than usual (1 is usual). */
+  size?: number;
 }
 
 export interface Scenery {

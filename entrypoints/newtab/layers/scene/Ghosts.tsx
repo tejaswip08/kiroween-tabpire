@@ -1,5 +1,5 @@
-import { useFrame } from '@react-three/fiber';
-import { useMemo } from 'react';
+import { useFrame, useThree } from '@react-three/fiber';
+import { useLayoutEffect, useMemo } from 'react';
 import { Color, FrontSide, InstancedMesh, LatheGeometry, Matrix4, ShaderMaterial, Vector2 } from 'three';
 import { LOOK } from '../../../../lib/scene/config';
 import { sceneColorsFor } from './colors';
@@ -70,10 +70,10 @@ void main() {
 
 const GHOST_BODY = 0.95;
 /**
- * Cute mint-green ghosts with hollow eyes, floating over the graves. Two are always out, and a Crypt
+ * Cute mint-green ghosts with hollow eyes, floating over the graves (a theme may pass a `tint`). Two are always out, and a Crypt
  * with items shows a third. They bob and sway, and always turn to face the camera.
  */
-export function Ghosts() {
+export function Ghosts({ tint }: { tint?: string } = {}) {
   const display = useDisplay();
   const { scene } = useSceneTheme();
   const mesh = useMemo(() => {
@@ -92,19 +92,28 @@ export function Ghosts() {
       fog: false,
     });
     const m = new InstancedMesh(ghostGeometry(), mat, MAX_GHOSTS);
-    const mat4 = new Matrix4();
-    scene.layout.ghostSpots.slice(0, MAX_GHOSTS).forEach((g, i) => {
-      mat4.makeTranslation(g.x, g.y - HEIGHT / 2 + 0.4, g.z);
-      m.setMatrixAt(i, mat4);
-    });
     m.frustumCulled = false;
     m.renderOrder = 4;
     return m;
-  }, [scene.layout.ghostSpots]);
+  }, []);
+  // The spots follow the shown theme. A theme switch moves the ghosts; it never builds a new mesh.
+  const invalidate = useThree((s) => s.invalidate);
+  useLayoutEffect(() => {
+    const mat4 = new Matrix4();
+    scene.layout.ghostSpots.slice(0, MAX_GHOSTS).forEach((g, i) => {
+      mat4.makeTranslation(g.x, g.y - HEIGHT / 2 + 0.4, g.z);
+      mesh.setMatrixAt(i, mat4);
+    });
+    mesh.instanceMatrix.needsUpdate = true;
+    invalidate();
+  }, [mesh, scene.layout.ghostSpots, invalidate]);
+  // A theme may tint its ghosts (Frozen Cemetery: icy blue); without a tint they keep the palette's ghost colour.
+  const tinted = useMemo(() => (tint ? new Color(tint) : null), [tint]);
   useColorSync((c) => {
     const u = (mesh.material as ShaderMaterial).uniforms;
-    (u.uBody!.value as Color).copy(c.ghost).multiplyScalar(GHOST_BODY);
-    (u.uRim!.value as Color).copy(c.ghost).multiplyScalar(LOOK.glow.ghostRim);
+    const base = tinted ?? c.ghost;
+    (u.uBody!.value as Color).copy(base).multiplyScalar(GHOST_BODY);
+    (u.uRim!.value as Color).copy(base).multiplyScalar(LOOK.glow.ghostRim);
   });
   useFrame(() => {
     const u = (mesh.material as ShaderMaterial).uniforms;

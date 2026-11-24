@@ -4,7 +4,7 @@ import type { Group } from 'three';
 import { MOON } from '../../../../lib/scene/sky';
 import { sceneColorsFor } from './colors';
 import { useDisplay } from './display';
-import { useColorSync } from './themeColors';
+import { useColorSync, useSceneTheme } from './themeColors';
 
 const DISTANCE = 300;
 const radiusAt = (deg: number) => DISTANCE * Math.tan((deg * Math.PI) / 180);
@@ -17,7 +17,7 @@ void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(
 // bloom threshold (0.95), so Bloom never picks it up.
 const discFragment = /* glsl */ `
 varying vec2 vUv;
-uniform vec3 uLight; uniform vec3 uDark;
+uniform vec3 uLight; uniform vec3 uDark; uniform float uCrisp;
 float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
 float noise(vec2 p) {
   vec2 i = floor(p); vec2 f = fract(p); f = f * f * (3.0 - 2.0 * f);
@@ -39,7 +39,7 @@ void main() {
   vec2 p = (vUv - 0.5) * 2.0;
   float r = length(p);
   // A very thin soft edge, about two pixels wide.
-  float aa = fwidth(r) * 1.5;
+  float aa = fwidth(r) * mix(1.5, 1.0, uCrisp);
   float a = 1.0 - smoothstep(1.0 - aa, 1.0, r);
   if (a <= 0.0) discard;
   float z = sqrt(max(1.0 - r * r, 0.0));
@@ -47,16 +47,16 @@ void main() {
   vec3 light = uLight;
   vec3 dark = uDark;
   // Patchy darker markings: broad noise with a soft edge, plus fine grain.
-  float patches = smoothstep(0.45, 0.62, fbm(p * 2.1 + 5.0));
-  float grain = fbm(p * 8.0) - 0.5;
-  vec3 col = mix(light, dark, patches * 0.75);
+  float patches = smoothstep(mix(0.45, 0.5, uCrisp), mix(0.62, 0.56, uCrisp), fbm(p * 2.1 + 5.0));
+  float grain = (fbm(p * 8.0) - 0.5) * mix(1.0, 0.35, uCrisp);
+  vec3 col = mix(light, dark, patches * mix(0.75, 0.6, uCrisp));
   col *= 1.0 + 0.22 * grain;
   float c = crater(p, vec2(-0.38, 0.28), 0.18) + crater(p, vec2(0.36, -0.34), 0.15) + crater(p, vec2(0.44, 0.3), 0.09)
           + crater(p, vec2(-0.2, -0.52), 0.1) + crater(p, vec2(0.05, 0.12), 0.06);
   col *= 1.0 + c;
   // Sphere shading: a little light from the upper left, and a darker limb.
   col *= 0.85 + 0.2 * dot(normalize(vec3(p, z)), normalize(vec3(-0.35, 0.4, 0.85)));
-  col *= mix(0.4, 1.0, pow(z, 0.5));
+  col *= mix(mix(0.4, 0.85, uCrisp), 1.0, pow(z, 0.5));
   gl_FragColor = vec4(col, a);
 }`;
 /** The moon: a plain Mars-like disc with no face and no halo. It always faces the camera at the moon direction. */
@@ -65,17 +65,21 @@ export function Moon() {
   const group = useRef<Group>(null);
   const uniforms = useMemo(() => {
     const crypt = sceneColorsFor('crypt');
-    return { uLight: { value: crypt.moonLight.clone() }, uDark: { value: crypt.moonDark.clone() } };
+    return { uLight: { value: crypt.moonLight.clone() }, uDark: { value: crypt.moonDark.clone() }, uCrisp: { value: 0 } };
   }, []);
   useColorSync((c) => {
     uniforms.uLight.value.copy(c.moonLight);
     uniforms.uDark.value.copy(c.moonDark);
   });
+  // A theme may ask for a crisp disc (sharp patches, firm edge).
+  const crisp = useSceneTheme().scene.unique?.moon.crisp ? 1 : 0;
   useFrame(({ camera }) => {
+    uniforms.uCrisp.value = crisp;
     const g = group.current;
     if (!g) return;
     g.position.copy(camera.position).addScaledVector(display.moon, DISTANCE);
     g.quaternion.copy(camera.quaternion);
+    g.scale.setScalar(display.moonScale);
   });
   return (
     <group ref={group} renderOrder={-90}>

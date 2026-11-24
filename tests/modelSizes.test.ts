@@ -33,7 +33,7 @@ async function measure(id: ModelId) {
 
 describe('Quaternius model sizes match the files', () => {
   it('covers the new theme models', () => {
-    for (const id of ['farm_barn', 'forest_rocks', 'frost_pine_a', 'blood_ruins', 'castle_torch', 'castle_stone_wall'] as ModelId[]) {
+    for (const id of ['farm_barn', 'forest_rocks', 'frost_pine_a', 'blood_ruins', 'castle_torch', 'castle_stone_wall', 'castle_wall_flag', 'farm_hay', 'farm_windmill'] as ModelId[]) {
       expect(ids).toContain(id);
     }
   });

@@ -68,7 +68,8 @@ describe('themes', () => {
           const v = t.scene[key] as unknown;
           expect(typeof v === 'string' ? HEX.test(v) : isLinear3(v), `${id}.${key}`).toBe(true);
         }
-        expect(Object.keys(t.scene).sort()).toEqual([...SCENE_KEYS].sort());
+        // A two-tone sky (the Witch's Forest) adds a glow colour for each side; every other theme has exactly the Crypt's keys.
+        expect(Object.keys(t.scene).filter((k) => k !== 'skyLeft' && k !== 'skyRight').sort()).toEqual([...SCENE_KEYS].sort());
         for (const name of SURFACE_TOKENS) {
           const v = t.surface[`--${name}`];
           expect(typeof v === 'string' && v.length > 0, `${id} --${name}`).toBe(true);
