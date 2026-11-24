@@ -3,6 +3,7 @@
 // Coordinates: x right, y up, z toward the camera (the camera is at z = 16).
 import type { Footprint } from '../layout';
 import { mulberry32 } from '../rng';
+import { FOREST_MID_CALLS, type Midground } from './forestHouse';
 // ---------- the fire ----------
 export interface Flame {
   /** Offset from the middle of the fire on the ground. */
@@ -188,7 +189,7 @@ export interface Thorn {
   rotY: number;
   scale: number;
 }
-export const SCARY_COUNT = 40;
+export const SCARY_COUNT = 28;
 export const THORN_COUNT = 70;
 export const LOG_COUNT = 12;
 export const LOG_TRIS = 120;
@@ -266,6 +267,8 @@ export interface ForestParts {
   logs: Thorn[];
   /** More crooked crosses and tombstones, scattered over the empty ground (the first few are `graves`). */
   moreGraves: Grave[];
+  /** The middle and the back of the scene: far trees, tree-line, stumps, logs, crosses and rolling bumps (see `forestHouse.ts`). */
+  mid: Midground;
 }
 /** The two colours the whole scene pivots on: a hot red-orange on the left and an eerie green on the right. */
 export const TWO_TONE = { left: '#ff5a1c', right: '#35e08a' } as const;
@@ -281,5 +284,5 @@ export const FOREST_PARTS = {
   graveTris: 700,
   liquidTris: 32,
   /** Ground, trail, flames, sparks, tufts, plants, graves, three scarecrows, ghosts, wisp, liquid, three scary trees, thorns, logs, more graves. */
-  calls: 20,
+  calls: 20 + FOREST_MID_CALLS,
 };

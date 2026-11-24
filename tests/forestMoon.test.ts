@@ -9,6 +9,7 @@ import { moonScreenRadiusScaled } from '../lib/scene/sky';
 import { themeScene } from '../lib/scene/themeLayout';
 import { FOREST_MOON, FOREST_MOON_DEPTH } from '../lib/scene/uniqueScenes/forest';
 import { buildScaryTree } from '../entrypoints/newtab/layers/scene/themes/forestShapes';
+import { buildFarTree } from '../entrypoints/newtab/layers/scene/themes/witchHouseShapes';
 const BARK: Record<string, string> = { forest_twisted_a: 'TwistedTree_2_1', forest_twisted_b: 'TwistedTree_1_1', forest_twisted_c: 'TwistedTree_3_1' };
 it('shows the moon behind a few branches, never hidden, at every window shape', async () => {
   const spec = themeScene('forest').unique!;
@@ -31,6 +32,13 @@ it('shows the moon behind a few branches, never hidden, at every window shape', 
     const mesh = new Mesh(scaryGeo[t.variant]!, mat);
     mesh.matrixAutoUpdate = false; mesh.matrix.compose(new Vector3(t.x, 0, t.z), new Quaternion().setFromEuler(new Euler(0, t.rotY, 0)), new Vector3(t.scale, t.scale, t.scale)); mesh.matrixWorld.copy(mesh.matrix);
     meshes.push({ mesh, name: `scary @${t.x.toFixed(1)},${t.z.toFixed(1)}` });
+  }
+  // The small far trees and the black trees in front of the moon (the cheap shape the scene draws them with).
+  const farGeo = [0, 1, 2].map(buildFarTree);
+  for (const t of [...spec.forest!.mid.farTrees, ...spec.forest!.mid.moonTrees]) {
+    const mesh = new Mesh(farGeo[t.variant]!, mat);
+    mesh.matrixAutoUpdate = false; mesh.matrix.compose(new Vector3(t.x, 0, t.z), new Quaternion().setFromEuler(new Euler(0, t.rotY, 0)), new Vector3(t.scale, t.scale, t.scale)); mesh.matrixWorld.copy(mesh.matrix);
+    meshes.push({ mesh, name: `far @${t.x.toFixed(1)},${t.z.toFixed(1)}` });
   }
   for (const aspect of [16 / 10, 16 / 9, 1.93, 21 / 9]) {
     const cam = cameraAt(0, aspect, true);

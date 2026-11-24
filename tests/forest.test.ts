@@ -14,7 +14,7 @@ import { MODELS, type Placement } from '../lib/scene/layout';
 import { themeScene } from '../lib/scene/themeLayout';
 import { UNIQUE_SCENES } from '../lib/scene/uniqueScenes';
 import {
-  FOREST_MOON, FOREST_MOON_DEPTH, HERO, JACK, LAYERS, PLACEMENT_TRI_LIMIT, TRAIL_HALF_WIDTH, TREE_LEAN, buildWitchsForest, cauldronFxAt, planTriangles,
+  FOREST_MOON, FOREST_MOON_DEPTH, HERO, WITCH_HOUSE, JACK, LAYERS, PLACEMENT_TRI_LIMIT, TRAIL_HALF_WIDTH, TREE_LEAN, buildWitchsForest, cauldronFxAt, planTriangles,
 } from '../lib/scene/uniqueScenes/forest';
 import {
   BOB_HEIGHT, CAULDRON, FIRE, FLAME_COUNT, FLAME_TRIS, FOREST_PARTS, GRAVES, GHOSTS, PLANT_TRIS, SCARECROWS, SWAY_AMPLITUDE, SCARY_COUNT, SCARY_TREE_TRIS, SCARY_VARIANTS, THORN_COUNT, THORN_TRIS,
@@ -23,6 +23,8 @@ import {
 import { VIEW_ASPECTS, distToPath, solidFootprint, type UniqueSceneSpec } from '../lib/scene/uniqueScenes/types';
 import { themeById } from '../lib/themes';
 import { weatherTriangles } from '../lib/scene/weather';
+import { moonScreenRadiusScaled } from '../lib/scene/sky';
+import { TREE_LINE_Z } from '../lib/scene/uniqueScenes/forestHouse';
 const spec = themeScene('forest').unique!;
 const forest = spec.forest!;
 const trees = spec.placements.filter((p) => p.model.startsWith('forest_twisted'));
@@ -375,14 +377,18 @@ describe('the cauldron and the mushrooms', () => {
     expect(c.g).toBeGreaterThan(c.r);
   });
   it('has only a few small glowing mushrooms by it, and no giant ones, potions or pale rocks', () => {
-    expect(shrooms.length).toBeGreaterThanOrEqual(3);
-    expect(shrooms.length).toBeLessThanOrEqual(5);
+    const byPot = shrooms.filter((m) => Math.hypot(m.x - pot.x, m.z - pot.z) < 4);
+    expect(byPot.length).toBeGreaterThanOrEqual(3);
+    expect(byPot.length).toBeLessThanOrEqual(5);
     for (const m of shrooms) {
-      expect(m.scale).toBeLessThanOrEqual(1.4);
-      expect(Math.hypot(m.x - pot.x, m.z - pot.z)).toBeLessThan(4);
-      expect(spec.glows.some((g) => g.kind === 'mushroom' && g.x === m.x && g.z === m.z)).toBe(true);
+      expect(m.scale).toBeLessThanOrEqual(1.6);
+      // Each cluster has at least its first mushroom glowing.
+      if (byPot.includes(m)) expect(spec.glows.some((g) => g.kind === 'mushroom' && g.x === m.x && g.z === m.z)).toBe(true);
     }
-    for (const id of ['forest_mushroom_king', 'forest_potion_a', 'forest_potion_b', 'forest_rock_large', 'forest_rocks'] as const) expect(spec.models).not.toContain(id);
+    expect(spec.glows.filter((g) => g.kind === 'mushroom').length).toBeGreaterThan(byPot.length);
+    // The rocks are the mossy ones of the middle ground (tinted green by the scene), never in the foreground or on the lane to the house.
+    for (const id of ['forest_mushroom_king', 'forest_potion_a', 'forest_potion_b'] as const) expect(spec.models).not.toContain(id);
+    for (const r of spec.placements.filter((p) => p.model === 'forest_rocks' || p.model === 'forest_rock_large')) expect(r.z, r.id).toBeLessThan(-6);
   });
 });
 describe('the colour and the light', () => {
@@ -421,30 +427,37 @@ describe('the colour and the light', () => {
   });
 });
 describe('the moon, and no clouds or Crypt sky life', () => {
-  it('shows a big moon in the upper right that the branches may cross, and turns the other sky layers off', () => {
+  it('shows a big pale yellow-green moon low behind the house, below the search box, that the branches may cross, and turns the other sky layers off', () => {
     expect(spec.layers.moon).not.toBe(false);
     expect(spec.moon).toBe(FOREST_MOON);
     expect(FOREST_MOON.seeThrough).toBe(true);
-    expect(FOREST_MOON.scale).toBeGreaterThan(1);
+    expect(FOREST_MOON.crisp).toBe(true);
+    expect(FOREST_MOON.scale).toBeGreaterThan(1.2);
     for (const aspect of VIEW_ASPECTS) {
       const t = FOREST_MOON.target(aspect);
-      expect(t.x).toBeGreaterThan(0.7);
-      expect(t.y).toBeLessThan(0.3);
+      // On the middle of the screen, low: its top stays below the search box (which ends near 0.24 of the height).
+      expect(t.x).toBeGreaterThan(0.45);
+      expect(t.x).toBeLessThan(0.62);
+      expect(t.y - moonScreenRadiusScaled(aspect, FOREST_MOON.scale).disc).toBeGreaterThan(0.235);
+      expect(t.y).toBeLessThan(0.42);
     }
     expect(spec.layers.clouds).toBe(false);
     expect(spec.layers.witch).toBe(false);
     expect(spec.layers.bats).toBe(0);
     expect(spec.layers.mist).toBe(true);
     expect(spec.weather!.kind).toBe('fireflies');
-    // It stands behind the near and middle trees and in front of the back row that fades into the fog.
+    // It stands behind everything the scene builds: the house, the trees and the tree-line.
     for (const aspect of VIEW_ASPECTS) {
-      const depth = (t: Placement) => onScreen(aspect, t.x, 0, t.z).depth;
-      const back = trees.filter((t) => t.z < -26);
-      expect(back.length).toBeGreaterThan(3);
-      for (const t of back) expect(depth(t), t.id).toBeGreaterThan(FOREST_MOON_DEPTH + 3);
-      expect(trees.filter((t) => depth(t) < FOREST_MOON_DEPTH).length).toBeGreaterThanOrEqual(8);
-      expect(forest.scary.every((t) => onScreen(aspect, t.x, 0, t.z).depth < FOREST_MOON_DEPTH + 6)).toBe(true);
+      const depth = (t: { x: number; z: number }) => onScreen(aspect, t.x, 0, t.z).depth;
+      for (const t of [...trees, ...forest.scary, ...forest.mid.farTrees, ...forest.mid.moonTrees]) expect(depth(t)).toBeLessThan(FOREST_MOON_DEPTH);
+      expect(depth({ x: 0, z: TREE_LINE_Z })).toBeLessThan(FOREST_MOON_DEPTH);
+      expect(depth(WITCH_HOUSE)).toBeLessThan(FOREST_MOON_DEPTH - 30);
     }
+    // The disc is pale yellow-green (not red); the sky glow colour stays the fire's red.
+    const [r, g, b] = themeById('forest').scene.moonLight;
+    expect(g).toBeGreaterThan(r);
+    expect(r).toBeGreaterThan(b);
+    expect(Math.max(r, g, b)).toBeLessThan(0.95);
     const m = hue(themeById('forest').scene.moon);
     expect(m.r).toBeGreaterThan(m.g * 2);
   });

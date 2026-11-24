@@ -12,19 +12,25 @@ import {
   CAULDRON, FIRE, FLAME_COUNT, FLAME_TRIS, FOREST_PARTS, GHOSTS, GRAVES, MUSHROOMS, PLANT_TRIS, SCARECROWS, SOUP_LEVEL,
   SOUP_RADIUS, SPARK_COUNT, TUFT_TRIS, WISP, SCARY_TREE_TRIS, THORN_TRIS, LOG_TRIS, EXTRA_GRAVE_TRIS, flames, scaryGround, grass, graveFootprint, scarecrowFootprint, type ForestParts,
 } from './forestParts';
+import { HOUSE_FOOTPRINT, HOUSE_LANE, MOON_DEPTH, forestMidground, midgroundTris } from './forestHouse';
 import { Placer, VIEW_ASPECTS, modelsOf, sampleLine, solidFootprint, type UniqueMoon, type UniqueSceneSpec } from './types';
 export { CAULDRON, FIRE };
+export { WITCH_HOUSE } from './forestHouse';
 /** Added to the caller's seed, so this theme has its own random stream. */
 export const FOREST_SEED = 7211;
 /**
- * How far (view depth) the moon stands in the forest: behind the near and middle trees, in front of the trees that fade into
- * the fog at the back (they start at about 43), so the dark branches cross it and the fogged wall never hides it.
+ * How far (view depth) the moon stands in the forest: behind the witch's house, the trees and the tree-line, so the dark
+ * branches cross it and the cottage stands in front of it.
  */
-export const FOREST_MOON_DEPTH = 38;
-/** A big blood-red moon in the upper right, behind the branches and the green mist. */
+export const FOREST_MOON_DEPTH = MOON_DEPTH;
+/**
+ * A large pale yellow-green full moon, low in the sky right behind the witch's house, below the search box and the header.
+ * It is a crisp disc with soft patches and no wide halo. Its lower part sinks into the ground fog.
+ */
 export const FOREST_MOON: UniqueMoon = {
-  target: (aspect) => ({ x: aspect > 2 ? 0.76 : 0.82, y: 0.2 }),
-  scale: 1.25,
+  target: (aspect) => ({ x: aspect > 2 ? 0.53 : 0.54, y: 0.37 }),
+  scale: 1.4,
+  crisp: true,
   // The branches of the dark trees cross in front of it, so it shows through the gaps.
   seeThrough: true,
 };
@@ -59,7 +65,7 @@ export const CROWN_SHIFT: Record<'forest_twisted_a' | 'forest_twisted_b' | 'fore
 export const CROWN_REACH = 2.5;
 /** The dirt path winds from the bottom centre of the screen to the misty distance. */
 const TRAIL: [number, number][] = [
-  [0.6, 13], [-0.4, 9], [1.3, 4.5], [2.0, 0], [0.5, -4.5], [-1.2, -9.5], [-0.9, -15], [0.6, -21], [1.0, -26],
+  [0.6, 13], [-0.4, 9], [1.3, 4.5], [2.0, 0], [0.5, -4.5], [-1.2, -9.5], [-0.9, -15], [0.6, -21], [1.0, -26], [2.0, -28.5], [1.3, -32.2],
 ];
 export const TRAIL_HALF_WIDTH = 1.5;
 /** The twisted trees. */
@@ -75,7 +81,7 @@ export const HERO = { model: 'forest_twisted_a' as const, x: -7.4, z: -0.6, rotY
 /** The big jack-o'-lantern beside the fire. */
 export const JACK = { x: -2.9, z: 5.2, rotY: 0.35, scale: 1.5 };
 /** The tree at the end of the trail that closes the tunnel: the centrepiece, on the middle of the screen, in the fog. */
-const TUNNEL_END = { model: 'forest_twisted_c' as const, x: 1.2, z: -31.5, rotY: Math.PI, scale: 1.6 };
+const TUNNEL_END = { model: 'forest_twisted_c' as const, x: -13, z: -31, rotY: 0, scale: 1.6 };
 /** Triangles of the placements (the shadow pass counted) the whole scene may reach. Own parts and weather add under 20,000 to the 200,000 plan. */
 export const PLACEMENT_TRI_LIMIT = 178_000;
 /** Triangles of some placements as the budget plan counts them: every instance, twice when the model casts shadows. */
@@ -92,9 +98,9 @@ const MID_TREES: readonly [number, number, Tree][] = [
   // Spare spots: they fill in where a tree above is left out to keep the moon's window of sky clear.
   [-16.5, -8, 'forest_twisted_a'], [-3.8, -21, 'forest_twisted_c'], [16, -9, 'forest_twisted_b'], [4.6, -21, 'forest_twisted_a'],
 ];
+// The middle of the back is left to the witch's house and the moon behind it, so the big trees of the back row stand at the sides.
 const FAR_TREES: readonly [number, number, Tree][] = [
-  [-16, -27, 'forest_twisted_b'], [-8, -30, 'forest_twisted_a'], [-20, -32, 'forest_twisted_c'], [-4, -33, 'forest_twisted_b'],
-  [7, -31, 'forest_twisted_c'], [15, -28, 'forest_twisted_a'], [20, -33, 'forest_twisted_b'], [-12, -34, 'forest_twisted_c'],
+  [-16, -27, 'forest_twisted_b'], [-20, -32, 'forest_twisted_c'], [20, -33, 'forest_twisted_b'], [-12, -34, 'forest_twisted_c'], [17, -27, 'forest_twisted_a'],
 ];
 export function buildWitchsForest(seed: number): UniqueSceneSpec {
   const line = sampleLine(TRAIL, 1.5);
@@ -107,6 +113,7 @@ export function buildWitchsForest(seed: number): UniqueSceneSpec {
   for (const s of SCARECROWS) placer.reserve(scarecrowFootprint(s));
   for (const g of GRAVES) placer.reserve(graveFootprint(g));
   placer.reserve({ x: FIRE.x, z: FIRE.z, hx: 1.5, hz: 1.1, rotY: 0 });
+  placer.reserve(HOUSE_FOOTPRINT);
   // ----- layer 1: the huge trees of the foreground -----
   const tree = (model: Tree, x: number, z: number, rotY: number, scale: number, group: 'themed' | 'centre' = 'themed', must = false, overMoon = false) => {
     // The crown is checked where it is: its middle is shifted sideways from the trunk, turned with the tree.
@@ -137,11 +144,12 @@ export function buildWitchsForest(seed: number): UniqueSceneSpec {
   const jack = placer.fixed(placer.make('pumpkin_orange_jackolantern', 'themed', JACK.x, JACK.z, JACK.rotY, JACK.scale), { margin: 0.05, anyMoon: true });
   const jackTop = MODELS.pumpkin_orange_jackolantern.h * JACK.scale;
   lights.push({ kind: 'torch', x: FIRE.x + 0.4, y: 1.0, z: FIRE.z + 0.7 });
-  lights.push({ kind: 'jackOLantern', x: jack.x + 0.2, y: jackTop * 0.45, z: jack.z + 1.1 });
+  // Behind the face, so the carved face is lit by the fire and reads orange instead of blowing out white.
+  lights.push({ kind: 'jackOLantern', x: jack.x + 0.2, y: jackTop * 0.9, z: jack.z - 1.7 });
   // A second, higher light throws the glow of the fire up the trunk and on the face.
   lights.push({ kind: 'torch', x: FIRE.x - 1.0, y: 3.4, z: FIRE.z - 0.8 });
-  for (const [dx, dz] of [[-0.5, 0], [0.5, 0.3], [0, -0.5]] as const) glows.push({ kind: 'torch', x: FIRE.x + dx, y: 0.7, z: FIRE.z + dz });
-  glows.push({ kind: 'jackOLantern', x: jack.x, y: jackTop * 0.5, z: jack.z + 0.4 });
+  for (const [dx, dz] of [[-0.5, 0], [0.5, 0.3], [0, -0.5]] as const) glows.push({ kind: 'torch', x: FIRE.x + dx, y: 0.7, z: FIRE.z + dz, size: 0.7 });
+  glows.push({ kind: 'jackOLantern', x: jack.x, y: jackTop * 0.5, z: jack.z + 0.4, size: 0.45 });
   // ----- the small cauldron beside the path, with a few small glowing mushrooms -----
   const pot = placer.fixed(placer.make('forest_cauldron', 'themed', CAULDRON.x, CAULDRON.z, CAULDRON.rotY, CAULDRON.scale), { margin: 0.05, anyMoon: true });
   const potTop = MODELS.forest_cauldron.h * pot.scale;
@@ -151,10 +159,37 @@ export function buildWitchsForest(seed: number): UniqueSceneSpec {
     const shroom = placer.tryAdd(placer.make('forest_mushroom', 'themed', pot.x + m.dx, pot.z + m.dz, between(0, Math.PI * 2), m.scale), { margin: 0.05, anyMoon: true });
     if (shroom) glows.push({ kind: 'mushroom', x: shroom.x, y: MODELS.forest_mushroom.h * shroom.scale * 0.85, z: shroom.z });
   }
+  // ----- mossy rocks and little glowing mushroom clusters in the middle ground, away from the lane in front of the house -----
+  const free = (x: number, z: number) => !(x > HOUSE_LANE.x[0] && x < HOUSE_LANE.x[1] && z > HOUSE_LANE.z[0] && z < HOUSE_LANE.z[1]);
+  let rocks = 0;
+  for (let n = 0; n < 160 && rocks < 6; n++) {
+    const x = between(-21, 21);
+    const z = between(-33, -7);
+    if (!free(x, z)) continue;
+    const large = rocks !== 2;
+    const scale = large ? between(0.38, 0.55) : between(0.55, 0.9);
+    // The large rock's file reaches 0.32 below its origin: lift it so its lowest point sits just in the ground.
+    const rock = placer.tryAdd(placer.make(large ? 'forest_rock_large' : 'forest_rocks', 'themed', x, z, between(0, Math.PI * 2), scale, large ? 0.3 * scale : 0), { margin: 0.4, anyMoon: true });
+    if (rock) rocks++;
+  }
+  let clusters = 0;
+  for (let n = 0; n < 160 && clusters < 3; n++) {
+    const x = between(-18, 18);
+    const z = between(-32, -8);
+    if (!free(x, z)) continue;
+    const first = placer.tryAdd(placer.make('forest_mushroom', 'themed', x, z, between(0, Math.PI * 2), between(1.0, 1.5)), { margin: 0.3, anyMoon: true });
+    if (!first) continue;
+    glows.push({ kind: 'mushroom', x: first.x, y: MODELS.forest_mushroom.h * first.scale * 0.85, z: first.z });
+    for (const [dx, dz, sc] of [[1.5, 0.4, 0.8], [-1.1, 1.1, 0.65]] as const) {
+      placer.tryAdd(placer.make('forest_mushroom', 'themed', x + dx, z + dz, between(0, Math.PI * 2), first.scale * sc), { margin: 0.02, anyMoon: true });
+    }
+    clusters++;
+  }
   const placements: Placement[] = placer.placements;
   const keepOut = [...placer.reserved, ...placements.map(solidFootprint)];
   const ground = grass(centre, TRAIL_HALF_WIDTH, keepOut);
   const { scary, thorns, logs, moreGraves } = scaryGround(centre, TRAIL_HALF_WIDTH, keepOut, (x, z, height, reach) => blocksMoonWindow(x, z, height, reach));
+  const mid = forestMidground(centre, TRAIL_HALF_WIDTH, [...keepOut, ...[...scary.map((t) => ({ x: t.x, z: t.z, hx: 1, hz: 1, rotY: 0 })), ...thorns.map((t) => ({ x: t.x, z: t.z, hx: 1, hz: 1, rotY: 0 })), ...logs.map((l) => ({ x: l.x, z: l.z, hx: 1.6, hz: 1.6, rotY: 0 })), ...moreGraves.map((g) => ({ x: g.x, z: g.z, hx: 0.6, hz: 0.6, rotY: 0 }))]]);
   const parts: ForestParts = {
     hero: { id: hero.id },
     fire: { x: FIRE.x, z: FIRE.z, flames: flames(), sparks: SPARK_COUNT },
@@ -168,12 +203,14 @@ export function buildWitchsForest(seed: number): UniqueSceneSpec {
     thorns,
     logs,
     moreGraves,
+    mid,
   };
   const extras = {
     tris:
       FOREST_PARTS.groundTris + 2 * centre.length + FLAME_COUNT * FLAME_TRIS + 2 * SPARK_COUNT +
       parts.grass.tufts.length * TUFT_TRIS + parts.grass.plants.length * PLANT_TRIS + scary.length * SCARY_TREE_TRIS + thorns.length * THORN_TRIS + logs.length * LOG_TRIS + moreGraves.length * EXTRA_GRAVE_TRIS + FOREST_PARTS.graveTris +
-      SCARECROWS.length * FOREST_PARTS.scarecrowTris + (GHOSTS.length + 1) * FOREST_PARTS.ghostTris + FOREST_PARTS.liquidTris,
+      SCARECROWS.length * FOREST_PARTS.scarecrowTris + (GHOSTS.length + 1) * FOREST_PARTS.ghostTris + FOREST_PARTS.liquidTris +
+      midgroundTris(mid, EXTRA_GRAVE_TRIS / 4, LOG_TRIS),
     calls: FOREST_PARTS.calls,
   };
   return {

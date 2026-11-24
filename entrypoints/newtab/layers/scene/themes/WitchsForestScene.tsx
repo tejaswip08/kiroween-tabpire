@@ -8,6 +8,8 @@ import { ForestTrees } from './ForestTrees';
 import { ForestFire } from './ForestFire';
 import { ForestFloor } from './ForestFloor';
 import { ForestGhosts } from './ForestGhosts';
+import { ForestHouse } from './ForestHouse';
+import { ForestMidground } from './ForestMidground';
 import { ForestScarecrows } from './ForestScarecrows';
 /**
  * The trees are drawn as near-black silhouettes: only the bark mesh of each file (no leaf clumps), multiplied by a very dark
@@ -18,6 +20,11 @@ const TREE_LOOK: Record<string, ModelLook> = {
   forest_twisted_a: { only: ['TwistedTree_2_1'], color: BARK },
   forest_twisted_b: { only: ['TwistedTree_1_1'], color: BARK },
   forest_twisted_c: { only: ['TwistedTree_3_1'], color: BARK },
+  // Mossy rocks: the grey stone multiplied by a dull green.
+  forest_rock_large: { color: '#7f9a74' },
+  forest_rocks: { color: '#7f9a74' },
+  // The carved face reads orange: the texture is darkened a little so the fire light and the glow do not blow it out white.
+  pumpkin_orange_jackolantern: { color: '#c98a52' },
 };
 /** Two lights from the sides with no shadows: hot red-orange from the left (the fire) and eerie green from the right. */
 function SideLights() {
@@ -32,13 +39,17 @@ function SideLights() {
 /**
  * The Witch's Forest: near-black gnarled trees in three layers of depth (instanced, bark only) closing over a winding dirt
  * path, the haunted tree with its glowing face, the fire and the big jack-o'-lantern at its foot, scarecrows, green ghosts,
- * crooked crosses, and a small cauldron with a few glowing mushrooms. Nothing stands on the middle of the path.
+ * crooked crosses, and a small cauldron with a few glowing mushrooms. Nothing stands on the middle of the path. At the end of the
+ * path stands the witch's cottage, in front of a pale moon, with far layers of small trees, stumps, mossy rocks, rolling bumps
+ * and thick ground fog filling the middle and the back.
  */
 export function WitchsForestScene({ spec }: { spec: UniqueSceneSpec }) {
   const groups = useMemo(() => spec.models.map((id) => ({ id, placements: spec.placements.filter((p) => p.model === id) })), [spec]);
   const parts = spec.forest!;
   const pot = useMemo(() => spec.placements.find((p) => p.model === 'forest_cauldron')!, [spec]);
   const liquid = useMemo(() => cauldronFxAt(pot), [pot]);
+  const allLogs = useMemo(() => [...parts.logs, ...parts.mid.logs], [parts]);
+  const allGraves = useMemo(() => [...parts.moreGraves, ...parts.mid.graves], [parts]);
   return (
     <>
       <SideLights />
@@ -46,7 +57,9 @@ export function WitchsForestScene({ spec }: { spec: UniqueSceneSpec }) {
       {groups.map((g) => (
         <SafeModelBatch key={g.id} id={g.id} placements={g.placements} look={TREE_LOOK[g.id]} />
       ))}
-      <ForestTrees scary={parts.scary} thorns={parts.thorns} logs={parts.logs} graves={parts.moreGraves} />
+      <ForestTrees scary={parts.scary} thorns={parts.thorns} logs={allLogs} graves={allGraves} />
+      <ForestMidground mid={parts.mid} />
+      <ForestHouse />
       <ForestFire x={parts.fire.x} z={parts.fire.z} flames={parts.fire.flames} sparks={parts.fire.sparks} />
       <ForestScarecrows spots={parts.scarecrows} />
       <ForestGhosts ghosts={parts.ghosts} wisp={parts.wisp} />

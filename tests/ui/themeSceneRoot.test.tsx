@@ -302,7 +302,7 @@ describe('ThemeSceneRoot for the Witch\'s Forest', () => {
       if ((o as THREE.InstancedMesh).isInstancedMesh && spec.models.includes(o.name as never)) instanced.add(o.name);
     });
     for (const m of spec.models.filter((id) => !('parts' in MODELS[id]) && !id.startsWith('forest_twisted'))) expect(instanced.has(m), m).toBe(true);
-    for (const n of ['forest-ground', 'forest-path', 'forest-graves', 'forest-grass', 'forest-plants', 'forest-scary-tree', 'forest-thorns', 'forest-logs', 'forest-more-graves', 'forest-flames', 'forest-sparks', 'forest-ghosts', 'forest-wisp']) {
+    for (const n of ['forest-ground', 'forest-path', 'forest-graves', 'forest-grass', 'forest-plants', 'forest-scary-tree', 'forest-thorns', 'forest-logs', 'forest-more-graves', 'forest-flames', 'forest-sparks', 'forest-ghosts', 'forest-wisp', 'witch-house', 'witch-house-body', 'witch-house-smoke', 'forest-bumps', 'forest-stumps', 'forest-tree-line', 'forest-horizon-fog']) {
       expect(named(scene, n), n).toBeDefined();
     }
     for (const n of ['theme-ground', 'theme-path']) expect(named(scene, n), n).toBeUndefined();
@@ -314,7 +314,7 @@ describe('ThemeSceneRoot for the Witch\'s Forest', () => {
     // The ghosts are one instanced mesh, the flames another.
     expect((named(scene, 'forest-ghosts') as THREE.InstancedMesh).count).toBe(spec.forest!.ghosts.length);
     expect((named(scene, 'forest-flames') as THREE.InstancedMesh).count).toBe(spec.forest!.fire.flames.length);
-    // Real lights: the fire, the jack-o'-lantern and the cauldron, never more than the budget. Two point layers: sparks and fireflies.
+    // Real lights: the fire, the jack-o'-lantern and the cauldron, never more than the budget. Three point layers: sparks, fireflies and the smoke of the witch's chimney.
     let lights = 0;
     let points = 0;
     const uniforms: string[] = [];
@@ -326,7 +326,7 @@ describe('ThemeSceneRoot for the Witch\'s Forest', () => {
     });
     expect(lights).toBe(spec.lights.length);
     expect(lights).toBeLessThanOrEqual(6);
-    expect(points).toBe(2);
+    expect(points).toBe(3);
     expect(scene.fog).not.toBeNull();
     // The sky is two-tone, and the moon disc is drawn (its shader has the uLight uniform).
     expect(uniforms).toContain('uTwoTone');

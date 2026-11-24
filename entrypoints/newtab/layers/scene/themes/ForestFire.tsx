@@ -9,22 +9,29 @@ const flameVertex = /* glsl */ `
 attribute float aPhase;
 uniform float uTime;
 varying float vH;
+varying float vFacing;
 void main() {
   vH = position.y;
-  float f = 0.82 + 0.14 * sin(uTime * 8.0 + aPhase * 6.2832) + 0.08 * sin(uTime * 13.7 + aPhase * 17.0);
+  // A soft, slow flicker: two slow waves, not the fast jitter of a spark.
+  float f = 0.86 + 0.08 * sin(uTime * 4.2 + aPhase * 6.2832) + 0.04 * sin(uTime * 7.1 + aPhase * 17.0);
   vec3 p = position;
   p.y *= f;
-  p.x += sin(uTime * 5.0 + aPhase * 6.2832 + p.y * 4.0) * 0.14 * p.y;
-  p.z += cos(uTime * 4.3 + aPhase * 9.0 + p.y * 3.0) * 0.1 * p.y;
+  p.x += sin(uTime * 3.0 + aPhase * 6.2832 + p.y * 3.0) * 0.1 * p.y;
+  p.z += cos(uTime * 2.6 + aPhase * 9.0 + p.y * 2.5) * 0.07 * p.y;
+  // How much the surface faces the camera: the rim fades out, so the cones read as soft flames, not hard spikes.
+  vec3 n = normalize(mat3(modelViewMatrix) * mat3(instanceMatrix) * normal);
+  vFacing = abs(n.z);
   gl_Position = projectionMatrix * modelViewMatrix * instanceMatrix * vec4(p, 1.0);
 }`;
 const flameFragment = /* glsl */ `
 varying float vH;
+varying float vFacing;
 void main() {
-  // Deep red at the root, hot orange in the middle, a pale yellow tip, fading out at the top.
-  vec3 col = mix(vec3(1.6, 0.18, 0.02), vec3(3.2, 1.2, 0.18), smoothstep(0.0, 0.55, vH));
-  col = mix(col, vec3(3.4, 2.4, 0.7), smoothstep(0.6, 1.0, vH));
-  float a = 0.95 * (1.0 - smoothstep(0.7, 1.0, vH));
+  // Orange at the root, bright orange in the middle, a yellow tip. Every channel stays under 1 so that overlapping flames
+  // add up to a warm yellow-orange, not to white.
+  vec3 col = mix(vec3(0.85, 0.07, 0.0), vec3(1.0, 0.24, 0.01), smoothstep(0.0, 0.5, vH));
+  col = mix(col, vec3(1.0, 0.62, 0.05), smoothstep(0.45, 1.0, vH));
+  float a = 0.42 * (1.0 - smoothstep(0.55, 1.0, vH)) * smoothstep(0.05, 0.7, vFacing);
   gl_FragColor = vec4(col * a, a);
 }`;
 const sparkVertex = /* glsl */ `
