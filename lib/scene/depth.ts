@@ -54,6 +54,8 @@ export const FAR_HILLS: readonly FarHill[] = [
   // The fortress's own hill, and a long low ridge behind everything that closes the gaps between the hills.
   { id: 'hill-d', x: -54, y: -1, z: -106, rx: 36, ry: 11, rz: 12 },
   { id: 'ridge', x: 0, y: -2, z: -112, rx: 130, ry: 11, rz: 10 },
+  // A continuous ridge across the whole background, so the village never stands over a gap between hills.
+  { id: 'ridge-front', x: 0, y: -2, z: -90, rx: 140, ry: 11, rz: 15 },
 ];
 /** Height of the hills at (x, z): the highest hill surface there, or 0 on flat ground. */
 export function farGroundY(x: number, z: number): number {
@@ -79,6 +81,21 @@ const FAR_ITEMS_RAW: readonly FarItem[] = [
 
 /** Every building's y is the hill surface under it. The builder then sinks each model so its lowest point is just inside the hill. */
 export const FAR_ITEMS: readonly FarItem[] = FAR_ITEMS_RAW.map((i) => ({ ...i, y: farGroundY(i.x, i.z) }));
+/** Rough half width of each kind of building (world units), used to seat it on the slope under its whole footprint. */
+const FAR_RADIUS: Record<FarItem['kind'], number> = { church: 3.2, barn: 2.4, windmill: 1.8, fortress: 7, ruins: 7, house: 1.8 };
+/**
+ * The height at which a building's base is seated: the lowest hill surface under its footprint, so a building on a slope
+ * is buried on the uphill side and never hangs over the downhill side.
+ */
+export function farSeatY(item: FarItem): number {
+  const r = FAR_RADIUS[item.kind] * item.scale ** (item.kind === 'house' || item.kind === 'barn' ? 1 : 0) * 0.8;
+  let low = farGroundY(item.x, item.z);
+  for (let i = 0; i < 8; i++) {
+    const a = (i / 8) * Math.PI * 2;
+    low = Math.min(low, farGroundY(item.x + Math.cos(a) * r, item.z + Math.sin(a) * r * 0.5));
+  }
+  return low;
+}
 /** How far a building's lowest point sits below the hill surface, so no gap can show. */
 export const FAR_EMBED = 0.4;
 export const FAR_WINDOW_COUNT = FAR_ITEMS.reduce((n, i) => n + i.windows.length, 0);

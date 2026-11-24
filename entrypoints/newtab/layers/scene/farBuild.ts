@@ -1,7 +1,7 @@
 import {
   BoxGeometry, BufferAttribute, BufferGeometry, CylinderGeometry, Euler, Matrix4, type Mesh, type Object3D, Quaternion, SphereGeometry, Vector3,
 } from 'three';
-import { CHURCH, FAR_EMBED, FAR_HILLS, FAR_ITEMS, FAR_MODELS, HOUSE, type FarItem } from '../../../../lib/scene/depth';
+import { CHURCH, FAR_EMBED, farSeatY, FAR_HILLS, FAR_ITEMS, FAR_MODELS, HOUSE, type FarItem } from '../../../../lib/scene/depth';
 import { hubOf, splitBlades } from '../../../../lib/scene/windmill';
 import { cornerIndices, geometryFromCorners, worldPositions } from './geometryTools';
 
@@ -102,6 +102,8 @@ export interface FarBuild {
   wins: Matrix4[];
   /** The buildings with their final y (resting on the hills). */
   placed: FarItem[];
+  /** World height of each placed building's lowest point (same order as `placed`). */
+  bases: number[];
 }
 
 /** Builds the far village from the four loaded Quaternius scenes. */
@@ -127,14 +129,26 @@ export function buildFarVillage(scenes: { barn: Object3D; windmill: Object3D; fo
     }
     return Number.isFinite(min) ? min : 0;
   };
+  /** Lowest point of the windmill's body (not its sails, which hang lower than the base) after scaling and turning. */
+  const lowestBody = (m: Mesh, item: FarItem): number => {
+    const index = cornerIndices(m.geometry);
+    const split = splitBlades(worldPositions(m), index);
+    const p = worldPositions(m, place({ ...item, y: 0 }).multiply(m.matrixWorld));
+    let min = Infinity;
+    for (const i of split.body) min = Math.min(min, p[i * 3 + 1]!);
+    return Number.isFinite(min) ? min : 0;
+  };
   // Every building stands on the hill: its lowest point (from its bounding box, after scaling) goes just under the surface.
+  const bases: number[] = [];
   const placedItems = FAR_ITEMS.map((item): FarItem => {
     const low =
       item.kind === 'barn' ? lowest(meshesOf(barn), item)
       : item.kind === 'fortress' ? lowest(meshesOf(fortress), item)
-      : item.kind === 'windmill' ? lowest(meshesOf(windmill), item)
+      : item.kind === 'windmill' ? lowestBody(meshesOf(windmill)[0]!, item)
       : 0;
-    return { ...item, y: item.y - low - FAR_EMBED };
+    const y = farSeatY(item) - low - FAR_EMBED;
+    bases.push(y + low);
+    return { ...item, y };
   });
   let bladeGeo: BufferGeometry | null = null;
   let hubWorld = new Vector3();
@@ -184,5 +198,5 @@ export function buildFarVillage(scenes: { barn: Object3D; windmill: Object3D; fo
       wins.push(base.clone().multiply(new Matrix4().compose(new Vector3(dx, dy, dz + 0.01), new Quaternion(), new Vector3(w, h, 1))));
     }
   }
-  return { village: chunks.build(), bladeGeo, hubWorld, wins, placed: placedItems };
+  return { village: chunks.build(), bladeGeo, hubWorld, wins, placed: placedItems, bases };
 }

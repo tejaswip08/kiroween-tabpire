@@ -100,16 +100,26 @@ describe('layout', () => {
     expect(width / before).toBeGreaterThan(0.72);
     expect(width / before).toBeLessThan(0.78);
   });
-  it('fills both sides of the path with gravestones, crosses, skulls, bones and candles', () => {
+  it('has a few hero gravestones and spaced groups on both sides, with few small props', () => {
+    const graves = L.placements.filter((p) => p.group === 'oldGrave');
+    expect(graves.length).toBeGreaterThanOrEqual(6);
+    expect(graves.length).toBeLessThanOrEqual(14);
     for (const side of [-1, 1]) {
       const here = L.placements.filter((p) => p.x * side > 3 && p.z < 10);
-      expect(here.filter((p) => p.group === 'oldGrave').length).toBeGreaterThanOrEqual(10);
-      expect(here.filter((p) => p.model.startsWith('gravemarker')).length).toBeGreaterThanOrEqual(3);
-      expect(here.filter((p) => p.model.startsWith('skull')).length).toBeGreaterThanOrEqual(2);
-      expect(here.filter((p) => p.model.startsWith('bone') || p.model === 'ribcage').length).toBeGreaterThanOrEqual(2);
-      expect(here.filter((p) => p.model.startsWith('candle')).length).toBeGreaterThanOrEqual(6);
+      expect(here.filter((p) => p.group === 'oldGrave' && p.scale >= 1.3).length).toBeGreaterThanOrEqual(1);
+      expect(here.filter((p) => p.group === 'oldGrave').length).toBeGreaterThanOrEqual(3);
     }
-    expect(L.glows.filter((g) => g.kind === 'candle' && g.slot === undefined).length).toBeGreaterThanOrEqual(10);
+    const smalls = L.placements.filter((p) => p.group === 'small' && !p.model.startsWith('forest_mushroom'));
+    expect(smalls.length).toBeLessThanOrEqual(12);
+    expect(L.placements.filter((p) => p.model.startsWith('forest_mushroom')).length).toBeLessThanOrEqual(6);
+  });
+  it('keeps the middle open: no big prop directly behind or between the cards', () => {
+    for (const p of L.placements) {
+      if (!['oldGrave', 'small', 'critter', 'pumpkin'].includes(p.group)) continue;
+      if (p.z < -4 || p.z > 8) continue;
+      const tooTall = MODELS[p.model].h * p.scale > 0.9;
+      if (tooTall) expect(Math.abs(p.x), p.id).toBeGreaterThan(3);
+    }
   });
   it('puts big jack-o-lanterns with glowing faces in the foreground', () => {
     const jacks = L.placements.filter((p) => p.model.includes('jackolantern'));
@@ -126,16 +136,18 @@ describe('layout', () => {
   });
   it('has autumn pines and bare dead trees on the edges, iron fences and hanging lanterns', () => {
     const trees = L.placements.filter((p) => p.group === 'tree');
-    expect(trees.filter((p) => p.model.startsWith('tree_pine_orange')).length).toBeGreaterThanOrEqual(7);
+    expect(trees.filter((p) => p.model.startsWith('tree_pine_orange')).length).toBeGreaterThanOrEqual(5);
     for (const side of [-1, 1]) {
-      expect(trees.filter((p) => p.x * side > 10 && p.model.startsWith('tree_pine')).length).toBeGreaterThanOrEqual(2);
+      expect(trees.filter((p) => p.x * side > 10 && p.model.startsWith('tree_pine')).length).toBeGreaterThanOrEqual(1);
       expect(trees.filter((p) => p.x * side > 10 && (p.model.includes('dead') || p.model.startsWith('forest_twisted'))).length).toBeGreaterThanOrEqual(2);
+      // Trees stand at the edges, not in the middle.
+      expect(trees.filter((p) => Math.abs(p.x) < 10 && p.z > -23).length).toBe(0);
     }
-    expect(trees.filter((p) => p.model.includes('dead') || p.model.startsWith('forest_twisted')).length).toBeGreaterThanOrEqual(8);
+    expect(trees.filter((p) => p.model.includes('dead') || p.model.startsWith('forest_twisted')).length).toBeGreaterThanOrEqual(6);
     expect(trees.some((p) => p.model.startsWith('forest_twisted'))).toBe(true);
     expect(L.placements.filter((p) => p.model === 'post_lantern').length).toBeGreaterThanOrEqual(3);
     expect(L.placements.filter((p) => p.group === 'fence').length).toBeGreaterThanOrEqual(18);
-    expect(L.ghostSpots.length).toBeGreaterThanOrEqual(2);
+    expect(L.ghostSpots).toHaveLength(2);
   });
   it('keeps the crypt, gate and fence on one line behind the path', () => {
     const gate = L.placements.find((p) => p.group === 'gate')!;
@@ -153,8 +165,8 @@ describe('layout', () => {
     expect(sc.mounds).toHaveLength(3);
     expect(sc.crows.length).toBeGreaterThanOrEqual(4);
     expect(sc.spiders).toHaveLength(3);
-    expect(sc.wisps.length).toBeGreaterThanOrEqual(12);
-    expect(sc.cobwebs.length).toBeGreaterThanOrEqual(2);
+    expect(sc.wisps.length).toBeLessThanOrEqual(6);
+    expect(sc.cobwebs).toHaveLength(1);
     for (const aspect of [16 / 10, 16 / 9]) {
       expect(onScreen(sc.cat.x, sc.cat.y, sc.cat.z, aspect), 'cat').toBe(true);
       expect(onScreen(sc.owl.x, sc.owl.y, sc.owl.z, aspect), 'owl').toBe(true);
@@ -181,20 +193,19 @@ describe('layout', () => {
     for (const g of ['critter']) expect(L.placements.filter((p) => p.group === g).length).toBeGreaterThanOrEqual(6);
   });
   it('has more trees, graves and glowing mushrooms, with a lean on many of them', () => {
-    expect(L.placements.filter((p) => p.group === 'tree').length).toBeGreaterThanOrEqual(33);
-    expect(L.placements.filter((p) => p.group === 'oldGrave').length).toBeGreaterThanOrEqual(50);
-    expect(L.placements.filter((p) => p.model.startsWith('forest_mushroom')).length).toBeGreaterThanOrEqual(6);
-    expect(L.glows.filter((g) => g.kind === 'mushroom').length).toBeGreaterThanOrEqual(6);
+    expect(L.placements.filter((p) => p.group === 'tree').length).toBeGreaterThanOrEqual(15);
+    expect(L.placements.filter((p) => p.model.startsWith('forest_mushroom')).length).toBeGreaterThanOrEqual(2);
+    expect(L.glows.filter((g) => g.kind === 'mushroom').length).toBeGreaterThanOrEqual(2);
     expect(L.glows.some((g) => g.kind === 'cauldron')).toBe(true);
-    expect(L.placements.filter((p) => p.tilt && (Math.abs(p.tilt[0]) > 0.005 || Math.abs(p.tilt[1]) > 0.005)).length).toBeGreaterThan(40);
+    expect(L.placements.filter((p) => p.tilt && (Math.abs(p.tilt[0]) > 0.005 || Math.abs(p.tilt[1]) > 0.005)).length).toBeGreaterThan(15);
     // Variety: many different kinds, and no two graves with exactly the same turn and size.
-    expect(new Set(L.placements.filter((p) => p.group === 'tree').map((p) => p.model)).size).toBeGreaterThanOrEqual(8);
+    expect(new Set(L.placements.filter((p) => p.group === 'tree').map((p) => p.model)).size).toBeGreaterThanOrEqual(6);
     const graves = L.placements.filter((p) => p.group === 'oldGrave');
     expect(new Set(graves.map((p) => `${p.model}|${p.rotY.toFixed(3)}|${p.scale.toFixed(3)}`)).size).toBe(graves.length);
     const kinds = new Set(graves.map((p) => p.model));
-    for (const k of ['grave_A', 'grave_B', 'grave_A_destroyed', 'gravemarker_A', 'gravemarker_B', 'gravestone']) expect(kinds.has(k as never), k).toBe(true);
+    for (const k of ['grave_A', 'grave_B', 'gravestone']) expect(kinds.has(k as never), k).toBe(true);
     const smalls = new Set(L.placements.filter((p) => p.group === 'small').map((p) => p.model));
-    for (const k of ['post_skull', 'shrine_candles', 'fence_broken', 'forest_cauldron']) {
+    for (const k of ['forest_cauldron']) {
       expect(smalls.has(k as never) || L.placements.some((p) => p.model === k), k).toBe(true);
     }
   });

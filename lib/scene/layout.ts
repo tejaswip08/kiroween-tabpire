@@ -446,10 +446,10 @@ export function buildLayout(seed: number = LAYOUT_SEED): Layout {
     glows.push(src);
     if (real) lights.push(src);
   };
-  jack('pumpkin_orange_jackolantern', -3.9, 6.1, 0.35, 1.0, true);
-  jack('pumpkin_yellow_jackolantern', 4.0, 5.0, -0.4, 0.95, true);
-  jack('pumpkin_orange_jackolantern', -5.6, 0.8, 0.5, 0.87, true);
-  jack('pumpkin_yellow_jackolantern', 5.8, -3.6, -0.5, 0.84, false);
+  jack('pumpkin_orange_jackolantern', -4.9, 6.2, 0.35, 1.0, true);
+  jack('pumpkin_yellow_jackolantern', 4.9, 5.6, -0.4, 0.95, true);
+  jack('pumpkin_orange_jackolantern', -10.2, 0.2, 0.5, 0.87, true);
+  jack('pumpkin_yellow_jackolantern', 10.4, -1.2, -0.5, 0.84, false);
   for (const side of [-1, 1]) {
     const l = fixed(make('lantern_standing', 'lantern', gateX + side * 2.5, FENCE_Z + 1.7, 0, 1.5));
     glows.push({ kind: 'lantern', x: l.x, y: 0.5 * 1.5, z: l.z });
@@ -465,9 +465,11 @@ export function buildLayout(seed: number = LAYOUT_SEED): Layout {
   // ----- data-driven things: new graves (24), coffins (8) and candles (12) -----
   const graveModels: ModelId[] = ['gravestone', 'grave_B'];
   let slot = 0;
-  for (const z of [-5, -10, -15]) {
-    for (const x of [-16, -12.8, -9.6, -6.4, 6.8, 10, 13.2, 16.4]) {
-      fixedNear(graveModels[slot % 2]!, 'newGrave', x, z, between(-0.06, 0.06), slot);
+  // Eight groups of three, spaced apart, four on each side.
+  const dataGroups: [number, number][] = [[-9, -8], [-18, -7], [-9.5, -14.5], [-21.5, -11], [9, -8], [18, -7], [9.5, -14.5], [21.5, -11]];
+  for (const [gx, gz] of dataGroups) {
+    for (let i = 0; i < 3; i++) {
+      fixedNear(graveModels[slot % 2]!, 'newGrave', gx + (i - 1) * 2.4, gz + (i === 1 ? -0.5 : 0), between(-0.06, 0.06), slot);
       slot++;
     }
   }
@@ -494,64 +496,48 @@ export function buildLayout(seed: number = LAYOUT_SEED): Layout {
   const treeJobs: [ModelId, () => { x: number; z: number; scale: number }][] = [
     ['tree_pine_orange_large', L(-17, -8)], ['tree_pine_orange_large', R(-17, -8)],
     ['tree_pine_orange_medium', L(-6, 4)], ['tree_pine_orange_medium', R(-6, 4)],
-    ['tree_pine_orange_large', L(-18, -12)], ['tree_pine_yellow_medium', R(2, 8)],
-    ['tree_pine_orange_medium', edge(-24, -10, -30, -24)], ['tree_pine_orange_large', edge(14, 24, -30, -24)],
     ['tree_dead_large', L(-4, 4, [1, 1.2])], ['tree_dead_large_decorated', R(-4, 4, [1, 1.15])],
-    ['tree_dead_medium', edge(-24, -14, -24, -21)], ['tree_dead_medium', edge(12, 24, -24, -21)],
+    ['tree_dead_medium', edge(-24, -14, -24, -21)], ['tree_dead_medium', edge(14, 24, -24, -21)],
     ['forest_twisted_a', edge(-24.2, -20.5, -12, 2, 0.28, 0.32)], ['forest_twisted_b', edge(20.5, 24.2, -12, 2, 0.28, 0.32)],
-    ['tree_dead_large', edge(-8, 12, -31, -24)], ['tree_pine_yellow_medium', edge(-12, 2, -31, -24)],
-    // More on both sides: autumn pines and bare trees along the edges, in the back and in the front corners.
-    ['tree_pine_orange_large', edge(-24, -14, -31, -23)], ['tree_pine_orange_large', edge(14, 24, -31, -23)],
-    ['tree_pine_orange_medium', L(-12, 0)], ['tree_pine_orange_medium', R(-12, 0)],
-    ['tree_pine_orange_large', L(2, 8)], ['tree_pine_orange_large', R(-2, 6)],
-    ['tree_dead_large', L(-16, -8)], ['tree_dead_large', R(-16, -8)],
+    ['tree_pine_orange_large', edge(-24, -16, -31, -23)], ['tree_pine_orange_large', edge(16, 24, -31, -23)],
     ['tree_dead_medium', L(0, 8)], ['tree_dead_medium', R(0, 8)],
-    ['tree_dead_large', edge(-24, -12, -31, -22)], ['tree_dead_medium', edge(12, 24, -31, -22)],
-    ['tree_dead_medium', edge(-26, -17, 4, 9)], ['tree_pine_orange_medium', edge(17, 26, 4, 9)],
   ];
   treeJobs.forEach(([model, region]) => tryAdd(model, 'tree', region, 160));
 
-  // ----- rows of old gravestones on both sides of the path (always there) -----
-  const rows = [3.5, -1, -7.5, -12.5, -17.5];
-  const leftCols = [-5.4, -8.8, -12.2, -15.6, -19];
-  const rightCols = [5.8, 9.2, 12.6, 16, 19.4];
-  const stones: ModelId[] = ['gravestone', 'grave_A', 'grave_B', 'grave_A_destroyed', 'gravemarker_A', 'gravestone', 'grave_B', 'gravemarker_B', 'grave_A', 'gravestone'];
-  rows.forEach((z, r) => {
-    [...leftCols, ...rightCols].forEach((x, c) => {
-      if ((r * 7 + c * 3) % 5 === 4) return; // a few gaps, so the rows look old
-      const model = stones[(r * 3 + c) % stones.length]!;
-      const small = model.startsWith('gravemarker');
-      tryAdd(model, 'oldGrave', () => ({ x: x + between(-0.4, 0.4), z: z + between(-0.4, 0.4), rotY: between(-0.18, 0.18), scale: small ? 1.25 : between(0.95, 1.1) }), 12);
-    });
-  });
-  // Wooden crosses, skulls and bones scattered on both sides.
-  const sides = (xLo: number, xHi: number, zLo: number, zHi: number) => () => {
-    const side = rng() < 0.5 ? -1 : 1;
-    return { x: side * between(xLo, xHi), z: between(zLo, zHi) };
+  // ----- hero gravestones in the foreground corners, then spaced groups in the midground -----
+  // Big gravestones frame the view at both sides. The middle stays open behind and between the cards.
+  const heroIds: string[] = [];
+  const hero = (model: ModelId, x: number, z: number, rot: number, scale: number) => {
+    const g = fixed(make(model, 'oldGrave', x, z, rot, scale), 0.3);
+    heroIds.push(g.id);
+    return g;
   };
-  for (let i = 0; i < 10; i++) tryAdd(i % 2 ? 'gravemarker_A' : 'gravemarker_B', 'small', () => ({ ...sides(4.5, 21, -17, 8)(), scale: 1.3 }), 80);
-  for (let i = 0; i < 8; i++) tryAdd('skull', 'small', () => ({ ...sides(3.6, 20, -16, 8)(), scale: between(1.1, 1.5) }), 80);
-  for (let i = 0; i < 4; i++) tryAdd('skull_candle', 'small', () => ({ ...sides(3.8, 16, -14, 6)(), scale: 1.25 }), 80);
-  const bones: ModelId[] = ['bone_A', 'bone_B', 'bone_C', 'bone_A', 'bone_B', 'bone_C', 'ribcage', 'ribcage', 'bone_A', 'bone_C'];
-  bones.forEach((m) => tryAdd(m, 'small', () => ({ ...sides(3.4, 21, -17, 9)(), scale: between(1.2, 1.7) }), 80));
-  tryAdd('shrine_candles', 'small', () => ({ x: between(-17, -13), z: between(-3, 3), scale: 1.2 }), 60);
-  tryAdd('bench_decorated', 'small', () => ({ x: between(13, 17), z: between(4, 8), rotY: -0.3 }), 60);
-  // Clusters of lit candles.
-  const clusters: [number, number][] = [[-9.6, 6.2], [10.2, 2.4], [-13.4, -3.4], [12.4, -10.2], [-6.6, -14.6], [7.6, -15.4], [-17.2, 3.8], [16.2, 7.2], [-11.2, 10.6]];
-  const lit: ModelId[] = ['candle_triple', 'candle_thin', 'candle_melted', 'candle_thin'];
-  clusters.forEach(([cx, cz]) => {
-    for (let i = 0; i < 4; i++) {
-      const model = lit[i]!;
-      const c = tryAdd(model, 'small', () => ({ x: cx! + between(-0.9, 0.9), z: cz! + between(-0.9, 0.9), scale: 1.3 }), 40);
-      if (c) glows.push({ kind: 'candle', x: c.x, y: MODELS[model].h * 1.3, z: c.z });
-    }
-  });
-  // More pumpkins along the path.
-  const pumpkins: ModelId[] = ['pumpkin_orange', 'pumpkin_yellow_small', 'pumpkin_orange', 'pumpkin_orange', 'pumpkin_yellow_small', 'pumpkin_orange', 'pumpkin_yellow_small'];
-  pumpkins.forEach((model, i) => {
-    const c = atArc(total * (0.1 + i * 0.12));
-    const side = i % 2 === 0 ? 1 : -1;
-    tryAdd(model, 'pumpkin', () => ({ x: c.x + side * (3.4 + between(0, 1.6)), z: c.z + between(-1.2, 1.2), scale: between(0.7, 1.0) }), 60);
+  const tidy = (cx: number, cz: number, models: ModelId[]) => {
+    // A small tidy cluster of two or three small props, set in front of a hero grave.
+    models.forEach((model, i) => {
+      const off: [number, number][] = [[-0.9, 0], [0.1, 0.55], [1.0, 0.1]];
+      const c = tryAdd(model, 'small', () => ({ x: cx + off[i]![0], z: cz + off[i]![1], scale: 1.3, rotY: i * 1.7 }), 3);
+      if (c && model.startsWith('candle')) glows.push({ kind: 'candle', x: c.x, y: MODELS[model].h * 1.3, z: c.z });
+    });
+  };
+  hero('grave_A', -7.4, 3.0, 0.15, 1.4);
+  hero('grave_B', 6.4, 2.6, -0.15, 1.4);
+  tidy(-5.0, 1.6, ['candle_triple', 'skull', 'candle_thin']);
+  tidy(4.1, 0.2, ['candle_thin', 'candle_melted', 'skull']);
+  // Old graves in neat groups of three with open ground between the groups.
+  const group = (cx: number, cz: number, models: ModelId[]): string[] =>
+    models.map((model, i) => {
+      const g = tryAdd(model, 'oldGrave', () => ({ x: cx + (i - 1) * 2.5, z: cz + (i === 1 ? -0.5 : 0), rotY: (i - 1) * 0.08, scale: 1.05 }), 3);
+      return g ? g.id : '';
+    });
+  const leftGroup = group(-12.5, -3.8, ['gravestone', 'grave_B', 'grave_A']).filter(Boolean);
+  const rightGroup = group(12.8, -4.6, ['grave_A', 'gravestone', 'grave_B']).filter(Boolean);
+  const webPair = leftGroup.length >= 2 ? leftGroup : rightGroup;
+  // A third hero stone on the right edge.
+  hero('gravestone', 8.0, 0.8, -0.2, 1.2);
+  // Pumpkins: three, away from the path.
+  [['pumpkin_orange', -8.6, 5.6], ['pumpkin_yellow_small', 8.6, 5.4], ['pumpkin_orange', 14.6, -1.2]].forEach(([model, x, z]) => {
+    tryAdd(model as ModelId, 'pumpkin', () => ({ x: x as number, z: z as number, scale: 0.9 }), 3);
   });
 
   // ===== A richer yard: more trees and graves, mushrooms, and spots for the animated critters =====
@@ -568,20 +554,20 @@ export function buildLayout(seed: number = LAYOUT_SEED): Layout {
   }
   // Spots for the cat, mounds, cauldron and open coffin are reserved first, before the yard fills up.
   // The black cat sits on a big gravestone beside the path.
-  const perch = fixedNear('gravestone', 'critter', -6.4, 2.9, 0.15, undefined, 1.35, 2);
+  const perch = fixedNear('gravestone', 'critter', -7.8, -0.6, 0.15, undefined, 1.35, 2);
   const cat = { x: perch.x, y: MODELS.gravestone.h * perch.scale * 0.96, z: perch.z, rotY: 0.1 };
   // Dirt mounds where skeletons push up out of the soil.
-  const moundSpots: [number, number][] = [[3.9, 1.6], [-3.5, -5.2], [3.7, -9.8]];
+  const moundSpots: [number, number][] = [[-5.0, -5.8], [7.0, -5.4], [-12.5, -9.6]];
   const mounds = moundSpots.map(([x, z], i) => {
     const m = fixedNear('dirt_mound', 'critter', x!, z!, between(0, 6.28), undefined, 1, 2);
     return { x: m.x, z: m.z, rotY: m.rotY, scale: 1, seed: i };
   });
   // The bubbling cauldron, and a half-open coffin.
   const cauldronSc = 4.2;
-  const caul = fixedNear('forest_cauldron', 'critter', 6.4, -0.6, 0.3, undefined, cauldronSc, 2);
+  const caul = fixedNear('forest_cauldron', 'critter', 7.6, -2.4, 0.3, undefined, cauldronSc, 2);
   const cauldron = { x: caul.x, y: MODELS.forest_cauldron.h * cauldronSc, z: caul.z };
   glows.push({ kind: 'cauldron', x: cauldron.x, y: cauldron.y, z: cauldron.z });
-  const spot = fixedNear('open_coffin_spot', 'critter', -8.2, -7.4, 0.5, undefined, 1, 3);
+  const spot = fixedNear('open_coffin_spot', 'critter', -8.8, -3.4, 0.5, undefined, 1, 3);
   const openCoffin = { x: spot.x, z: spot.z, rotY: spot.rotY };
   // Three bare trees that carry the owl and spiders and the crows. They stand in plain view, so each one takes
   // the place of any random gravestones, bones or trees that are in the way. Fixed things (lanterns, jack-o'-lanterns,
@@ -616,60 +602,32 @@ export function buildLayout(seed: number = LAYOUT_SEED): Layout {
     }
     throw new Error(`No room for the ${model} tree near ${x},${z}`);
   };
-  const owlTree = perchTree('tree_dead_large', -9.8, -6.2, 1.1);
-  const crowTreeA = perchTree('tree_dead_medium', -15.5, -12.8, 1.2);
-  const crowTreeB = perchTree('tree_dead_large', 7.3, -18.2, 1.1);
-  // Glowing mushrooms near the graves, and a few big ones.
-  for (let i = 0; i < 14; i++) {
-    const sc = between(1.7, 2.6);
-    const mush = lean(tryAdd('forest_mushroom', 'small', () => ({ x: (next() < 0.5 ? -1 : 1) * between(3.4, 20), z: between(-18, 8.5), scale: sc }), 300), 0.1);
-    if (mush) glows.push({ kind: 'mushroom', x: mush.x, y: MODELS.forest_mushroom.h * sc * 0.85, z: mush.z });
-  }
-  for (const side of [-1, 1]) {
-    const sc = between(0.7, 0.9);
-    const king = tryAdd('forest_mushroom_king', 'small', () => ({ x: side * between(8, 17), z: between(-12, 2), scale: sc }), 80);
-    if (king) glows.push({ kind: 'mushroom', x: king.x, y: MODELS.forest_mushroom_king.h * sc * 0.8, z: king.z });
-  }
-
-  // A back row of trees in the fog behind the fence, in a mix of kinds and sizes.
-  const backRow: ModelId[] = [
-    'tree_pine_orange_large', 'forest_twisted_c', 'tree_pine_orange_medium', 'tree_dead_large', 'tree_pine_yellow_medium',
-    'tree_pine_orange_large', 'tree_dead_medium', 'forest_twisted_b', 'tree_pine_orange_medium', 'tree_dead_large',
-    'tree_pine_yellow_medium', 'tree_dead_large', 'tree_pine_orange_large', 'tree_dead_large', 'tree_pine_orange_medium', 'tree_dead_medium',
-  ];
-  backRow.forEach((model) => {
-    const twisted = model.startsWith('forest_twisted');
-    lean(
-      tryAdd(model, 'tree', () => ({ x: between(-26, 26), z: between(-38.8, -32.4), scale: twisted ? between(0.25, 0.34) : between(0.9, 1.4), rotY: between(0, 6.28) }), 120),
-      0.1,
-    );
+  const owlTree = perchTree('tree_dead_large', -13.5, -12, 1.1);
+  const crowTreeA = perchTree('tree_dead_medium', -15.5, -18.2, 1.2);
+  const crowTreeB = perchTree('tree_dead_large', -17.2, -14.8, 1.1);
+  // At most two small mushroom clusters, each beside a hero grave.
+  const mushroomClusters: [number, number][] = [[-6.8, -2.2], [10.6, -2.8]];
+  mushroomClusters.forEach(([cx, cz]) => {
+    [[-0.5, 0.1, 2.1], [0.45, 0.5, 1.7], [0.05, -0.55, 1.9]].forEach(([dx, dz, sc]) => {
+      const mush = lean(tryAdd('forest_mushroom', 'small', () => ({ x: cx! + dx! + between(-0.5, 0.5), z: cz! + dz! + between(-0.5, 0.5), scale: sc! }), 40), 0.1);
+      if (mush) glows.push({ kind: 'mushroom', x: mush.x, y: MODELS.forest_mushroom.h * sc! * 0.85, z: mush.z });
+    });
   });
-  // And more along both sides, in the gaps.
-  const sideTrees: ModelId[] = ['tree_pine_orange_medium', 'tree_dead_medium', 'tree_pine_yellow_medium', 'tree_dead_large', 'tree_pine_orange_large', 'tree_dead_large_decorated'];
-  sideTrees.forEach((model, i) => {
+  // A back row of trees in the fog behind the fence, only toward the two edges so the gate and crypt stay clear.
+  const backRow: [ModelId, number, number][] = [
+    ['tree_pine_orange_large', -24, 1], ['forest_twisted_c', -19, 0.3], ['tree_dead_large', -15, 1.2], ['tree_pine_yellow_medium', -21, 1.1],
+    ['tree_pine_orange_large', 24, 1], ['forest_twisted_b', 20, 0.28], ['tree_dead_large', 16, 1.2], ['tree_pine_orange_medium', 22, 1.1],
+  ];
+  backRow.forEach(([model, x, scale]) => {
+    lean(tryAdd(model, 'tree', () => ({ x: x + between(-1, 1), z: between(-38.8, -32.4), scale, rotY: between(0, 6.28) }), 120), 0.1);
+  });
+  // A few more trees at the far left and right edges.
+  const sideTrees: ModelId[] = ['tree_pine_orange_medium', 'tree_dead_medium', 'tree_dead_large'];
+  sideTrees.forEach((model) => {
     for (const side of [-1, 1]) {
-      lean(tryAdd(model, 'tree', () => ({ x: side * between(17, 26), z: between(-26, 9), scale: between(0.85, 1.3), rotY: between(0, 6.28) }), 120), 0.1);
+      lean(tryAdd(model, 'tree', () => ({ x: side * between(21, 26), z: between(-26, 9), scale: between(0.85, 1.3), rotY: between(0, 6.28) }), 120), 0.1);
     }
-    void i;
   });
-  // More graves with a lot of variety: kinds, turns, leans and sizes.
-  const variety: ModelId[] = [
-    'grave_A', 'grave_B', 'grave_A_destroyed', 'gravemarker_A', 'gravemarker_B', 'gravestone', 'shrine_candles', 'gravemarker_A', 'fence_broken', 'grave_B',
-  ];
-  for (let i = 0; i < 48; i++) {
-    const model = variety[i % variety.length]!;
-    const single = model === 'shrine_candles' || model === 'fence_broken';
-    lean(
-      tryAdd(
-        model,
-        single ? 'small' : 'oldGrave',
-        () => ({ x: (next() < 0.5 ? -1 : 1) * between(3.6, 22), z: between(-18.8, 8.5), rotY: single ? between(0, 6.28) : between(-0.5, 0.5), scale: between(0.85, 1.2) }),
-        50,
-      ),
-      0.07,
-    );
-  }
-  for (let i = 0; i < 2; i++) lean(tryAdd('post_skull', 'small', () => ({ x: (i ? 1 : -1) * between(5, 18), z: between(-16, 4), rotY: (i ? -1 : 1) * Math.PI / 2, scale: 1 }), 80), 0.05);
   // ----- spots for the animated critters and details -----
   const top = (p: Placement, k: number) => MODELS[p.model].h * p.scale * k;
 
@@ -693,34 +651,27 @@ export function buildLayout(seed: number = LAYOUT_SEED): Layout {
   const st = owlTree;
   const sTop = MODELS[st.model].h * st.scale * 0.72;
   const spiders = [0, 1, 2].map((i) => ({ x: st.x - 1.3 + i * 0.85, topY: sTop - i * 0.1, z: st.z + 1.7 + i * 0.3, drop: [1.5, 2.1, 1.1][i]!, seed: i + 1 }));
-  // Cobwebs hang between neighbouring gravestones, in view of the camera.
-  const inView = (x: number, z: number) => 16 - z > 8 && Math.abs(x - 0.5) < 0.5 * (16 - z);
-  const rowGraves = placements.filter((p) => p.group === 'oldGrave' && inView(p.x, p.z)).sort((a, b) => a.z - b.z || a.x - b.x);
+  // One cobweb hangs between two neighbouring gravestones of the left midground group.
+  const webA = placements.find((q) => q.id === webPair[0]);
+  const webB = placements.find((q) => q.id === webPair[1]);
   const cobwebs: Scenery['cobwebs'] = [];
-  const used = new Set<string>();
-  for (const a of rowGraves) {
-    if (cobwebs.length >= 7) break;
-    const b = rowGraves.find((q) => q !== a && !used.has(q.id) && Math.abs(q.z - a.z) < 1.6 && q.x - a.x > 1.7 && q.x - a.x < 5 && q.x * a.x > 0);
-    if (!b || used.has(a.id)) continue;
-    used.add(a.id);
-    used.add(b.id);
-    const dx = b.x - a.x;
-    cobwebs.push({ x: (a.x + b.x) / 2, y: 0.95, z: (a.z + b.z) / 2 + 0.1, w: dx * 0.95, h: 1.5, rotY: 0 });
+  if (webA && webB) {
+    const dx = webB.x - webA.x;
+    cobwebs.push({ x: (webA.x + webB.x) / 2, y: 0.95, z: (webA.z + webB.z) / 2 + 0.1, w: dx * 0.95, h: 1.5, rotY: 0 });
   }
   // Will-o'-the-wisps drift between the graves.
-  const wisps = Array.from({ length: 14 }, (_, i) => ({ x: (i % 2 ? 1 : -1) * between(3.8, 18), y: between(0.7, 2.4), z: between(-17, 6), seed: i + 1 }));
+  const wisps = Array.from({ length: 6 }, (_, i) => ({ x: (i % 2 ? 1 : -1) * between(7, 18), y: between(0.7, 2.4), z: between(-16, 2), seed: i + 1 }));
   const scenery: Scenery = { cat, crows, owl, spiders, mounds, cauldron, openCoffin, wisps, cobwebs };
 
   // ----- where the floating ghosts hover -----
   const ghostSpots = [
-    { x: -5.2, y: 1.7, z: -5.8 },
-    { x: 6.4, y: 1.9, z: -9.5 },
-    { x: -2.2, y: 1.5, z: -13.5 },
+    { x: -9.5, y: 1.7, z: -9.5 },
+    { x: 10.5, y: 1.9, z: -10.5 },
   ];
 
   // Nothing in the near foreground is cut off by the screen edge: scattered props that would be are dropped (the
   // trees that carry the owl and the crows stay). Lit candles and mushroom glows that stood beside them go too.
-  const keep = new Set<string>([owlTree.id, crowTreeA.id, crowTreeB.id]);
+  const keep = new Set<string>([owlTree.id, crowTreeA.id, crowTreeB.id, ...heroIds, ...leftGroup, ...rightGroup]);
   const dropped = placements.filter((p) => (p.group === 'small' || p.group === 'oldGrave' || p.group === 'tree') && !keep.has(p.id) && cutByScreenEdge(p));
   if (dropped.length) {
     const gone = new Set(dropped.map((p) => p.id));

@@ -3,7 +3,7 @@ import type { Mesh } from 'three';
 import { cornerIndices, worldPositions } from '../entrypoints/newtab/layers/scene/geometryTools';
 import { BUDGET } from '../lib/scene/config';
 import {
-  CHURCH, EXTRAS, FAR_HILLS, farGroundY, FAR_ITEMS, FAR_MODELS, FAR_WINDOW_COUNT, LOW_CLOUD_LAYERS, LOW_CLOUD_MOON_FADE_DEG, farTriangles,
+  CHURCH, EXTRAS, FAR_EMBED, FAR_HILLS, farGroundY, farSeatY, FAR_ITEMS, FAR_MODELS, FAR_WINDOW_COUNT, LOW_CLOUD_LAYERS, LOW_CLOUD_MOON_FADE_DEG, farTriangles,
   lowCloudEdgeFade, lowCloudMoonVisibility, lowCloudPuffs, lowCloudX,
 } from '../lib/scene/depth';
 import { MOON_KEEP_OUT_DEG } from '../lib/scene/sky';
@@ -26,6 +26,15 @@ describe('the far village', () => {
     for (const item of FAR_ITEMS) {
       expect(item.y, item.id).toBeCloseTo(farGroundY(item.x, item.z), 6);
       expect(item.y, item.id).toBeGreaterThan(3);
+    }
+  });
+  it('has one continuous hill ridge across the whole background, with no gap down to flat ground', () => {
+    for (let x = -90; x <= 90; x += 0.5) expect(farGroundY(x, -90), `x ${x}`).toBeGreaterThan(3);
+  });
+  it('seats each building at the lowest hill surface under its footprint, never above the hill', () => {
+    for (const item of FAR_ITEMS) {
+      expect(farSeatY(item), item.id).toBeLessThanOrEqual(farGroundY(item.x, item.z) + 1e-9);
+      expect(farSeatY(item), item.id).toBeGreaterThan(2);
     }
   });
   it('is a crooked church: leaning, with a tower taller than the nave and a steeple on top', () => {
@@ -156,6 +165,11 @@ describe('the built far village (real models)', () => {
     expect(r).toBeLessThan(1.0);
     expect(built.hubWorld.z).toBeLessThan(-90);
     expect(built.wins).toHaveLength(FAR_WINDOW_COUNT);
+    // Nothing hovers: each building's base (from its bounding box after scaling) sits FAR_EMBED below the lowest hill surface under it.
+    built.placed.forEach((item, i) => {
+      expect(built.bases[i]!, item.id).toBeCloseTo(farSeatY(item) - FAR_EMBED, 6);
+      expect(built.bases[i]!, item.id).toBeLessThan(farGroundY(item.x, item.z));
+    });
     // Triangles: the models, the church, the houses and the hills together stay near the plan.
     expect(pos.count / 3).toBeLessThan(farTriangles() + 600);
     expect(pos.count / 3).toBeGreaterThan(12000);

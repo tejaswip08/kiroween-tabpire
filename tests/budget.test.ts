@@ -222,8 +222,8 @@ describe('the Crypt plan is the plan before the themes work', () => {
     const crypt = plan('crypt');
     expect(crypt.weather).toBeNull();
     expect(crypt.lay.placements).toEqual(L.placements);
-    expect(crypt.tris).toBe(157_876);
-    expect(crypt.draws).toBe(123);
+    expect(crypt.tris).toBe(115_524);
+    expect(crypt.draws).toBe(113);
   });
   it('keeps the render quality settings', () => {
     expect(QUALITY).toEqual({

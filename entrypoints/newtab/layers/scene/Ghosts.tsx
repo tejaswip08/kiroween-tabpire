@@ -115,10 +115,12 @@ export function Ghosts({ tint }: { tint?: string } = {}) {
     (u.uBody!.value as Color).copy(base).multiplyScalar(GHOST_BODY);
     (u.uRim!.value as Color).copy(base).multiplyScalar(LOOK.glow.ghostRim);
   });
+  // A theme with only two ghost spots (the Crypt) never shows a third.
+  const spots = scene.layout.ghostSpots.length;
   useFrame(() => {
     const u = (mesh.material as ShaderMaterial).uniforms;
     u.uTime!.value = display.time;
-    u.uCount!.value = Math.min(MAX_GHOSTS, Math.max(MIN_GHOSTS, display.ghosts));
+    u.uCount!.value = Math.min(MAX_GHOSTS, spots, Math.max(MIN_GHOSTS, display.ghosts));
   });
   return <primitive object={mesh} />;
 }
