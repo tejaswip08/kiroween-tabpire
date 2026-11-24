@@ -2,7 +2,7 @@ import { useFrame } from '@react-three/fiber';
 import { useGLTF } from '@react-three/drei';
 import { Component, useEffect, useMemo, type ReactNode } from 'react';
 import {
-  Box3, BufferAttribute, type BufferGeometry, Color, Euler, InstancedMesh, Matrix4, type Material, Mesh, type MeshStandardMaterial, type Object3D, Quaternion, Texture, Vector3,
+  Box3, BufferAttribute, type BufferGeometry, Color, Euler, InstancedMesh, Matrix4, type Material, Mesh, type MeshStandardMaterial, type Object3D, Quaternion, type SkinnedMesh, Texture, Vector3,
 } from 'three';
 import { MODELS, modelFile, modelInfo, type Group, type ModelId, type Placement } from '../../../../lib/scene/layout';
 import { useDisplay, type SceneDisplay } from './display';
@@ -80,6 +80,38 @@ function glowing(mat: Material): Material {
   return g;
 }
 
+/** Baked copies of skinned geometries, one per source geometry, kept like drei's file cache (never disposed). */
+const bakedCache = new WeakMap<BufferGeometry, BufferGeometry>();
+/**
+ * Props are drawn as plain instanced meshes, without a skeleton. A skinned mesh (only `forest_mushroom_king` has one)
+ * gets its real shape from its bones: drawn plainly it comes out 100 times too big. This bakes the rest pose into a
+ * plain geometry once: each vertex moved by its bones (`getVertexPosition`), in the mesh's own space.
+ */
+export function bakeSkinned(mesh: SkinnedMesh): BufferGeometry {
+  const src = mesh.geometry;
+  const hit = bakedCache.get(src);
+  if (hit) return hit;
+  mesh.skeleton.update();
+  const pos = src.getAttribute('position');
+  const out = new Float32Array(pos.count * 3);
+  const v = new Vector3();
+  for (let i = 0; i < pos.count; i++) {
+    mesh.getVertexPosition(i, v);
+    out[i * 3] = v.x;
+    out[i * 3 + 1] = v.y;
+    out[i * 3 + 2] = v.z;
+  }
+  const g = src.clone();
+  g.deleteAttribute('skinIndex');
+  g.deleteAttribute('skinWeight');
+  g.setAttribute('position', new BufferAttribute(out, 3));
+  g.computeVertexNormals();
+  g.computeBoundingBox();
+  g.computeBoundingSphere();
+  bakedCache.set(src, g);
+  return g;
+}
+
 export function collectParts(root: Object3D, tint = false, glow = false, only?: readonly string[], recentre = false): Part[] {
   root.updateMatrixWorld(true);
   const parts: Part[] = [];
@@ -93,10 +125,11 @@ export function collectParts(root: Object3D, tint = false, glow = false, only?: 
     if (glow) mat = glowing(mat);
     const map = (mat as { map?: Texture | null }).map;
     if (map) map.anisotropy = 4;
-    parts.push({ geometry: m.geometry, material: mat, local: m.matrixWorld.clone() });
+    const geometry = (m as SkinnedMesh).isSkinnedMesh ? bakeSkinned(m as SkinnedMesh) : m.geometry;
+    parts.push({ geometry, material: mat, local: m.matrixWorld.clone() });
     if (recentre) {
-      if (!m.geometry.boundingBox) m.geometry.computeBoundingBox();
-      box.union(m.geometry.boundingBox!.clone().applyMatrix4(m.matrixWorld));
+      if (!geometry.boundingBox) geometry.computeBoundingBox();
+      box.union(geometry.boundingBox!.clone().applyMatrix4(m.matrixWorld));
     }
   });
   // Footprint centre to x = 0, z = 0 and the lowest point to y = 0 (for files whose origin is elsewhere).
