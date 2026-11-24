@@ -1,41 +1,14 @@
 // The shapes the Witch's Forest builds itself: the face on the haunted tree, the flame, the scarecrow, the ghost, the graves,
 // the grass and the ground. Each is one merged geometry (one draw call). No image files.
 import {
-  BoxGeometry, BufferAttribute, BufferGeometry, Color, ConeGeometry, CylinderGeometry, LatheGeometry, PlaneGeometry, Shape, ShapeGeometry, SphereGeometry, Vector2,
+  BoxGeometry, BufferAttribute, BufferGeometry, Color, ConeGeometry, CylinderGeometry, LatheGeometry, PlaneGeometry, SphereGeometry, Vector2,
 } from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
-import { FACE, FACE_SCALE, TRUNK_FACE, FACE_LIFT, type Grave, type Polygon } from '../../../../../lib/scene/uniqueScenes/forestParts';
+import type { Grave } from '../../../../../lib/scene/uniqueScenes/forestParts';
+import { mulberry32 } from '../../../../../lib/scene/rng';
 import { coloured } from './shapes';
 /** A merged geometry, or an empty one when there is nothing to merge. */
 const merge = (parts: BufferGeometry[]): BufferGeometry => mergeGeometries(parts) ?? new BufferGeometry();
-const toShape = (poly: Polygon) => {
-  const s = new Shape();
-  poly.forEach(([x, y], i) => (i === 0 ? s.moveTo(x, y) : s.lineTo(x, y)));
-  s.closePath();
-  return s;
-};
-/**
- * The jack-o'-lantern face as one flat-coloured mesh facing +z, with its centre at the origin. Every point is bent onto the
- * rounded trunk (the cross-section of the tree there is an ellipse) and held `FACE_LIFT` in front of it, so the carving
- * follows the wood instead of cutting through it. Positions only: the material is a plain glowing colour.
- */
-export function buildFace(): BufferGeometry {
-  const { radiusX, radiusZ } = TRUNK_FACE;
-  const parts = [...FACE.eyes, FACE.nose, FACE.mouth].map((poly) => {
-    const g = new ShapeGeometry(toShape(poly));
-    const pos = g.getAttribute('position');
-    for (let i = 0; i < pos.count; i++) {
-      pos.setXY(i, pos.getX(i) * FACE_SCALE, pos.getY(i) * FACE_SCALE);
-      const u = Math.max(-0.92, Math.min(0.92, pos.getX(i) / radiusX));
-      // Depth of the trunk's surface behind the tip of its curve, at this sideways offset.
-      pos.setZ(i, FACE_LIFT - radiusZ * (1 - Math.sqrt(1 - u * u)));
-    }
-    g.deleteAttribute('uv');
-    g.deleteAttribute('normal');
-    return g;
-  });
-  return merge(parts);
-}
 /** One flame: a thin cone of 6 sides, open at the base, standing on y = 0 and 1 high. Its colour comes from the shader. */
 export function buildFlame(): BufferGeometry {
   return new ConeGeometry(1, 1, 6, 1, true).translate(0, 0.5, 0);
@@ -194,4 +167,123 @@ export function buildForestGround(fire: { x: number; z: number }): BufferGeometr
   }
   g.setAttribute('color', new BufferAttribute(col, 3));
   return g;
+}
+
+type V3 = [number, number, number];
+/**
+ * A tapered tube along a line of points: `sides` sides, a radius for each point, one flat colour, open at both ends (the ends
+ * are thin). Indexed, with normals, so tubes merge with each other.
+ */
+function tube(points: readonly V3[], radii: readonly number[], color: string, sides = 5): BufferGeometry {
+  const c = new Color(color);
+  const pos: number[] = [];
+  const col: number[] = [];
+  const index: number[] = [];
+  points.forEach((p, i) => {
+    const a = points[Math.max(0, i - 1)]!;
+    const b = points[Math.min(points.length - 1, i + 1)]!;
+    let tx = b[0] - a[0];
+    let ty = b[1] - a[1];
+    let tz = b[2] - a[2];
+    const tl = Math.hypot(tx, ty, tz) || 1;
+    tx /= tl;
+    ty /= tl;
+    tz /= tl;
+    // A vector across the tube: the tangent crossed with the up axis, or the x axis when the tube runs straight up.
+    let nx = -tz;
+    let ny = 0;
+    let nz = tx;
+    if (Math.hypot(nx, nz) < 0.2) {
+      nx = 1;
+      nz = 0;
+    }
+    const nl = Math.hypot(nx, ny, nz) || 1;
+    nx /= nl;
+    ny /= nl;
+    nz /= nl;
+    const bx = ty * nz - tz * ny;
+    const by = tz * nx - tx * nz;
+    const bz = tx * ny - ty * nx;
+    for (let k = 0; k < sides; k++) {
+      const th = (k / sides) * Math.PI * 2;
+      const r = radii[i]!;
+      pos.push(p[0] + (Math.cos(th) * nx + Math.sin(th) * bx) * r, p[1] + (Math.cos(th) * ny + Math.sin(th) * by) * r, p[2] + (Math.cos(th) * nz + Math.sin(th) * bz) * r);
+      col.push(c.r, c.g, c.b);
+    }
+    if (i < points.length - 1) {
+      for (let k = 0; k < sides; k++) {
+        const k2 = (k + 1) % sides;
+        const q = i * sides;
+        index.push(q + k, q + sides + k, q + k2, q + k2, q + sides + k, q + sides + k2);
+      }
+    }
+  });
+  const g = new BufferGeometry();
+  g.setAttribute('position', new BufferAttribute(new Float32Array(pos), 3));
+  g.setAttribute('color', new BufferAttribute(new Float32Array(col), 3));
+  g.setIndex(index);
+  g.computeVertexNormals();
+  return g;
+}
+const BARK = '#2b1f1b';
+const BARK_LIGHT = '#3b2b25';
+/**
+ * A scary dead tree, about 5 to 7 high and 5 across, standing on y = 0: a twisted trunk on gripping roots, long crooked limbs
+ * that reach out and up, each ending in three thin claw fingers that curl down, and two bent spikes on top. The three variants
+ * differ in lean, height and number of limbs. One merged geometry of flat-coloured tubes, under 900 triangles.
+ */
+export function buildScaryTree(variant: number): BufferGeometry {
+  const rng = mulberry32(100 + variant * 37);
+  const between = (lo: number, hi: number) => lo + (hi - lo) * rng();
+  const height = 4.6 + variant * 0.8;
+  const lean = (variant - 1) * 0.5;
+  const parts: BufferGeometry[] = [];
+  const trunk: V3[] = [];
+  const tr: number[] = [];
+  const steps = 6;
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps;
+    trunk.push([Math.sin(t * 3.1 + variant) * 0.35 * t + lean * t * t, height * t, Math.cos(t * 2.4 + variant * 2) * 0.3 * t]);
+    tr.push(0.55 * (1 - t) ** 0.9 + 0.07);
+  }
+  parts.push(tube(trunk, tr, BARK, 6));
+  // Roots gripping the ground.
+  for (let k = 0; k < 4; k++) {
+    const a = k * 1.6 + between(0, 0.8);
+    const len = between(0.9, 1.5);
+    parts.push(tube([[Math.cos(a) * 0.2, 0.5, Math.sin(a) * 0.2], [Math.cos(a) * len * 0.6, 0.28, Math.sin(a) * len * 0.6], [Math.cos(a) * len, 0.02, Math.sin(a) * len]], [0.26, 0.15, 0.04], BARK, 4));
+  }
+  // Long crooked limbs, with claw fingers at the ends.
+  const limbs = 5 + variant;
+  for (let k = 0; k < limbs; k++) {
+    const t = 0.35 + (k / limbs) * 0.6;
+    const base = trunk[Math.min(steps, Math.round(t * steps))]!;
+    const a = k * 2.4 + between(0, 0.6);
+    const dx = Math.cos(a);
+    const dz = Math.sin(a);
+    const len = between(1.4, 2.4) * (1.1 - t * 0.4);
+    const rise = between(-0.2, 0.9);
+    const p1: V3 = [base[0] + dx * len * 0.35, base[1] + 0.3 + rise * 0.3, base[2] + dz * len * 0.35];
+    const p2: V3 = [base[0] + dx * len * 0.7 - dz * 0.25, base[1] + 0.35 + rise * 0.8, base[2] + dz * len * 0.7 + dx * 0.25];
+    const p3: V3 = [base[0] + dx * len, base[1] + 0.2 + rise * 0.6, base[2] + dz * len];
+    parts.push(tube([base, p1, p2, p3], [0.17 * (1 - t * 0.5), 0.12, 0.07, 0.035], BARK, 5));
+    for (let f = -1; f <= 1; f++) {
+      const fa = a + f * 0.55;
+      const fx = Math.cos(fa);
+      const fz = Math.sin(fa);
+      parts.push(tube([p3, [p3[0] + fx * 0.3, p3[1] + 0.1, p3[2] + fz * 0.3], [p3[0] + fx * 0.55, p3[1] - 0.12, p3[2] + fz * 0.55]], [0.035, 0.022, 0.006], BARK_LIGHT, 3));
+    }
+  }
+  // Two bent spikes on top.
+  const top = trunk[steps]!;
+  for (const s of [-1, 1]) parts.push(tube([top, [top[0] + s * 0.25, top[1] + 0.5, top[2]], [top[0] + s * 0.55, top[1] + 0.85, top[2] + 0.1 * s]], [0.07, 0.045, 0.006], BARK_LIGHT, 4));
+  return merge(parts);
+}
+/** A thorn bush: nine curved spikes fanning up and out from the middle, dark at the root. 1 high and 1 across, standing on y = 0. */
+export function buildThornBush(): BufferGeometry {
+  const spikes = Array.from({ length: 9 }, (_, k) => {
+    const g = new ConeGeometry(0.07, 1, 3, 1, true).translate(0, 0.5, 0).scale(1, 0.6 + (k % 3) * 0.2, 1).rotateZ(0.35 + (k % 4) * 0.18).rotateY(k * 0.7);
+    return withGradient(g, '#0b0907', '#2a1f22', 0, 1);
+  });
+  return merge(spikes);
 }

@@ -1,58 +1,8 @@
 // The parts the Witch's Forest draws itself, as pure data: the face on the haunted tree, the fire, the scarecrows, the
 // ghosts, the graves and the grass. No three, no browser APIs. The drawing is in `entrypoints/newtab/layers/scene/themes/`.
 // Coordinates: x right, y up, z toward the camera (the camera is at z = 16).
-import type { Footprint, Placement } from '../layout';
+import type { Footprint } from '../layout';
 import { mulberry32 } from '../rng';
-export type Point = readonly [number, number];
-export type Polygon = readonly Point[];
-// ---------- the face on the haunted tree ----------
-/**
- * The jack-o'-lantern face, in face space: x to the right, y up, centred on the nose, about 1.3 wide and 1.2 tall. Angry triangle eyes slant down toward the nose; the mouth is a
- * wide jagged grin. Each polygon is a simple outline (the mouth is concave).
- */
-export const FACE: { eyes: readonly Polygon[]; nose: Polygon; mouth: Polygon } = {
-  eyes: [
-    [[-0.56, 0.5], [-0.12, 0.22], [-0.46, 0.02]],
-    [[0.56, 0.5], [0.12, 0.22], [0.46, 0.02]],
-  ],
-  nose: [[0, 0.1], [-0.1, -0.12], [0.1, -0.12]],
-  mouth: [
-    [-0.62, -0.2], [-0.4, -0.1], [-0.26, -0.3], [-0.1, -0.12], [0.06, -0.3], [0.22, -0.12], [0.38, -0.3], [0.62, -0.2],
-    [0.5, -0.5], [0.34, -0.4], [0.22, -0.62], [0.06, -0.46], [-0.1, -0.64], [-0.24, -0.44], [-0.4, -0.58],
-  ],
-};
-/** Triangles of the face with every polygon triangulated: a polygon of n points has n - 2. */
-export const FACE_TRIS = [...FACE.eyes, FACE.nose, FACE.mouth].reduce((sum, poly) => sum + poly.length - 2, 0);
-/** Where the face sits on the trunk of `forest_twisted_a`, in the model's own units: the centre of the trunk at that height, and the radii of its cross-section. */
-export const TRUNK_FACE = { x: -0.35, y: 2.3, z: -0.66, radiusX: 0.64, radiusZ: 0.8 } as const;
-/** The face is drawn this much smaller than `FACE` (which is drawn for a trunk 1.7 across): the trunk is 1.3 across at that height. */
-export const FACE_SCALE = 0.8;
-/** The face stands this far (model units) in front of the trunk's surface. */
-export const FACE_LIFT = 0.05;
-export interface FacePose {
-  x: number;
-  y: number;
-  z: number;
-  /** Turn about the vertical axis. The face is built facing +z, so this includes the half turn onto the back of the model. */
-  rotY: number;
-  scale: number;
-}
-/**
- * Where the face goes for a placed `forest_twisted_a`. The face is on the model's -z side (its trunk is straight there), so
- * a tree turned about half a turn shows it to the camera.
- */
-export function facePose(tree: Pick<Placement, 'x' | 'y' | 'z' | 'rotY' | 'scale'>): FacePose {
-  const c = Math.cos(tree.rotY);
-  const s = Math.sin(tree.rotY);
-  const { x: lx, y: ly, z: lz } = TRUNK_FACE;
-  return {
-    x: tree.x + (lx * c + lz * s) * tree.scale,
-    y: tree.y + ly * tree.scale,
-    z: tree.z + (-lx * s + lz * c) * tree.scale,
-    rotY: tree.rotY + Math.PI,
-    scale: tree.scale,
-  };
-}
 // ---------- the fire ----------
 export interface Flame {
   /** Offset from the middle of the fire on the ground. */
@@ -219,11 +169,64 @@ export function grass(path: readonly { x: number; z: number }[], halfWidth: numb
   }
   return { tufts, plants };
 }
+// ---------- the scary trees and the thorn bushes ----------
+/** Three hand-shaped dead trees (see `buildScaryTree`): a crooked trunk, bent limbs and claw-like fingers. */
+export const SCARY_VARIANTS = 3;
+/** Triangles of one scary tree and of one thorn bush, upper bounds. */
+export const SCARY_TREE_TRIS = 640;
+export const THORN_TRIS = 30;
+export interface ScaryTree {
+  x: number;
+  z: number;
+  rotY: number;
+  scale: number;
+  variant: number;
+}
+export interface Thorn {
+  x: number;
+  z: number;
+  rotY: number;
+  scale: number;
+}
+export const SCARY_COUNT = 26;
+export const THORN_COUNT = 34;
+/** Half the width of a scary tree at scale 1 (its trunk and roots), for keeping the others clear of it. */
+export const SCARY_REACH = 0.9;
+/**
+ * Fills the empty ground with dead trees and thorn bushes, in both sides of the path and from the foreground back into the
+ * mist. Seeded. Nothing stands on the path or inside `keepOut`, and in the foreground only at the sides, so the middle of the
+ * screen over the path stays open.
+ */
+export function scaryGround(path: readonly { x: number; z: number }[], halfWidth: number, keepOut: readonly Footprint[]): { scary: ScaryTree[]; thorns: Thorn[] } {
+  const rng = mulberry32(5521);
+  const between = (lo: number, hi: number) => lo + (hi - lo) * rng();
+  const dist = (x: number, z: number) => path.reduce((m, c) => Math.min(m, Math.hypot(c.x - x, c.z - z)), Infinity);
+  const free = (x: number, z: number, r: number) =>
+    dist(x, z) >= halfWidth + r + 0.8 && keepOut.every((f) => Math.hypot(f.x - x, f.z - z) > Math.max(f.hx, f.hz) + r + 0.2);
+  const scary: ScaryTree[] = [];
+  for (let n = 0; n < 900 && scary.length < SCARY_COUNT; n++) {
+    const side = rng() < 0.5 ? -1 : 1;
+    const z = between(-26, 7);
+    const x = side * between(z > 2 ? 5.5 : 3.4, 15);
+    const scale = between(0.9, 1.5) * (z < -14 ? 1.15 : 1);
+    if (!free(x, z, SCARY_REACH * scale) || scary.some((t) => Math.hypot(t.x - x, t.z - z) < (SCARY_REACH * (t.scale + scale)) + 0.8)) continue;
+    scary.push({ x, z, rotY: between(0, Math.PI * 2), scale, variant: scary.length % SCARY_VARIANTS });
+  }
+  const thorns: Thorn[] = [];
+  for (let n = 0; n < 900 && thorns.length < THORN_COUNT; n++) {
+    const x = between(-14, 14);
+    const z = between(-24, 8);
+    const scale = between(0.8, 1.6);
+    if (!free(x, z, 0.8 * scale) || scary.some((t) => Math.hypot(t.x - x, t.z - z) < SCARY_REACH * t.scale + 0.8 * scale)) continue;
+    thorns.push({ x, z, rotY: between(0, Math.PI * 2), scale });
+  }
+  return { scary, thorns };
+}
 // ---------- everything together ----------
 /** What the scene draws itself, for the spec, the scene component and the tests. */
 export interface ForestParts {
-  /** The id of the haunted tree (a placement), and where its face goes. */
-  hero: { id: string; face: FacePose };
+  /** The id of the biggest tree of the foreground (a placement). */
+  hero: { id: string };
   fire: { x: number; z: number; flames: Flame[]; sparks: number };
   /** The big jack-o'-lantern beside the fire (the id of its placement). */
   jackId: string;
@@ -232,6 +235,8 @@ export interface ForestParts {
   wisp: GhostSpot;
   graves: Grave[];
   grass: Grass;
+  scary: ScaryTree[];
+  thorns: Thorn[];
 }
 /** The two colours the whole scene pivots on: a hot red-orange on the left and an eerie green on the right. */
 export const TWO_TONE = { left: '#ff5a1c', right: '#35e08a' } as const;
@@ -246,6 +251,6 @@ export const FOREST_PARTS = {
   /** The graves (all merged), and the liquid disc of the cauldron (32 segments). */
   graveTris: 700,
   liquidTris: 32,
-  /** Ground, trail, face, flames, sparks, tufts, plants, graves, three scarecrows, ghosts, wisp, liquid. */
-  calls: 15,
+  /** Ground, trail, flames, sparks, tufts, plants, graves, three scarecrows, ghosts, wisp, liquid, three scary trees, thorns. */
+  calls: 18,
 };

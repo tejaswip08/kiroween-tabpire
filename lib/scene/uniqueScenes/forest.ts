@@ -7,21 +7,19 @@
 import { MODELS, type Placement, type WarmSource } from '../layout';
 import { WEATHER } from '../weather';
 import {
-  CAULDRON, FACE_TRIS, FIRE, FLAME_COUNT, FLAME_TRIS, FOREST_PARTS, GHOSTS, GRAVES, MUSHROOMS, PLANT_TRIS, SCARECROWS, SOUP_LEVEL,
-  SOUP_RADIUS, SPARK_COUNT, TUFT_TRIS, WISP, facePose, flames, grass, graveFootprint, scarecrowFootprint, type ForestParts,
+  CAULDRON, FIRE, FLAME_COUNT, FLAME_TRIS, FOREST_PARTS, GHOSTS, GRAVES, MUSHROOMS, PLANT_TRIS, SCARECROWS, SOUP_LEVEL,
+  SOUP_RADIUS, SPARK_COUNT, TUFT_TRIS, WISP, SCARY_TREE_TRIS, THORN_TRIS, flames, scaryGround, grass, graveFootprint, scarecrowFootprint, type ForestParts,
 } from './forestParts';
-import { Placer, modelsOf, sampleLine, type UniqueMoon, type UniqueSceneSpec } from './types';
+import { Placer, modelsOf, sampleLine, solidFootprint, type UniqueMoon, type UniqueSceneSpec } from './types';
 export { CAULDRON, FIRE };
 /** Added to the caller's seed, so this theme has its own random stream. */
 export const FOREST_SEED = 7211;
-/**
- * There is no moon in the Witch's Forest. The aim only points the key light and the glow of the sky: the light comes from
- * the upper left, where the fire is, and no disc is drawn.
- */
+/** A big blood-red moon in the upper right, behind the branches and the green mist. */
 export const FOREST_MOON: UniqueMoon = {
-  target: () => ({ x: 0.3, y: 0.14 }),
-  scale: 0.5,
-  hidden: true,
+  target: () => ({ x: 0.82, y: 0.2 }),
+  scale: 1.25,
+  // The branches of the dark trees cross in front of it, so it shows through the gaps.
+  seeThrough: true,
 };
 /** The dirt path winds from the bottom centre of the screen to the misty distance. */
 const TRAIL: [number, number][] = [
@@ -112,21 +110,25 @@ export function buildWitchsForest(seed: number): UniqueSceneSpec {
     if (shroom) glows.push({ kind: 'mushroom', x: shroom.x, y: MODELS.forest_mushroom.h * shroom.scale * 0.85, z: shroom.z });
   }
   const placements: Placement[] = placer.placements;
-  const keepOut = [...placer.reserved, ...placements.filter((p) => !p.model.startsWith('forest_twisted')).map((p) => ({ x: p.x, z: p.z, hx: MODELS[p.model].hx * p.scale, hz: MODELS[p.model].hz * p.scale, rotY: p.rotY }))];
+  const keepOut = [...placer.reserved, ...placements.map(solidFootprint)];
+  const ground = grass(centre, TRAIL_HALF_WIDTH, keepOut);
+  const { scary, thorns } = scaryGround(centre, TRAIL_HALF_WIDTH, keepOut);
   const parts: ForestParts = {
-    hero: { id: hero.id, face: facePose(hero) },
+    hero: { id: hero.id },
     fire: { x: FIRE.x, z: FIRE.z, flames: flames(), sparks: SPARK_COUNT },
     jackId: jack.id,
     scarecrows: [...SCARECROWS],
     ghosts: [...GHOSTS],
     wisp: WISP,
     graves: [...GRAVES],
-    grass: grass(centre, TRAIL_HALF_WIDTH, keepOut),
+    grass: ground,
+    scary,
+    thorns,
   };
   const extras = {
     tris:
-      FOREST_PARTS.groundTris + 2 * centre.length + FACE_TRIS + FLAME_COUNT * FLAME_TRIS + 2 * SPARK_COUNT +
-      parts.grass.tufts.length * TUFT_TRIS + parts.grass.plants.length * PLANT_TRIS + FOREST_PARTS.graveTris +
+      FOREST_PARTS.groundTris + 2 * centre.length + FLAME_COUNT * FLAME_TRIS + 2 * SPARK_COUNT +
+      parts.grass.tufts.length * TUFT_TRIS + parts.grass.plants.length * PLANT_TRIS + scary.length * SCARY_TREE_TRIS + thorns.length * THORN_TRIS + FOREST_PARTS.graveTris +
       SCARECROWS.length * FOREST_PARTS.scarecrowTris + (GHOSTS.length + 1) * FOREST_PARTS.ghostTris + FOREST_PARTS.liquidTris,
     calls: FOREST_PARTS.calls,
   };
@@ -147,7 +149,7 @@ export function buildWitchsForest(seed: number): UniqueSceneSpec {
     // The ghosts float high among the branches on the right.
     ghostSpots: GHOSTS.map((g) => ({ x: g.x, y: g.y, z: g.z })),
     weather: WEATHER.fireflies,
-    layers: { clouds: false, witch: false, bats: 0, ghosts: false, mist: true, embers: false, moon: false },
+    layers: { clouds: false, witch: false, bats: 0, ghosts: false, mist: true, embers: false },
     extras,
     forest: parts,
     // Thick green fog: the far trees fade into it, and it lies low on the ground.

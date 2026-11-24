@@ -4,7 +4,7 @@ import type { UniqueSceneSpec } from '../../../../../lib/scene/uniqueScenes/type
 import { CauldronFx } from '../CauldronFx';
 import { SafeModelBatch, type ModelLook } from '../ModelBatch';
 import { useSceneTheme } from '../themeColors';
-import { ForestFace } from './ForestFace';
+import { ForestTrees } from './ForestTrees';
 import { ForestFire } from './ForestFire';
 import { ForestFloor } from './ForestFloor';
 import { ForestGhosts } from './ForestGhosts';
@@ -46,7 +46,7 @@ export function WitchsForestScene({ spec }: { spec: UniqueSceneSpec }) {
       {groups.map((g) => (
         <SafeModelBatch key={g.id} id={g.id} placements={g.placements} look={TREE_LOOK[g.id]} />
       ))}
-      <ForestFace pose={parts.hero.face} />
+      <ForestTrees scary={parts.scary} thorns={parts.thorns} />
       <ForestFire x={parts.fire.x} z={parts.fire.z} flames={parts.fire.flames} sparks={parts.fire.sparks} />
       <ForestScarecrows spots={parts.scarecrows} />
       <ForestGhosts ghosts={parts.ghosts} wisp={parts.wisp} />

@@ -249,7 +249,7 @@ const forestRoot = () => (
   </SceneThemeContext>
 );
 describe('ThemeSceneRoot for the Witch\'s Forest', () => {
-  it('mounts the shared layers and the forest, the face, the fire, the scarecrows, the ghosts and the cauldron liquid, and none of the Crypt-only parts', async () => {
+  it('mounts the shared layers and the forest, the fire, the scarecrows, the ghosts and the cauldron liquid, and none of the Crypt-only parts', async () => {
     const { scene } = await mount(forestRoot);
     expect(named(scene, 'fallback')).toBeUndefined();
     const spec = sceneThemeFor('forest').scene.unique!;
@@ -259,7 +259,7 @@ describe('ThemeSceneRoot for the Witch\'s Forest', () => {
       if ((o as THREE.InstancedMesh).isInstancedMesh && spec.models.includes(o.name as never)) instanced.add(o.name);
     });
     for (const m of spec.models.filter((id) => !('parts' in MODELS[id]) && !id.startsWith('forest_twisted'))) expect(instanced.has(m), m).toBe(true);
-    for (const n of ['forest-ground', 'forest-path', 'forest-graves', 'forest-grass', 'forest-plants', 'forest-face', 'forest-flames', 'forest-sparks', 'forest-ghosts', 'forest-wisp']) {
+    for (const n of ['forest-ground', 'forest-path', 'forest-graves', 'forest-grass', 'forest-plants', 'forest-scary-tree', 'forest-thorns', 'forest-flames', 'forest-sparks', 'forest-ghosts', 'forest-wisp']) {
       expect(named(scene, n), n).toBeDefined();
     }
     for (const n of ['theme-ground', 'theme-path']) expect(named(scene, n), n).toBeUndefined();
@@ -285,9 +285,9 @@ describe('ThemeSceneRoot for the Witch\'s Forest', () => {
     expect(lights).toBeLessThanOrEqual(6);
     expect(points).toBe(2);
     expect(scene.fog).not.toBeNull();
-    // The sky is two-tone, and there is no moon disc (its shader has the uLight uniform).
+    // The sky is two-tone, and the moon disc is drawn (its shader has the uLight uniform).
     expect(uniforms).toContain('uTwoTone');
-    expect(uniforms).not.toContain('uLight');
+    expect(uniforms).toContain('uLight');
     // The cauldron liquid is drawn at the small pot of the forest, not at the Crypt's.
     expect(crypt.fx).toEqual([cauldronFxAt(spec.placements.find((p) => p.model === 'forest_cauldron')!)]);
     expect(crypt.rendered).toEqual([]);
@@ -303,51 +303,43 @@ describe('ThemeSceneRoot for the Witch\'s Forest', () => {
     expect(flies).toHaveLength(1);
     expect(flies[0]!.geometry.drawRange.count).toBe(WEATHER.fireflies.count);
   });
-  it('flickers the flames and the face with time, and sways the scarecrows and bobs the ghosts', async () => {
+  it('flickers the flames with time, and sways the scarecrows and bobs the ghosts', async () => {
     const { scene, display, store } = await mount(forestRoot);
     const spec = sceneThemeFor('forest').scene.unique!;
     const flames = (named(scene, 'forest-flames') as THREE.InstancedMesh).material as THREE.ShaderMaterial;
-    const face = (named(scene, 'forest-face') as THREE.Mesh).material as THREE.MeshBasicMaterial;
     const ghosts = named(scene, 'forest-ghosts') as THREE.InstancedMesh;
     const crows: THREE.Object3D[] = [];
     scene.traverse((o) => {
       if (o.name === 'forest-scarecrow') crows.push(o.parent!);
     });
-    const colours = new Set<number>();
     const heights = new Set<number>();
     const m = new THREE.Matrix4();
     for (const t of [2, 5, 9]) {
       display.time = t;
       await act(async () => advance(t * 1000, true, store.getState()));
       expect(flames.uniforms.uTime!.value).toBe(t);
-      colours.add(face.color.r);
       ghosts.getMatrixAt(0, m);
       heights.add(m.elements[13]!);
       crows.forEach((c, i) => expect(c.rotation.z).toBeCloseTo(scarecrowSway(spec.forest!.scarecrows[i]!, t, false), 9));
       expect(Math.abs(crows[0]!.rotation.z)).toBeLessThanOrEqual(SWAY_AMPLITUDE + 1e-9);
       expect(m.elements[13]).toBeCloseTo(spec.forest!.ghosts[0]!.y + bob(spec.forest!.ghosts[0]!.phase, t, false), 6);
     }
-    expect(colours.size).toBeGreaterThan(1);
     expect(heights.size).toBeGreaterThan(1);
   });
-  it('holds the flames, the face, the scarecrows and the ghosts still under reduced motion', async () => {
+  it('holds the flames, the scarecrows and the ghosts still under reduced motion', async () => {
     const { scene, display, store } = await mount(forestRoot, true);
     const spec = sceneThemeFor('forest').scene.unique!;
     const flames = (named(scene, 'forest-flames') as THREE.InstancedMesh).material as THREE.ShaderMaterial;
-    const face = (named(scene, 'forest-face') as THREE.Mesh).material as THREE.MeshBasicMaterial;
     const ghosts = named(scene, 'forest-ghosts') as THREE.InstancedMesh;
     const crows: THREE.Object3D[] = [];
     scene.traverse((o) => {
       if (o.name === 'forest-scarecrow') crows.push(o.parent!);
     });
     const m = new THREE.Matrix4();
-    let first: number | undefined;
     for (const t of [3, 9]) {
       display.time = t; // even if the time were not held at 0, nothing moves
       await act(async () => advance(t * 1000, true, store.getState()));
       expect(flames.uniforms.uTime!.value).toBe(0);
-      first ??= face.color.r;
-      expect(face.color.r).toBe(first);
       for (const c of crows) expect(c.rotation.z).toBe(0);
       ghosts.getMatrixAt(1, m);
       expect(m.elements[13]).toBeCloseTo(spec.forest!.ghosts[1]!.y, 5);

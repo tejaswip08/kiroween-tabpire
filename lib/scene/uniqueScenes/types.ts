@@ -50,6 +50,8 @@ export interface UniqueMoon {
    * and the glow in the sky, but nothing can stand over a moon that is not there.
    */
   hidden?: boolean;
+  /** The disc is drawn, but dark trees may stand over it (their branches cross it). */
+  seeThrough?: boolean;
 }
 export interface UniqueGround {
   kind: GroundKind;
@@ -268,7 +270,7 @@ export function viewViolations(p: Placement, isCentrepiece: boolean, aspects: re
  * A moon with `inFront` lets the placements of group `centre` stand in front of it; every other placement is still checked.
  */
 export function blocksMoonFor(p: Placement, moon: UniqueMoon, aspects: readonly number[] = VIEW_ASPECTS): boolean {
-  if (moon.hidden) return false;
+  if (moon.hidden || moon.seeThrough) return false;
   if (moon.inFront && p.group === 'centre') return false;
   const info = MODELS[p.model];
   const height = info.h * p.scale;

@@ -5,7 +5,7 @@ import fc from 'fast-check';
 import { BoxGeometry, Group, Matrix4, Mesh, MeshStandardMaterial } from 'three';
 import { describe, expect, it } from 'vitest';
 import { buildBatches, tintLook } from '../entrypoints/newtab/layers/scene/ModelBatch';
-import { buildFace, buildFlame, buildForestGround, buildGhost, buildGraves, buildPlant, buildTuft, buildWitchScarecrow, GROUND_CELLS } from '../entrypoints/newtab/layers/scene/themes/forestShapes';
+import { buildScaryTree, buildThornBush, buildFlame, buildForestGround, buildGhost, buildGraves, buildPlant, buildTuft, buildWitchScarecrow, GROUND_CELLS } from '../entrypoints/newtab/layers/scene/themes/forestShapes';
 import { trianglesOf } from '../entrypoints/newtab/layers/scene/themes/shapes';
 import { cameraAt, project } from '../lib/scene/camera';
 import { sceneColorsFor } from '../entrypoints/newtab/layers/scene/colors';
@@ -17,8 +17,8 @@ import {
   FOREST_MOON, HERO, JACK, LAYERS, PLACEMENT_TRI_LIMIT, TRAIL_HALF_WIDTH, TREE_LEAN, buildWitchsForest, cauldronFxAt, planTriangles,
 } from '../lib/scene/uniqueScenes/forest';
 import {
-  BOB_HEIGHT, CAULDRON, FACE, FACE_TRIS, FIRE, FLAME_COUNT, FLAME_TRIS, FOREST_PARTS, GRAVES, GHOSTS, PLANT_TRIS, SCARECROWS, SWAY_AMPLITUDE, TRUNK_FACE,
-  TUFT_TRIS, WISP, bob, facePose, flames, grass, scarecrowSway,
+  BOB_HEIGHT, CAULDRON, FIRE, FLAME_COUNT, FLAME_TRIS, FOREST_PARTS, GRAVES, GHOSTS, PLANT_TRIS, SCARECROWS, SWAY_AMPLITUDE, SCARY_COUNT, SCARY_TREE_TRIS, SCARY_VARIANTS, THORN_COUNT, THORN_TRIS,
+  TUFT_TRIS, WISP, bob, flames, grass, scarecrowSway,
 } from '../lib/scene/uniqueScenes/forestParts';
 import { VIEW_ASPECTS, distToPath, solidFootprint, type UniqueSceneSpec } from '../lib/scene/uniqueScenes/types';
 import { themeById } from '../lib/themes';
@@ -71,48 +71,36 @@ describe('the haunted tree and its face', () => {
     expect(TREE_LEAN.forest_twisted_a).toBe(-1);
         expect(Math.cos(hero.rotY)).toBeLessThan(0);
   });
-  it('has a face with two angry triangle eyes, a nose and a jagged mouth', () => {
-    expect(FACE.eyes).toHaveLength(2);
-    for (const eye of FACE.eyes) expect(eye).toHaveLength(3);
-    // The eyes mirror each other, and slant down toward the nose (the inner corner is lower than the outer one).
-    const [l, r] = FACE.eyes;
-    expect(l!.map(([x, y]) => [-x, y])).toEqual(r!.map(([x, y]) => [x, y]));
-    const inner = l!.reduce((a, b) => (b[0] > a[0] ? b : a));
-    const outer = l!.reduce((a, b) => (b[0] < a[0] ? b : a));
-    expect(inner[1]).toBeLessThan(outer[1]);
-    expect(FACE.mouth.length).toBeGreaterThanOrEqual(12);
-    // The mouth is jagged: its upper edge goes up and down.
-    const ups = FACE.mouth.slice(1, 8).filter((p, i) => p[1] > FACE.mouth[i]![1]).length;
-    expect(ups).toBeGreaterThanOrEqual(3);
-    expect(FACE_TRIS).toBe(2 + 1 + FACE.mouth.length - 2);
+  it('has no face on the trunk', () => {
+    expect(Object.keys(forest.hero)).toEqual(['id']);
   });
-  it('sits on the trunk on the side that faces the camera, at the height of the trunk, and turns with the tree (property)', () => {
-    expect(forest.hero.face).toEqual(facePose(hero));
-    const face = forest.hero.face;
-    // In front of the trunk centre toward the camera, and within the trunk's height (below the first branches).
-    expect(face.z).toBeGreaterThan(hero.z);
-    expect(face.y - hero.y).toBeGreaterThan(1.5 * hero.scale);
-    expect(face.y - hero.y).toBeLessThan(3.5 * hero.scale);
-    for (const aspect of VIEW_ASPECTS) {
-      const q = onScreen(aspect, face.x, face.y, face.z);
-      expect(q.x, `aspect ${aspect}`).toBeGreaterThan(0.06);
-      expect(q.x).toBeLessThan(0.3);
-      expect(q.y).toBeGreaterThan(0.25);
-      expect(q.y).toBeLessThan(0.5);
+});
+describe('the scary trees and thorn bushes that fill the ground', () => {
+  it('has dozens of dead trees of three shapes and thorn bushes, on both sides, never on the path or in a solid prop', () => {
+    expect(forest.scary.length).toBeGreaterThanOrEqual(SCARY_COUNT - 4);
+    expect(forest.scary.length).toBeLessThanOrEqual(SCARY_COUNT);
+    expect(forest.thorns.length).toBeGreaterThanOrEqual(THORN_COUNT - 8);
+    expect(new Set(forest.scary.map((t) => t.variant)).size).toBe(SCARY_VARIANTS);
+    for (const side of [-1, 1]) expect(forest.scary.filter((t) => Math.sign(t.x) === side).length).toBeGreaterThanOrEqual(6);
+    for (const t of [...forest.scary, ...forest.thorns]) {
+      expect(distToPath(spec.path.centre, t.x, t.z)).toBeGreaterThanOrEqual(TRAIL_HALF_WIDTH + 0.8);
+      for (const p of spec.placements) expect(Math.hypot(p.x - t.x, p.z - t.z), p.id).toBeGreaterThan(solidFootprint(p).hx);
     }
-    fc.assert(
-      fc.property(fc.double({ min: -7, max: 7, noNaN: true }), fc.double({ min: 0.5, max: 2, noNaN: true }), (rotY, scale) => {
-        const p = { x: 10, y: 0.3, z: -4, rotY, scale };
-        const f = facePose(p);
-        // The distance to the axis of the tree is the same at any turn.
-        expect(Math.hypot(f.x - p.x - 0, f.z - p.z)).toBeCloseTo(Math.hypot(TRUNK_FACE.x, TRUNK_FACE.z) * scale, 9);
-        expect(f.y - p.y).toBeCloseTo(TRUNK_FACE.y * scale, 9);
-        expect(f.rotY).toBeCloseTo(rotY + Math.PI, 9);
-      }),
-    );
+    // Near the camera they stand only at the sides, so the middle of the screen over the path stays open.
+    for (const t of forest.scary) if (t.z > 2) expect(Math.abs(t.x)).toBeGreaterThanOrEqual(5.5);
   });
-  it('glows orange on the tree, is one mesh, and stays inside its declared triangles', () => {
-    expect(trianglesOf(buildFace())).toBe(FACE_TRIS);
+  it('builds each tree as one merged geometry with claws, within its triangle bound', () => {
+    for (let v = 0; v < SCARY_VARIANTS; v++) {
+      const g = buildScaryTree(v);
+      expect(trianglesOf(g)).toBeLessThanOrEqual(SCARY_TREE_TRIS);
+      expect(trianglesOf(g)).toBeGreaterThan(300);
+      g.computeBoundingBox();
+      expect(g.boundingBox!.min.y).toBeGreaterThanOrEqual(-0.05);
+      expect(g.boundingBox!.max.y).toBeGreaterThan(4.5);
+      expect(g.boundingBox!.max.x - g.boundingBox!.min.x).toBeGreaterThan(3);
+      for (const a of g.getAttribute('position').array) expect(Number.isFinite(a)).toBe(true);
+    }
+    expect(trianglesOf(buildThornBush())).toBeLessThanOrEqual(THORN_TRIS);
   });
 });
 describe('the fire and the big jack-o\'-lantern', () => {
@@ -428,16 +416,24 @@ describe('the colour and the light', () => {
     expect(g.r + g.g + g.b).toBeLessThan(60);
   });
 });
-describe('no moon, no clouds, no Crypt sky life', () => {
-  it('draws no moon disc, but still aims the light, and turns the shared sky layers it does not want off', () => {
-    expect(spec.layers.moon).toBe(false);
+describe('the moon, and no clouds or Crypt sky life', () => {
+  it('shows a big moon in the upper right that the branches may cross, and turns the other sky layers off', () => {
+    expect(spec.layers.moon).not.toBe(false);
     expect(spec.moon).toBe(FOREST_MOON);
-    expect(FOREST_MOON.hidden).toBe(true);
+    expect(FOREST_MOON.seeThrough).toBe(true);
+    expect(FOREST_MOON.scale).toBeGreaterThan(1);
+    for (const aspect of VIEW_ASPECTS) {
+      const t = FOREST_MOON.target(aspect);
+      expect(t.x).toBeGreaterThan(0.7);
+      expect(t.y).toBeLessThan(0.3);
+    }
     expect(spec.layers.clouds).toBe(false);
     expect(spec.layers.witch).toBe(false);
     expect(spec.layers.bats).toBe(0);
     expect(spec.layers.mist).toBe(true);
     expect(spec.weather!.kind).toBe('fireflies');
+    const m = hue(themeById('forest').scene.moon);
+    expect(m.r).toBeGreaterThan(m.g * 2);
   });
   it('has thick fog', () => {
     expect(spec.fogScale).toBeGreaterThanOrEqual(2.5);
@@ -466,7 +462,7 @@ describe('the budget', () => {
     );
   });
   it('is one mesh per kind: the hand-built shapes each merge to one geometry', () => {
-    for (const g of [buildFace(), buildWitchScarecrow(), buildGhost(), buildGraves(GRAVES), buildTuft(), buildPlant(), buildForestGround(FIRE)]) {
+    for (const g of [buildScaryTree(0), buildThornBush(), buildWitchScarecrow(), buildGhost(), buildGraves(GRAVES), buildTuft(), buildPlant(), buildForestGround(FIRE)]) {
       expect(g.getAttribute('position').count).toBeGreaterThan(0);
     }
     expect(new Matrix4().identity().elements).toHaveLength(16);

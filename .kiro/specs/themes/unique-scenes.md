@@ -87,10 +87,9 @@ tabs, candles for garlic sites) are Crypt-only.
    horizon, falling leaves. Ground: brown-orange earth.
 2. **Witch's Forest** (a haunted red-green forest, after a painting). Two-tone light: a hot red-orange glow in the upper sky
    and on the left (a fire), eerie green mist in the distance and on the right. Dark red sky at the top, murky green at the
-   horizon, thick green fog low on the ground. No moon disc. Huge gnarled `forest_twisted_a/b/c` in three layers of depth
+   horizon, thick green fog low on the ground. A big blood-red moon in the upper right that the branches cross. Huge gnarled `forest_twisted_a/b/c` in three layers of depth
    (bark mesh only, no leaf clumps, near-black silhouettes with orange rim light on the left and green on the right) close
-   over a winding dirt path like a tunnel; the centrepiece is the tree that closes the tunnel at the end of the path. The
-   biggest tree, left foreground, has a glowing jack-o'-lantern face; a fire of flickering cones burns at its foot beside a
+   over a winding dirt path like a tunnel; the centrepiece is the tree that closes the tunnel at the end of the path. Dozens of hand-built scary dead trees (crooked trunks, gripping roots, clawed limbs) and thorn bushes fill the empty ground at the sides. A fire of flickering cones burns at its foot beside a
    big `pumpkin_orange_jackolantern`. A big scarecrow (ragged coat, witch hat, straw hands) on a post in the right
    foreground and two small ones along the path, swaying. Three or four bright green ghosts bob among the branches on the
    right, one faint orange wisp on the left. A few crooked crosses and tiny tombstones, rough grass and small dark plants at

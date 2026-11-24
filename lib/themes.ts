@@ -4,6 +4,8 @@ import { ACCENT, COLD, CRYPT_EXTRA, CRYPT_SHADER, WARM } from './scene/palette';
 
 export const THEME_IDS = ['crypt', 'pumpkin', 'forest', 'frost', 'bloodmoon', 'castle'] as const;
 export type ThemeId = (typeof THEME_IDS)[number];
+/** Hidden from the picker and treated as unknown when stored. Their scenes and tests stay in place. Remove an id here to bring it back. */
+export const DISABLED_THEMES: readonly ThemeId[] = ['bloodmoon', 'castle'];
 export const DEFAULT_THEME: ThemeId = 'crypt';
 export const isThemeId = (v: unknown): v is ThemeId =>
   typeof v === 'string' && (THEME_IDS as readonly string[]).includes(v);
@@ -173,8 +175,8 @@ const SCENE_FOREST: ScenePalette = {
   rim: '#35e08a',
   moonlight: '#ff6a2a',
   moon: '#ff5a22',
-  moonLight: [0.6, 0.12, 0.04],
-  moonDark: [0.25, 0.05, 0.02],
+  moonLight: [0.85, 0.2, 0.07],
+  moonDark: [0.4, 0.07, 0.03],
   cloudBody: [0.02, 0.01, 0.01],
   cloudTint: [0.2, 0.05, 0.02],
   lowCloud: '#22492f',
@@ -622,5 +624,7 @@ export const THEMES: readonly Theme[] = [
   { id: 'castle', name: 'Haunted Castle', description: 'Grey towers, banners and torches under pale light.', scene: SCENE_CASTLE, surface: SURFACE_CASTLE, props: PROPS_CASTLE, weather: 'embers' },
 ];
 
+/** The themes the picker offers. */
+export const ENABLED_THEMES: readonly Theme[] = THEMES.filter((t) => !DISABLED_THEMES.includes(t.id));
 /** Never undefined. Unknown ids give the Crypt. */
 export const themeById = (id: string): Theme => THEMES.find((t) => t.id === id) ?? THEMES[0]!;
