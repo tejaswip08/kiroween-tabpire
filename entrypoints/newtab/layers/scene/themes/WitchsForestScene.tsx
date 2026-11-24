@@ -46,7 +46,7 @@ export function WitchsForestScene({ spec }: { spec: UniqueSceneSpec }) {
       {groups.map((g) => (
         <SafeModelBatch key={g.id} id={g.id} placements={g.placements} look={TREE_LOOK[g.id]} />
       ))}
-      <ForestTrees scary={parts.scary} thorns={parts.thorns} />
+      <ForestTrees scary={parts.scary} thorns={parts.thorns} logs={parts.logs} graves={parts.moreGraves} />
       <ForestFire x={parts.fire.x} z={parts.fire.z} flames={parts.fire.flames} sparks={parts.fire.sparks} />
       <ForestScarecrows spots={parts.scarecrows} />
       <ForestGhosts ghosts={parts.ghosts} wisp={parts.wisp} />

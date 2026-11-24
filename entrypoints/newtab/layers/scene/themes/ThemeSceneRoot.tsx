@@ -29,7 +29,7 @@ export function ThemeSceneRoot({ id }: { id: ThemeId }) {
   return (
     <>
       <Sky />
-      {layers.moon !== false && <Moon />}
+      {layers.moon !== false && <Moon behind={id === 'forest'} />}
       <SkyFeatures features={spec.sky} lightningSeed={spec.castle?.lightningSeed} />
       {layers.clouds && <Clouds />}
       {layers.witch && <Witch />}

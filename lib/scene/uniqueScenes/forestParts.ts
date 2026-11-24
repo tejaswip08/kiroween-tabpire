@@ -188,8 +188,12 @@ export interface Thorn {
   rotY: number;
   scale: number;
 }
-export const SCARY_COUNT = 26;
-export const THORN_COUNT = 34;
+export const SCARY_COUNT = 40;
+export const THORN_COUNT = 70;
+export const LOG_COUNT = 12;
+export const LOG_TRIS = 120;
+export const EXTRA_GRAVE_COUNT = 14;
+export const EXTRA_GRAVE_TRIS = 100;
 /** Half the width of a scary tree at scale 1 (its trunk and roots), for keeping the others clear of it. */
 export const SCARY_REACH = 0.9;
 /**
@@ -197,7 +201,7 @@ export const SCARY_REACH = 0.9;
  * mist. Seeded. Nothing stands on the path or inside `keepOut`, and in the foreground only at the sides, so the middle of the
  * screen over the path stays open.
  */
-export function scaryGround(path: readonly { x: number; z: number }[], halfWidth: number, keepOut: readonly Footprint[]): { scary: ScaryTree[]; thorns: Thorn[] } {
+export function scaryGround(path: readonly { x: number; z: number }[], halfWidth: number, keepOut: readonly Footprint[]): { scary: ScaryTree[]; thorns: Thorn[]; logs: Thorn[]; moreGraves: Grave[] } {
   const rng = mulberry32(5521);
   const between = (lo: number, hi: number) => lo + (hi - lo) * rng();
   const dist = (x: number, z: number) => path.reduce((m, c) => Math.min(m, Math.hypot(c.x - x, c.z - z)), Infinity);
@@ -206,21 +210,39 @@ export function scaryGround(path: readonly { x: number; z: number }[], halfWidth
   const scary: ScaryTree[] = [];
   for (let n = 0; n < 900 && scary.length < SCARY_COUNT; n++) {
     const side = rng() < 0.5 ? -1 : 1;
-    const z = between(-26, 7);
+    const z = between(-26, 9);
     const x = side * between(z > 2 ? 5.5 : 3.4, 15);
-    const scale = between(0.9, 1.5) * (z < -14 ? 1.15 : 1);
+    // Small ones in the foreground, so they never rise into the middle of the screen; big ones further back.
+    const scale = z > 2 ? between(0.6, 0.95) : between(0.9, 1.5) * (z < -14 ? 1.15 : 1);
     if (!free(x, z, SCARY_REACH * scale) || scary.some((t) => Math.hypot(t.x - x, t.z - z) < (SCARY_REACH * (t.scale + scale)) + 0.8)) continue;
     scary.push({ x, z, rotY: between(0, Math.PI * 2), scale, variant: scary.length % SCARY_VARIANTS });
   }
   const thorns: Thorn[] = [];
   for (let n = 0; n < 900 && thorns.length < THORN_COUNT; n++) {
     const x = between(-14, 14);
-    const z = between(-24, 8);
+    const z = between(-24, 10);
     const scale = between(0.8, 1.6);
     if (!free(x, z, 0.8 * scale) || scary.some((t) => Math.hypot(t.x - x, t.z - z) < SCARY_REACH * t.scale + 0.8 * scale)) continue;
     thorns.push({ x, z, rotY: between(0, Math.PI * 2), scale });
   }
-  return { scary, thorns };
+  const taken = (x: number, z: number, r: number) => scary.some((t) => Math.hypot(t.x - x, t.z - z) < SCARY_REACH * t.scale + r) || thorns.some((t) => Math.hypot(t.x - x, t.z - z) < t.scale + r);
+  const logs: Thorn[] = [];
+  for (let n = 0; n < 900 && logs.length < LOG_COUNT; n++) {
+    const x = between(-14, 14);
+    const z = between(-22, 9);
+    if (!free(x, z, 1.4) || scary.some((t) => Math.hypot(t.x - x, t.z - z) < SCARY_REACH * t.scale + 1.6) || logs.some((l) => Math.hypot(l.x - x, l.z - z) < 3.5)) continue;
+    logs.push({ x, z, rotY: between(0, Math.PI * 2), scale: between(0.8, 1.3) });
+  }
+  // A log lies where a thorn bush stood: the bush goes.
+  for (let i = thorns.length - 1; i >= 0; i--) if (logs.some((l) => Math.hypot(l.x - thorns[i]!.x, l.z - thorns[i]!.z) < 2.2 * l.scale)) thorns.splice(i, 1);
+  const moreGraves: Grave[] = [];
+  for (let n = 0; n < 1200 && moreGraves.length < EXTRA_GRAVE_COUNT; n++) {
+    const x = between(-13, 13);
+    const z = between(-20, 9);
+    if (!free(x, z, 0.7) || taken(x, z, 0.7) || logs.some((l) => Math.hypot(l.x - x, l.z - z) < 2.4) || moreGraves.some((g) => Math.hypot(g.x - x, g.z - z) < 1.6)) continue;
+    moreGraves.push({ kind: rng() < 0.5 ? 'cross' : 'stone', x, z, rotY: between(0, Math.PI * 2), tilt: (rng() < 0.5 ? -1 : 1) * between(0.1, 0.3), scale: between(0.8, 1.2) });
+  }
+  return { scary, thorns, logs, moreGraves };
 }
 // ---------- everything together ----------
 /** What the scene draws itself, for the spec, the scene component and the tests. */
@@ -237,6 +259,10 @@ export interface ForestParts {
   grass: Grass;
   scary: ScaryTree[];
   thorns: Thorn[];
+  /** Fallen dead logs lying on the ground. */
+  logs: Thorn[];
+  /** More crooked crosses and tombstones, scattered over the empty ground (the first few are `graves`). */
+  moreGraves: Grave[];
 }
 /** The two colours the whole scene pivots on: a hot red-orange on the left and an eerie green on the right. */
 export const TWO_TONE = { left: '#ff5a1c', right: '#35e08a' } as const;
@@ -251,6 +277,6 @@ export const FOREST_PARTS = {
   /** The graves (all merged), and the liquid disc of the cauldron (32 segments). */
   graveTris: 700,
   liquidTris: 32,
-  /** Ground, trail, flames, sparks, tufts, plants, graves, three scarecrows, ghosts, wisp, liquid, three scary trees, thorns. */
-  calls: 18,
+  /** Ground, trail, flames, sparks, tufts, plants, graves, three scarecrows, ghosts, wisp, liquid, three scary trees, thorns, logs, more graves. */
+  calls: 20,
 };

@@ -77,12 +77,16 @@ describe('the haunted tree and its face', () => {
 });
 describe('the scary trees and thorn bushes that fill the ground', () => {
   it('has dozens of dead trees of three shapes and thorn bushes, on both sides, never on the path or in a solid prop', () => {
-    expect(forest.scary.length).toBeGreaterThanOrEqual(SCARY_COUNT - 4);
+    expect(forest.scary.length).toBeGreaterThanOrEqual(SCARY_COUNT - 6);
     expect(forest.scary.length).toBeLessThanOrEqual(SCARY_COUNT);
-    expect(forest.thorns.length).toBeGreaterThanOrEqual(THORN_COUNT - 8);
+    expect(forest.thorns.length).toBeGreaterThanOrEqual(30);
+    expect(forest.thorns.length).toBeLessThanOrEqual(THORN_COUNT);
+    // Fallen logs and more graves lie on the rest of the ground.
+    expect(forest.logs.length).toBeGreaterThanOrEqual(6);
+    expect(forest.moreGraves.length).toBeGreaterThanOrEqual(10);
     expect(new Set(forest.scary.map((t) => t.variant)).size).toBe(SCARY_VARIANTS);
     for (const side of [-1, 1]) expect(forest.scary.filter((t) => Math.sign(t.x) === side).length).toBeGreaterThanOrEqual(6);
-    for (const t of [...forest.scary, ...forest.thorns]) {
+    for (const t of [...forest.scary, ...forest.thorns, ...forest.logs, ...forest.moreGraves]) {
       expect(distToPath(spec.path.centre, t.x, t.z)).toBeGreaterThanOrEqual(TRAIL_HALF_WIDTH + 0.8);
       for (const p of spec.placements) expect(Math.hypot(p.x - t.x, p.z - t.z), p.id).toBeGreaterThan(solidFootprint(p).hx);
     }

@@ -259,7 +259,7 @@ describe('ThemeSceneRoot for the Witch\'s Forest', () => {
       if ((o as THREE.InstancedMesh).isInstancedMesh && spec.models.includes(o.name as never)) instanced.add(o.name);
     });
     for (const m of spec.models.filter((id) => !('parts' in MODELS[id]) && !id.startsWith('forest_twisted'))) expect(instanced.has(m), m).toBe(true);
-    for (const n of ['forest-ground', 'forest-path', 'forest-graves', 'forest-grass', 'forest-plants', 'forest-scary-tree', 'forest-thorns', 'forest-flames', 'forest-sparks', 'forest-ghosts', 'forest-wisp']) {
+    for (const n of ['forest-ground', 'forest-path', 'forest-graves', 'forest-grass', 'forest-plants', 'forest-scary-tree', 'forest-thorns', 'forest-logs', 'forest-more-graves', 'forest-flames', 'forest-sparks', 'forest-ghosts', 'forest-wisp']) {
       expect(named(scene, n), n).toBeDefined();
     }
     for (const n of ['theme-ground', 'theme-path']) expect(named(scene, n), n).toBeUndefined();
@@ -288,6 +288,14 @@ describe('ThemeSceneRoot for the Witch\'s Forest', () => {
     // The sky is two-tone, and the moon disc is drawn (its shader has the uLight uniform).
     expect(uniforms).toContain('uTwoTone');
     expect(uniforms).toContain('uLight');
+    // The moon is drawn in the opaque pass, before the props, so the trees and branches cover it.
+    let moon: THREE.ShaderMaterial | undefined;
+    scene.traverse((o) => {
+      const mat = (o as THREE.Mesh).material as THREE.ShaderMaterial | undefined;
+      if (mat?.isShaderMaterial && mat.uniforms.uLight) moon = mat;
+    });
+    expect(moon!.transparent).toBe(false);
+    expect(moon!.depthWrite).toBe(false);
     // The cauldron liquid is drawn at the small pot of the forest, not at the Crypt's.
     expect(crypt.fx).toEqual([cauldronFxAt(spec.placements.find((p) => p.model === 'forest_cauldron')!)]);
     expect(crypt.rendered).toEqual([]);

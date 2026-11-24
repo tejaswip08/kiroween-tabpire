@@ -17,7 +17,7 @@ void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(
 // bloom threshold (0.95), so Bloom never picks it up.
 const discFragment = /* glsl */ `
 varying vec2 vUv;
-uniform vec3 uLight; uniform vec3 uDark; uniform float uCrisp;
+uniform vec3 uLight; uniform vec3 uDark; uniform float uCut; uniform float uCrisp;
 float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
 float noise(vec2 p) {
   vec2 i = floor(p); vec2 f = fract(p); f = f * f * (3.0 - 2.0 * f);
@@ -41,7 +41,7 @@ void main() {
   // A very thin soft edge, about two pixels wide.
   float aa = fwidth(r) * mix(1.5, 1.0, uCrisp);
   float a = 1.0 - smoothstep(1.0 - aa, 1.0, r);
-  if (a <= 0.0) discard;
+  if (a <= uCut) discard;
   float z = sqrt(max(1.0 - r * r, 0.0));
   // The body colours come from the theme (uLight to uDark, in linear colour).
   vec3 light = uLight;
@@ -59,13 +59,15 @@ void main() {
   col *= mix(mix(0.4, 0.85, uCrisp), 1.0, pow(z, 0.5));
   gl_FragColor = vec4(col, a);
 }`;
-/** The moon: a plain Mars-like disc with no face and no halo. It always faces the camera at the moon direction. */
-export function Moon() {
+/** The moon: a plain Mars-like disc with no face and no halo. It always faces the camera at the moon direction.
+ * With `behind` the disc is drawn in the opaque pass (hard edge), before every prop, so trees and branches cover it. Without it
+ * the disc is blended on top of the opaque props, which the Crypt's clear sky never shows. */
+export function Moon({ behind = false }: { behind?: boolean } = {}) {
   const display = useDisplay();
   const group = useRef<Group>(null);
   const uniforms = useMemo(() => {
     const crypt = sceneColorsFor('crypt');
-    return { uLight: { value: crypt.moonLight.clone() }, uDark: { value: crypt.moonDark.clone() }, uCrisp: { value: 0 } };
+    return { uLight: { value: crypt.moonLight.clone() }, uDark: { value: crypt.moonDark.clone() }, uCrisp: { value: 0 }, uCut: { value: behind ? 0.5 : 0 } };
   }, []);
   useColorSync((c) => {
     uniforms.uLight.value.copy(c.moonLight);
@@ -85,7 +87,7 @@ export function Moon() {
     <group ref={group} renderOrder={-90}>
       <mesh renderOrder={-90}>
         <planeGeometry args={[radiusAt(MOON.discDeg) * 2, radiusAt(MOON.discDeg) * 2]} />
-        <shaderMaterial vertexShader={vertex} fragmentShader={discFragment} uniforms={uniforms} transparent depthWrite={false} depthTest={false} toneMapped={false} fog={false} />
+        <shaderMaterial vertexShader={vertex} fragmentShader={discFragment} uniforms={uniforms} transparent={!behind} depthWrite={false} depthTest={false} toneMapped={false} fog={false} />
       </mesh>
     </group>
   );

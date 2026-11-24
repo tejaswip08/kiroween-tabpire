@@ -287,3 +287,10 @@ export function buildThornBush(): BufferGeometry {
   });
   return merge(spikes);
 }
+/** A fallen dead log with two broken stubs, lying along x on y = 0, about 3.2 long. */
+export function buildFallenLog(): BufferGeometry {
+  const body = tube([[-1.6, 0.25, 0], [-0.5, 0.3, 0.08], [0.6, 0.3, -0.05], [1.6, 0.2, 0]], [0.12, 0.3, 0.3, 0.14], BARK, 6);
+  const stubA = tube([[-0.2, 0.45, 0], [-0.25, 0.9, 0.1], [-0.1, 1.25, 0.2]], [0.1, 0.06, 0.012], BARK_LIGHT, 4);
+  const stubB = tube([[0.7, 0.4, 0], [0.8, 0.7, -0.15], [0.7, 0.95, -0.35]], [0.08, 0.05, 0.01], BARK_LIGHT, 4);
+  return merge([body, stubA, stubB]);
+}

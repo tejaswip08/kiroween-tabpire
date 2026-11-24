@@ -8,7 +8,7 @@ import { MODELS, type Placement, type WarmSource } from '../layout';
 import { WEATHER } from '../weather';
 import {
   CAULDRON, FIRE, FLAME_COUNT, FLAME_TRIS, FOREST_PARTS, GHOSTS, GRAVES, MUSHROOMS, PLANT_TRIS, SCARECROWS, SOUP_LEVEL,
-  SOUP_RADIUS, SPARK_COUNT, TUFT_TRIS, WISP, SCARY_TREE_TRIS, THORN_TRIS, flames, scaryGround, grass, graveFootprint, scarecrowFootprint, type ForestParts,
+  SOUP_RADIUS, SPARK_COUNT, TUFT_TRIS, WISP, SCARY_TREE_TRIS, THORN_TRIS, LOG_TRIS, EXTRA_GRAVE_TRIS, flames, scaryGround, grass, graveFootprint, scarecrowFootprint, type ForestParts,
 } from './forestParts';
 import { Placer, modelsOf, sampleLine, solidFootprint, type UniqueMoon, type UniqueSceneSpec } from './types';
 export { CAULDRON, FIRE };
@@ -112,7 +112,7 @@ export function buildWitchsForest(seed: number): UniqueSceneSpec {
   const placements: Placement[] = placer.placements;
   const keepOut = [...placer.reserved, ...placements.map(solidFootprint)];
   const ground = grass(centre, TRAIL_HALF_WIDTH, keepOut);
-  const { scary, thorns } = scaryGround(centre, TRAIL_HALF_WIDTH, keepOut);
+  const { scary, thorns, logs, moreGraves } = scaryGround(centre, TRAIL_HALF_WIDTH, keepOut);
   const parts: ForestParts = {
     hero: { id: hero.id },
     fire: { x: FIRE.x, z: FIRE.z, flames: flames(), sparks: SPARK_COUNT },
@@ -124,11 +124,13 @@ export function buildWitchsForest(seed: number): UniqueSceneSpec {
     grass: ground,
     scary,
     thorns,
+    logs,
+    moreGraves,
   };
   const extras = {
     tris:
       FOREST_PARTS.groundTris + 2 * centre.length + FLAME_COUNT * FLAME_TRIS + 2 * SPARK_COUNT +
-      parts.grass.tufts.length * TUFT_TRIS + parts.grass.plants.length * PLANT_TRIS + scary.length * SCARY_TREE_TRIS + thorns.length * THORN_TRIS + FOREST_PARTS.graveTris +
+      parts.grass.tufts.length * TUFT_TRIS + parts.grass.plants.length * PLANT_TRIS + scary.length * SCARY_TREE_TRIS + thorns.length * THORN_TRIS + logs.length * LOG_TRIS + moreGraves.length * EXTRA_GRAVE_TRIS + FOREST_PARTS.graveTris +
       SCARECROWS.length * FOREST_PARTS.scarecrowTris + (GHOSTS.length + 1) * FOREST_PARTS.ghostTris + FOREST_PARTS.liquidTris,
     calls: FOREST_PARTS.calls,
   };
