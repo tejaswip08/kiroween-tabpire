@@ -1,6 +1,6 @@
 import { useFrame } from '@react-three/fiber';
 import { useEffect, useMemo } from 'react';
-import { CircleGeometry, Color, CylinderGeometry, DoubleSide, MeshStandardMaterial, ShaderMaterial, UniformsLib, UniformsUtils, Vector3 } from 'three';
+import { CircleGeometry, Color, DoubleSide, ShaderMaterial, UniformsLib, UniformsUtils, Vector3 } from 'three';
 import { LAKE, LAKE_SEGMENTS, LAKE_Y } from '../../../../../lib/scene/uniqueScenes/frostIce';
 import type { FrostPlan } from '../../../../../lib/scene/uniqueScenes/frostPlan';
 import { useDisplay } from '../display';
@@ -65,7 +65,7 @@ void main() {
     float d = length(w - s.xy) / max(s.z, 0.001);
     under += s.z > 0.0 ? exp(-d * d * 1.6) : 0.0;
   }
-  col += uGlow * under * (0.25 + 0.75 * uPulse) * (0.55 + 0.9 * cracks);
+  col += uGlow * under * (0.2 + 0.8 * uPulse) * (0.5 + 0.8 * cracks);
   // A soft sheen that slowly moves across the ice.
   float band = sin(dot(w, vec2(0.21, 0.11)) + uTime * 0.25) * 0.5 + 0.5;
   col += uMoonColor * smoothstep(0.7, 1.0, band) * 0.06 * (0.5 + 0.5 * noise(w * 0.5));
@@ -82,9 +82,7 @@ void main() {
   col += uMoonColor * (streak * 0.7 * glints + wide * 0.1);
   // A frosted rim at the shore.
   col = mix(col, uRim, smoothstep(0.88, 1.0, r) * 0.6);
-  // Glass: see-through in the middle (so the bones show), more solid toward the shore and where the cracks are.
-  float alpha = clamp(0.6 + 0.3 * smoothstep(0.4, 1.0, r) + 0.25 * cracks, 0.0, 1.0);
-  gl_FragColor = vec4(col, alpha * (1.0 - smoothstep(0.985, 1.0, r)));
+  gl_FragColor = vec4(col, 0.97 * (1.0 - smoothstep(0.96, 1.0, r)));
   #include <fog_fragment>
 }`;
 
@@ -96,13 +94,8 @@ void main() {
 export function FrozenLake({ plan }: { plan?: FrostPlan }) {
   const display = useDisplay();
   const geometry = useMemo(() => new CircleGeometry(1, LAKE_SEGMENTS).rotateX(-Math.PI / 2), []);
-  // The dark lake bed (opaque, just above the snow) and the wall of ice round the shore (the ice is as thick as `LAKE_Y`).
-  const bed = useMemo(() => new CircleGeometry(1, LAKE_SEGMENTS).rotateX(-Math.PI / 2), []);
-  const wall = useMemo(() => new CylinderGeometry(1, 1, LAKE_Y, LAKE_SEGMENTS, 1, true), []);
-  const bedMaterial = useMemo(() => new MeshStandardMaterial({ color: '#050c1a', emissive: '#0a1d38', emissiveIntensity: 0.6, roughness: 1 }), []);
-  const wallMaterial = useMemo(() => new MeshStandardMaterial({ color: '#7fb4e4', emissive: '#16467c', emissiveIntensity: 0.7, roughness: 0.2, flatShading: true }), []);
   const spots = useMemo(() => {
-    const list = plan ? [...plan.hands.map((h) => [h.x, h.z, 2.6]), [plan.skull.x, plan.skull.z, 3.0], [plan.broken.x, plan.broken.z, 3.0]] : [];
+    const list = plan ? [[plan.hand.x, plan.hand.z, 2.4]] : [];
     return Array.from({ length: 6 }, (_, i) => new Vector3(list[i]?.[0] ?? 0, list[i]?.[1] ?? 0, list[i]?.[2] ?? 0));
   }, [plan]);
   const material = useMemo(
@@ -120,7 +113,7 @@ export function FrozenLake({ plan }: { plan?: FrostPlan }) {
             uIceFar: { value: new Color('#12345c') },
             uRim: { value: new Color('#9ec8ee') },
             uPulse: { value: 0.6 },
-            uGlow: { value: new Color('#2f8cff') },
+            uGlow: { value: new Color('#2f8cff').multiplyScalar(2.4) },
             uSpots: { value: [] as Vector3[] },
           },
         ]),
@@ -135,16 +128,7 @@ export function FrozenLake({ plan }: { plan?: FrostPlan }) {
     [],
   );
   material.uniforms.uSpots!.value = spots;
-  useEffect(
-    () => () => {
-      geometry.dispose();
-      bed.dispose();
-      wall.dispose();
-      bedMaterial.dispose();
-      wallMaterial.dispose();
-    },
-    [geometry, bed, wall, bedMaterial, wallMaterial],
-  );
+  useEffect(() => () => geometry.dispose(), [geometry]);
   useEffect(() => () => material.dispose(), [material]);
   // The moon's colour follows the theme.
   useColorSync((c) => {
@@ -157,11 +141,5 @@ export function FrozenLake({ plan }: { plan?: FrostPlan }) {
     // The pulse of light under the ice stands still under reduced motion.
     material.uniforms.uPulse!.value = icePulse(display.time, display.reduced);
   });
-  return (
-    <>
-      <mesh geometry={bed} material={bedMaterial} position={[LAKE.x, 0.03, LAKE.z]} scale={[LAKE.rx * 0.995, 1, LAKE.rz * 0.995]} receiveShadow name="frozen-lake-bed" />
-      <mesh geometry={wall} material={wallMaterial} position={[LAKE.x, LAKE_Y / 2, LAKE.z]} scale={[LAKE.rx, 1, LAKE.rz]} receiveShadow name="frozen-lake-wall" />
-      <mesh geometry={geometry} material={material} position={[LAKE.x, LAKE_Y, LAKE.z]} scale={[LAKE.rx, 1, LAKE.rz]} renderOrder={1} name="frozen-lake" />
-    </>
-  );
+  return <mesh geometry={geometry} material={material} position={[LAKE.x, LAKE_Y, LAKE.z]} scale={[LAKE.rx, 1, LAKE.rz]} renderOrder={1} name="frozen-lake" />;
 }

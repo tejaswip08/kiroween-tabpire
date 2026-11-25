@@ -7,13 +7,13 @@ import { LOOK } from '../../../../lib/scene/config';
  * Bloom on everything brighter than the threshold, a vignette and one tone-mapping step at the
  * end. Bloom uses mipmap blur, which starts from a half-resolution image. No multisampling.
  */
-export function Effects() {
+export function Effects({ bloom }: { bloom?: { threshold: number; intensity: number } } = {}) {
   return (
     <EffectComposer multisampling={0} frameBufferType={HalfFloatType}>
       <Bloom
         mipmapBlur
-        intensity={LOOK.bloom.intensity}
-        luminanceThreshold={LOOK.bloom.threshold}
+        intensity={bloom?.intensity ?? LOOK.bloom.intensity}
+        luminanceThreshold={bloom?.threshold ?? LOOK.bloom.threshold}
         luminanceSmoothing={LOOK.bloom.smoothing}
         radius={LOOK.bloom.radius}
       />

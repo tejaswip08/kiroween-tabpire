@@ -44,7 +44,7 @@ export function FrostChapel({ icicles }: { icicles: readonly Icicle[] }) {
     body.name = 'frost-chapel';
     const door = new Mesh(
       buildDoorway(),
-      new ShaderMaterial({ vertexShader: doorVertex, fragmentShader: doorFragment, uniforms: { uPulse: { value: 0.7 }, uIce: { value: new Color('#7fc8ff').multiplyScalar(1.15) } }, fog: false, side: DoubleSide }),
+      new ShaderMaterial({ vertexShader: doorVertex, fragmentShader: doorFragment, uniforms: { uPulse: { value: 0.7 }, uIce: { value: new Color('#7fc8ff').multiplyScalar(3.2) } }, fog: false, side: DoubleSide }),
     );
     door.position.set(0, 0.02, CHAPEL.frontZ + 0.12);
     door.name = 'frost-chapel-door';

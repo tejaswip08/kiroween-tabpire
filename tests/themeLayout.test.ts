@@ -189,7 +189,7 @@ describe('per-theme counts (design table)', () => {
   const WANT: Partial<Record<Exclude<ThemeId, 'crypt'>, [string, number, number][]>> = {
     pumpkin: [['farm_barn', 1, 1], ['farm_silo', 1, 1], ['farm_corn', 8, 6], ['farm_pumpkin', 6, 4], ['farm_fence', 3, 2]],
     forest: [['forest_mushroom_king', 2, 1], ['forest_potion_a', 1, 1], ['forest_potion_b', 1, 1], ['forest_rock_large', 2, 1], ['forest_rocks', 1, 1]],
-    frost: [['frost_pine_a', 1, 1], ['frost_pine_b', 1, 1], ['frost_pines', 1, 1], ['frost_rock', 3, 2]],
+    frost: [['frost_pine_a', 1, 1]],
     bloodmoon: [['blood_ruins', 1, 1], ['blood_column', 4, 3], ['blood_column_round', 3, 2], ['blood_pedestal', 2, 1]],
   };
   it.each(OTHERS)('%s places the design counts within tolerance', (id) => {

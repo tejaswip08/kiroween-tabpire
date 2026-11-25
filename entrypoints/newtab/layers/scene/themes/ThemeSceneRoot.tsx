@@ -10,6 +10,7 @@ import { Glows } from '../Glows';
 import { Lights } from '../Lights';
 import { Mist } from '../Mist';
 import { Moon } from '../Moon';
+import { FROST_BLOOM } from '../../../../../lib/scene/uniqueScenes/frost';
 import { FOREST_MOON_DEPTH } from '../../../../../lib/scene/uniqueScenes/forest';
 import { Sky } from '../Sky';
 import { SceneWeather } from '../Weather';
@@ -43,7 +44,7 @@ export function ThemeSceneRoot({ id }: { id: ThemeId }) {
       {layers.mist && <Mist />}
       {layers.embers && <Embers />}
       <SceneWeather />
-      <Effects />
+      <Effects bloom={id === 'frost' ? FROST_BLOOM : undefined} />
     </>
   );
 }

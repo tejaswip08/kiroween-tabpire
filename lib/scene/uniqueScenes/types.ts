@@ -117,7 +117,7 @@ export interface UniqueSceneSpec {
   /** The ice of the Frozen Cemetery: the ids of the gravestones in the lake, the icicles under their tops and the snow mounds. */
   ice?: { stones: string[]; icicles: Icicle[]; mounds: Mound[] };
   /** The Frozen Cemetery's own parts: the chapel, the graveyard, the ice pillars, the wolves and what hangs from the dead trees. */
-  frost?: { plan: FrostPlan; attached: FrostAttached };
+  frost?: { plan: FrostPlan; attached: FrostAttached; drifts: Mound[]; lanternSpots: { kind: 'lantern'; x: number; y: number; z: number }[] };
   /**
    * Placements that stand on a platform the scene draws itself (the Blood Moon ruins): id to the height of the platform top.
    * Their lowest point is that high above y = 0, not on the ground.

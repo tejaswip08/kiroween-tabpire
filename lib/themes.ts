@@ -196,9 +196,9 @@ const SCENE_FROST: ScenePalette = {
   // A deep navy night with a dark blue horizon (little grey haze), cold bright moonlight and an icy blue rim light.
   skyTop: '#040b1c',
   skyMid: '#0b2347',
-  skyHorizon: '#1f4a82',
-  haze: '#27508a',
-  fog: '#15305a',
+  skyHorizon: '#1b3d6b',
+  haze: '#24497a',
+  fog: '#1b3d6b',
   farSilhouette: '#122648',
   groundBase: '#8ea9cc',
   groundTint: '#dbe8ff',
@@ -594,7 +594,7 @@ const PROPS_FROST: ThemeProps = {
     { model: 'frost_pines', count: 1, scale: [2, 3], zone: 'left' },
     { model: 'frost_rock', count: 3, scale: [1, 1.5], zone: 'right' },
   ],
-  required: ['frost_pine_a', 'frost_pine_b', 'frost_pines', 'frost_rock'],
+  required: ['frost_pine_a'],
 };
 const PROPS_BLOODMOON: ThemeProps = {
   adds: [

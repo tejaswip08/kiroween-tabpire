@@ -2,8 +2,8 @@
 // the tests. The bands never light the moon disc: they fade out around it (`auroraClearance`).
 import { MOON } from './sky';
 
-/** Brightest an aurora pixel may add to the sky (before the clearance around the moon). Strong, but kept under the Bloom threshold. */
-export const AURORA_PEAK = 0.46;
+/** Brightest an aurora pixel may add to the sky (before the clearance around the moon). A soft ribbon, well under the Bloom threshold. */
+export const AURORA_PEAK = 0.36;
 /** Within this many moon-disc radii of the moon the aurora is fully off. */
 export const AURORA_OFF_DISCS = 2.5;
 /** From this many moon-disc radii on, the aurora is at full strength. */

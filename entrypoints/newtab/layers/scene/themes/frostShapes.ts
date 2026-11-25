@@ -194,7 +194,7 @@ function cage(x: number, y: number, z: number): BufferGeometry[] {
   return out;
 }
 /** The lit part of a lantern (a small box, drawn unlit and bright so it blooms). */
-export const buildFlameBox = (): BufferGeometry => new BoxGeometry(0.28, 0.36, 0.28).translate(0, LANTERN_POST.flameY, 0);
+export const buildFlameBox = (): BufferGeometry => new BoxGeometry(0.2, 0.3, 0.2).translate(0, LANTERN_POST.flameY, 0);
 /** An empty lantern hanging from a chain, top of the chain at y = 0, the cage under it. Dark inside, no flame. */
 export function buildHangingLantern(): BufferGeometry {
   return merge([box(0.03, 0.6, 0.03, IRON, 0, -0.3, 0), ...cage(0, -0.95, 0), box(0.2, 0.28, 0.2, '#0b1220', 0, -0.95, 0)]);
@@ -362,3 +362,17 @@ export function buildOwlHead(): BufferGeometry {
     cone(0.04, 0.09, 3, '#d98a2a', 0, 0.12, 0.2, Math.PI / 2, 0, 0),
   ]);
 }
+/** A far pine silhouette: three stacked cones, dark navy with a bluish dusting of snow on each tier. Unit width, 1.9 tall, foot at y = 0. */
+export function buildFarPine(): BufferGeometry {
+  const dark = '#08142b';
+  const snow = '#2a4778';
+  const tiers: readonly (readonly [number, number, number])[] = [[0.62, 0.95, 0.5], [0.46, 0.85, 1.05], [0.3, 0.75, 1.55]];
+  const p: BufferGeometry[] = [];
+  for (const [r, h, y] of tiers) {
+    p.push(cone(r, h, 6, dark, 0, y, 0));
+    p.push(cone(r * 0.72, h * 0.62, 6, snow, 0.0, y + h * 0.2, 0.0));
+  }
+  return merge(p);
+}
+/** The small halo round a lantern's flame: a box about the size of the cage, drawn faint and warm (never bigger than the lantern). */
+export const buildLanternHalo = (): BufferGeometry => new BoxGeometry(0.42, 0.5, 0.42).translate(0, LANTERN_POST.flameY, 0);

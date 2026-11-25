@@ -3,15 +3,12 @@
 import { MODELS, type Placement } from '../layout';
 import { mulberry32 } from '../rng';
 
-/**
- * The frozen lake: a wide ellipse in the middle distance, left of the path, behind the cards band and in front of the chapel.
- * It is a thick sheet of ice: its top is `LAKE_Y` above the snow, and the hands and the skull lie below the top.
- */
-export const LAKE = { x: -4, z: -19.5, rx: 9.5, rz: 5.0 } as const;
+/** The round frozen pond on the left, in the middle distance, beside the path: dark ice lying flat on the snow. */
+export const LAKE = { x: -14.5, z: -21, rx: 5.2, rz: 4.6 } as const;
 /** Segments of the lake disc, so its triangles are known. */
 export const LAKE_SEGMENTS = 48;
-/** The top of the ice is this far above the snow. Everything under the ice (bones, the dark lake bed) lies between 0 and this. */
-export const LAKE_Y = 1.2;
+/** The top of the ice is this far above the snow, so the two never fight over the depth. */
+export const LAKE_Y = 0.06;
 
 /** Normalised distance from the lake centre: below 1 is on the ice, 1 is the shore. `margin` widens the lake by that many units. */
 export function lakeDistance(x: number, z: number, margin = 0): number {
