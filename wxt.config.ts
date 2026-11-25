@@ -20,8 +20,8 @@ export default defineConfig({
     content_security_policy: { extension_pages: "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'" },
     // The pink bat logo, made by tools/make-icons.mjs from tools/icon/bat.svg.
     icons: ICONS,
-    // Required for the toolbar badge (browser.action). No popup yet.
-    action: { default_title: 'Tabpire', default_icon: ICONS },
+    // The toolbar badge (browser.action) and the popup (entrypoints/popup, added by WXT as default_popup).
+    action: { default_title: 'Tabpire', default_icon: ICONS, default_popup: 'popup.html' },
     browser_specific_settings: {
       gecko: {
         // Placeholder. Replace with the real add-on id before submission.

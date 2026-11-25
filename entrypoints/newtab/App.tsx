@@ -5,7 +5,7 @@ import { emitSceneEvent } from '../../lib/scene/bus';
 import { actionNotice, dawnNotice, resurrectNotice } from '../../lib/messages';
 import { openInThisTab, searchWithDefaultEngine, showTab } from '../../lib/nav';
 import type { Suggestion } from '../../lib/suggest';
-import { coffin, crypt, dawn, garlic, resurrect, stake, ungarlic, type ActionResult } from '../../lib/tabs';
+import { coffin, crypt, dawn, garlic, resurrect, stake, ungarlic, wake, type ActionResult } from '../../lib/tabs';
 import type { SceneInputs } from '../../lib/scene/meaning';
 import { sumMb, type Card } from '../../lib/view';
 import { CardGrid } from './components/CardGrid';
@@ -24,6 +24,7 @@ import { useTheme } from './components/useTheme';
 import { prefersReducedMotion } from './hooks/useExitingCards';
 import { useToasts } from './hooks/useToasts';
 import { FpsReadout } from './layers/FpsReadout';
+import { Sunrise } from './components/Sunrise';
 import { PortraitLayerHost, SceneLayerHost } from './layers/hosts';
 
 async function runCardAction(card: Card, action: CardAction): Promise<ActionResult> {
@@ -39,6 +40,8 @@ async function runCardAction(card: Card, action: CardAction): Promise<ActionResu
       return garlic(id);
     case 'ungarlic':
       return card.site ? ungarlic(card.site) : { ok: false, reason: 'no-site' };
+    case 'wake':
+      return wake(id);
   }
 }
 
@@ -49,6 +52,8 @@ export function App() {
   const lastSaveFailed = useRef(saveFailed);
   const [busyIds, setBusyIds] = useState<ReadonlySet<number>>(new Set());
   const [dawnBusy, setDawnBusy] = useState(false);
+  /** Goes up each time Dawn starts, which plays the sunrise once. */
+  const [sunrise, setSunrise] = useState(0);
   const [filter, setFilter] = useState<VampireState | null>(null);
   const running = useRef(new Set<number>());
   const dawnRunning = useRef(false);
@@ -127,11 +132,13 @@ export function App() {
     return icons;
   }, [data.rawTabs]);
   const shownCards = useMemo(() => filterByState(data.cards, filter), [data.cards, filter]);
-  const dawnCount = dawnTargets(
+  const dawnInfos = dawnTargets(
     data.cards.map((c) => c.info),
     data.garlic,
     data.now,
-  ).length;
+  );
+  const dawnCount = dawnInfos.length;
+  const dawnMb = dawnInfos.reduce((sum, info) => sum + (data.cards.find((c) => c.info === info)?.mb ?? 0), 0);
   const dawnKept = useMemo(
     () => data.cards.map((c) => dawnKeepReason(c.info, data.garlic, data.now)).filter((r): r is DawnKeepReason => r !== null),
     [data.cards, data.garlic, data.now],
@@ -141,6 +148,8 @@ export function App() {
     if (dawnRunning.current) return;
     dawnRunning.current = true;
     setDawnBusy(true);
+    // The sunrise sweeps over the whole screen, also for closing tabs that are hidden behind "+N more".
+    if (dawnCount > 0 && !prefersReducedMotion()) setSunrise((k) => k + 1);
     const marks = markDawnExits(data.cards, data.garlic, Date.now(), prefersReducedMotion());
     let ok = false;
     try {
@@ -154,7 +163,7 @@ export function App() {
       setDawnBusy(false);
       reload();
     }
-  }, [push, reload, data.cards, data.garlic]);
+  }, [push, reload, data.cards, data.garlic, dawnCount]);
 
   const sceneInputs = useMemo<SceneInputs>(
     () => ({
@@ -184,6 +193,7 @@ export function App() {
           staked={data.stats.staked}
           coffined={data.stats.coffined}
           dawnCount={dawnCount}
+          dawnMb={dawnMb}
           dawnKept={dawnKept}
           dawnBusy={dawnBusy}
           onDawn={onDawn}
@@ -213,6 +223,7 @@ export function App() {
         </main>
         <Toasts toasts={toasts} onDismiss={dismiss} />
       </div>
+      {sunrise > 0 && <Sunrise key={sunrise} onDone={() => setSunrise(0)} />}
       <FpsReadout />
     </>
   );

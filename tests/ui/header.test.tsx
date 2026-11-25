@@ -59,7 +59,7 @@ describe('header buttons', () => {
     expect(btn.getAttribute('aria-haspopup')).toBe('dialog');
     expect(btn.getAttribute('aria-expanded')).toBe('false');
     const tip = document.getElementById(btn.getAttribute('aria-describedby')!)!;
-    expect(tip.textContent).toBe('Change how Tabpire looks: four themes.');
+    expect(tip.textContent).toBe('THEMESChange how Tabpire looks: four themes.');
     expect(screen.queryByRole('dialog')).toBeNull();
     await userEvent.click(btn);
     expect(btn.getAttribute('aria-expanded')).toBe('true');
@@ -77,18 +77,18 @@ describe('header buttons', () => {
     const { onDawn } = setup({ dawnCount: 3 });
     const btn = screen.getByRole('button', { name: /Dawn/ });
     expect(btn.getAttribute('aria-disabled')).toBeNull();
-    expect(within(btn).getByLabelText('3 ready').textContent).toBe('3');
+    expect(btn.textContent).toBe('Dawn · burn 3');
     const tip = document.getElementById(btn.getAttribute('aria-describedby')!)!;
-    expect(tip.textContent).toBe('Dawn: close 3 starving tabs and save them to the Crypt.');
+    expect(tip.querySelector('.tip-title')!.textContent).toBe('DAWN · BURNS 3 STARVING');
     await userEvent.click(btn);
     expect(onDawn).toHaveBeenCalledTimes(1);
   });
 
-  it('uses singular text for one tab', () => {
+  it('labels Dawn with the number it would burn', () => {
     setup({ dawnCount: 1 });
-    const btn = screen.getByRole('button', { name: /Dawn/ });
-    expect(document.getElementById(btn.getAttribute('aria-describedby')!)!.textContent).toBe(
-      'Dawn: close 1 starving tab and save it to the Crypt.',
+    const btn = screen.getByRole('button', { name: 'Dawn · burn 1' });
+    expect(document.getElementById(btn.getAttribute('aria-describedby')!)!.querySelector('.tip-title')!.textContent).toBe(
+      'DAWN · BURNS 1 STARVING',
     );
   });
 
@@ -96,13 +96,13 @@ describe('header buttons', () => {
     const { onDawn } = setup({ dawnCount: 0 });
     const btn = screen.getByRole('button', { name: 'Dawn' });
     expect(btn.getAttribute('aria-disabled')).toBe('true');
-    expect(document.getElementById(btn.getAttribute('aria-describedby')!)!.textContent).toBe(
-      'Dawn: no starving tabs to close right now.',
+    expect(document.getElementById(btn.getAttribute('aria-describedby')!)!.querySelector('.tip-says')!.textContent).toBe(
+      '“No one is starving. The sun can wait.”',
     );
     await userEvent.click(btn);
     fireEvent.keyDown(btn, { key: 'Enter' });
     expect(onDawn).not.toHaveBeenCalled();
-    expect(within(btn).queryByLabelText(/ready/)).toBeNull();
+    expect(btn.textContent).toBe('Dawn');
   });
 
   it('disables Dawn while it runs', async () => {
@@ -110,9 +110,9 @@ describe('header buttons', () => {
     const btn = screen.getByRole('button', { name: /Dawn/ });
     expect(btn.getAttribute('aria-disabled')).toBe('true');
     expect(btn.getAttribute('aria-busy')).toBe('true');
-    expect(document.getElementById(btn.getAttribute('aria-describedby')!)!.textContent).toBe(
+    expect([...document.getElementById(btn.getAttribute('aria-describedby')!)!.querySelectorAll('.tip-point')].map((e) => e.textContent)).toEqual([
       'Dawn is running. Please wait.',
-    );
+    ]);
     await userEvent.click(btn);
     expect(onDawn).not.toHaveBeenCalled();
   });

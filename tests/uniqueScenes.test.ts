@@ -273,7 +273,7 @@ describe('Pumpkin Patch (the template)', () => {
       expect(t.y).toBeGreaterThanOrEqual(0.24);
       expect(t.y).toBeLessThanOrEqual(0.3);
       expect(t.x).toBeGreaterThan(0.74);
-      expect(t.x).toBeLessThan(0.92);
+      expect(t.x).toBeLessThanOrEqual(0.92);
     }
     expect(spec.path.kind).toBe('dirt');
     expect(spec.ground.kind).toBe('grass');

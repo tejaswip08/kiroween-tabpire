@@ -84,7 +84,7 @@
   font-size: 13px;
   font-weight: 600;
   color: var(--ink);
-  background: rgba(255, 255, 255, 0.05);
+  background: linear-gradient(180deg, var(--panel-fill-top), var(--panel-fill-bottom));
   transition: transform 0.14s ease;
 }
 

@@ -4,7 +4,7 @@ import { assetUrl } from '../assetUrl';
 import { BUDGET, CAPS } from './config';
 import { cameraAt, project, projectDirection } from './camera';
 import { clamp, mulberry32 } from './rng';
-import { moonDirection, moonScreenRadius } from './sky';
+import { layoutMoonDirection, moonScreenRadius } from './sky';
 
 export const LAYOUT_SEED = 1031;
 
@@ -267,14 +267,17 @@ const FENCE_Z = -20.4;
 // ---------- moon clear zone ----------
 const MOON_ASPECTS = [16 / 10, 16 / 9, 21 / 9];
 
-/** True when the top of a tall prop would appear over the moon's halo on screen. */
-export function blocksMoon(p: Placement): boolean {
+/**
+ * True when the top of a tall prop would appear over the moon's halo on screen. The Crypt layout is built with the moon
+ * aim it was made for (`layoutMoonDirection`); pass `moonDirection` to check against the moon as it is drawn now.
+ */
+export function blocksMoon(p: Placement, direction: (aspect: number) => readonly [number, number, number] = layoutMoonDirection): boolean {
   const info = MODELS[p.model];
   if (info.h < 2.5) return false;
   const pad = Math.max(info.hx, info.hz) * p.scale;
   for (const aspect of MOON_ASPECTS) {
     const cam = cameraAt(0, aspect, true);
-    const moon = projectDirection(moonDirection(aspect), cam);
+    const moon = projectDirection(direction(aspect) as never, cam);
     if (!moon) continue;
     const r = moonScreenRadius(aspect).halo * 1.25;
     for (const dy of [1, 0.6]) {

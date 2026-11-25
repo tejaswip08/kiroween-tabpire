@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { DAY_MS } from '../lib/hunger';
 import { countByState, filterByState, toggleFilter } from '../lib/legend';
-import { STATE_EXPLANATION, STATE_HINT, STATE_ORDER, hungerPercent, hungerShare, lastUsedText, shortAge, vampireNote } from '../lib/vampireVoice';
+import { STATE_EXPLANATION, STATE_HINT, STATE_ORDER, hungerPercent, hungerShare, lastUsedText, shortAge } from '../lib/vampireVoice';
 
 const H = 60 * 60 * 1000;
 const M = 60 * 1000;
@@ -43,36 +43,14 @@ describe('times', () => {
   });
 });
 
-describe('vampireNote', () => {
-  it('awake: remembers the visit and asks for another before tomorrow', () => {
-    const n = vampireNote('awake', 15 * H, idle(15 * H));
-    expect(n.quote).toBe("You visited me 15 hours ago. I'm getting a little grey... visit me before tomorrow.");
-    expect(n.explanation).toBe(STATE_EXPLANATION.awake);
-    expect(n.explanation).toContain('Used in the last day');
-  });
-  it('awake: is cheerful when the visit was recent or the tab is in use', () => {
-    expect(vampireNote('awake', 40 * M, idle(40 * M)).quote).toBe("You visited me 40 minutes ago. I'm feeling fine.");
-    expect(vampireNote('awake', 0, { active: true, audible: false, lastAccessed: 1 }).quote).toContain("You're here with me");
-    expect(vampireNote('awake', 0, { active: false, audible: false, lastAccessed: undefined }).quote).toContain("don't remember");
-  });
-  it('starving: counts the days', () => {
-    expect(vampireNote('starving', 3 * DAY_MS, idle(3 * DAY_MS)).quote).toBe("I've waited 3 days. Feed me or stake me.");
-    expect(vampireNote('starving', DAY_MS + H, idle(DAY_MS + H)).quote).toBe("I've waited a day. Feed me or stake me.");
-  });
-  it('asleep and protected have fixed lines', () => {
-    expect(vampireNote('asleep', 9 * DAY_MS, idle(9 * DAY_MS)).quote).toBe("Shh... I'm sleeping in my coffin.");
-    expect(vampireNote('protected', 9 * DAY_MS, idle(9 * DAY_MS)).quote).toBe("Garlic? Fine, I'll behave.");
-  });
-  it('always gives a plain explanation and a quote for every state', () => {
-    for (const s of STATE_ORDER) {
-      const n = vampireNote(s, 2 * H, idle(2 * H));
-      expect(n.quote.length).toBeGreaterThan(5);
-      expect(n.explanation).toBe(STATE_EXPLANATION[s]);
-      expect(STATE_HINT[s].length).toBeGreaterThan(0);
+describe('state words', () => {
+  it('has a plain explanation and a hint for every state', () => {
+    for (const st of STATE_ORDER) {
+      expect(STATE_EXPLANATION[st].length).toBeGreaterThan(10);
+      expect(STATE_HINT[st].length).toBeGreaterThan(0);
     }
   });
 });
-
 describe('legend', () => {
   const cards = [{ state: 'awake' as const }, { state: 'awake' as const }, { state: 'starving' as const }, { state: 'protected' as const }];
   it('counts every state, including empty ones', () => {

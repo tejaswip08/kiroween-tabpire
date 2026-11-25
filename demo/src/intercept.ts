@@ -40,6 +40,12 @@ export function installInterceptors(navigate: (route: DemoRoute) => void): void 
     }
     if (props.active === true) {
       const tab = tabId === undefined ? undefined : fake.tabs.get(tabId);
+      if (tab?.discarded) {
+        // Wake: the demo cannot switch tabs, so the sleeping tab wakes in place.
+        fake.wakeTab(tab.id);
+        notify(`In the extension this switches to ${tab.title || (tab.url ? hostOf(tab.url) : 'that tab')} and wakes it.`);
+        return true;
+      }
       notify(`In the extension this switches to ${tab?.title || (tab?.url ? hostOf(tab.url) : 'that tab')}.`);
       return true;
     }

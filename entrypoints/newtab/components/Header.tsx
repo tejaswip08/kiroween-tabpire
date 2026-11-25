@@ -2,6 +2,7 @@ import { useCallback, useRef, useState } from 'react';
 import type { DawnKeepReason } from '../../../lib/hunger';
 import type { ThemeId } from '../../../lib/themes';
 import { openBloodBank } from '../../../lib/tabs';
+import { BLOOD_BANK_TIP, THEMES_TIP } from '../../../lib/tips';
 import { BatMark, BloodOrbIcon, ThemesIcon } from './icons';
 import { DawnButton } from './DawnButton';
 import { HeaderButton } from './HeaderButton';
@@ -16,6 +17,7 @@ export function Header({
   staked,
   coffined,
   dawnCount,
+  dawnMb = 0,
   dawnKept = [],
   dawnBusy,
   onDawn,
@@ -29,6 +31,8 @@ export function Header({
   staked: number;
   coffined: number;
   dawnCount: number;
+  /** The memory of the tabs Dawn would close. */
+  dawnMb?: number;
   /** Why each starving tab that Dawn will not close is kept. */
   dawnKept?: readonly DawnKeepReason[];
   dawnBusy: boolean;
@@ -57,7 +61,7 @@ export function Header({
             ref={themesBtn}
             label="Themes"
             icon={<ThemesIcon size={24} />}
-            tip="Change how Tabpire looks: four themes."
+            tip={THEMES_TIP}
             popup="dialog"
             expanded={themesOpen}
             tipHidden={themesOpen}
@@ -68,10 +72,10 @@ export function Header({
         <HeaderButton
           label="Blood Bank"
           icon={<BloodOrbIcon size={26} />}
-          tip="Blood Bank: your totals, rank and recent deeds."
+          tip={BLOOD_BANK_TIP}
           onClick={() => void openBloodBank()}
         />
-        <DawnButton count={dawnCount} busy={dawnBusy} onDawn={onDawn} kept={dawnKept} />
+        <DawnButton count={dawnCount} mb={dawnMb} busy={dawnBusy} onDawn={onDawn} kept={dawnKept} />
       </nav>
     </header>
   );

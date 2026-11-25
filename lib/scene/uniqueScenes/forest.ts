@@ -6,7 +6,7 @@
 // Coordinates: x right, y up, z toward the camera (the camera is at z = 16).
 import { cameraAt, project } from '../camera';
 import { MODELS, type Placement, type WarmSource } from '../layout';
-import { moonScreenRadiusScaled } from '../sky';
+import { clearSkyMoon, moonScreenRadiusScaled } from '../sky';
 import { WEATHER } from '../weather';
 import {
   CAULDRON, FIRE, FLAME_COUNT, FLAME_TRIS, FOREST_PARTS, GHOSTS, GRAVES, MUSHROOMS, PLANT_TRIS, SCARECROWS, SOUP_LEVEL,
@@ -28,7 +28,7 @@ export const FOREST_MOON_DEPTH = MOON_DEPTH;
  * It is a crisp disc with soft patches and no wide halo. Its lower part sinks into the ground fog.
  */
 export const FOREST_MOON: UniqueMoon = {
-  target: (aspect) => ({ x: aspect > 2 ? 0.53 : 0.54, y: 0.37 }),
+  target: (aspect) => clearSkyMoon(aspect, 1.4),
   scale: 1.4,
   crisp: true,
   // The branches of the dark trees cross in front of it, so it shows through the gaps.
@@ -129,8 +129,9 @@ export function buildWitchsForest(seed: number): UniqueSceneSpec {
     return (TREE_LEAN[m] * -side > 0 ? 0 : Math.PI) + between(-0.3, 0.3);
   };
   tree('forest_twisted_b', -13.5, -4, lean('forest_twisted_b', -13.5), 1.3);
-  // The big tree on the right stands in front of the moon on purpose: its branches cross the disc.
-  const moonTree = tree('forest_twisted_c', 11.5, -3, lean('forest_twisted_c', 11.5), 1.25, 'themed', false, true);
+  // The third huge foreground tree stands at the left edge. (It stood on the right, in front of the old moon; the moon is now
+  // in the clear sky of the upper right corner, where a huge near tree would hide it.)
+  tree('forest_twisted_c', -15, 0, lean('forest_twisted_c', -15), 1.25);
   tree('forest_twisted_a', 5.6, -9.5, lean('forest_twisted_a', 5.6), 1.3);
   // ----- the tree that closes the tunnel at the end of the trail -----
   const end = tree(TUNNEL_END.model, TUNNEL_END.x, TUNNEL_END.z, TUNNEL_END.rotY, TUNNEL_END.scale, 'centre', true)!;

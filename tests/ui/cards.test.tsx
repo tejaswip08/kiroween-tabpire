@@ -91,18 +91,19 @@ describe('TabCard titles and icons', () => {
     expect(heading.getAttribute('title')).toBe(long);
   });
 
-  it('repeats the full title in every button tooltip, so keyboard users can read it on focus', () => {
+  it('gives every button a rich tip (title, the vampire\'s line, points), and keeps the full title on the card', () => {
     const long = 'A very long title that will be cut with an ellipsis on the card '.repeat(3).trim();
     const { card } = renderCard(raw(1, { title: long }));
     const buttons = within(card).getAllByRole('button');
     expect(buttons).toHaveLength(4);
     for (const button of buttons) {
       const tip = document.getElementById(button.getAttribute('aria-describedby')!)!;
-      expect(tip.querySelector('.tip-note')?.textContent).toBe(long);
-      expect(tip.querySelector('.tip-text')?.textContent).not.toBe(long);
+      expect(tip.querySelector('.tip-title')?.textContent).toMatch(/^[A-Z ·]+$/);
+      expect(tip.querySelector('.tip-says')?.textContent).toMatch(/^“.+”$/);
+      expect(tip.querySelectorAll('.tip-point').length).toBeGreaterThan(0);
     }
+    expect(within(card).getByRole('heading').getAttribute('title')).toBe(long);
   });
-
   it('falls back to the site name, then "Untitled tab"', () => {
     expect(within(renderCard(raw(1, { title: '  ' })).card).getByRole('heading').textContent).toBe('site1.com');
     cleanup();

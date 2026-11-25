@@ -52,6 +52,7 @@ export async function recordActions(
       action: r.action,
       site: r.site,
       ...(r.title !== undefined ? { title: r.title } : {}),
+      ...(r.mb > 0 ? { mb: r.mb } : {}),
     }));
     await store.setStats(next);
     await store.setLog([...log, ...entries].slice(-LOG_LIMIT));
@@ -132,6 +133,22 @@ export async function coffin(tabId: number, now: number = Date.now()): Promise<A
   return { ok: true, changed: true, mb };
 }
 
+/**
+ * Wake: switch to a sleeping (discarded) tab, which makes the browser load it again. Nothing is logged and no memory
+ * is reclaimed: the tab starts using memory again.
+ */
+export async function wake(tabId: number): Promise<ActionResult> {
+  const tab = await getTab(tabId);
+  if (!tab || tab.id === undefined) return fail('no-tab');
+  try {
+    await browser.tabs.update(tabId, { active: true });
+    if (tab.windowId !== undefined && tab.windowId >= 0) await browser.windows.update(tab.windowId, { focused: true });
+  } catch {
+    return fail('browser-error');
+  }
+  await refreshBadgeQuietly();
+  return { ok: true, changed: true, mb: 0 };
+}
 /** Crypt: save the tab, then close it. The tab stays open if the save fails. */
 export async function crypt(tabId: number, now: number = Date.now()): Promise<ActionResult> {
   const tab = await getTab(tabId);
@@ -232,6 +249,20 @@ export async function resurrect(
   return { ok: true, changed: true, mb: 0 };
 }
 
+/** Deletes a saved tab from the crypt without reopening it. Nothing is logged. */
+export async function forgetCrypt(itemId: string): Promise<ActionResult> {
+  let found = false;
+  try {
+    await transact(async () => {
+      const items = await store.getCrypt();
+      found = items.some((i) => i.id === itemId);
+      if (found) await store.setCrypt(items.filter((i) => i.id !== itemId));
+    });
+  } catch {
+    return fail('browser-error');
+  }
+  return found ? { ok: true, changed: true, mb: 0 } : fail('not-found');
+}
 /**
  * Dawn: close every starving tab, saving each to the crypt first.
  * Never closes active, pinned, audible, discarded or garlic tabs, or tabs

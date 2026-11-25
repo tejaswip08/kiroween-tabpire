@@ -1,5 +1,8 @@
 /* Demo shell. The root is a flex column (base.css): strip on top, page frame fills the rest. */
 .demo-strip {
+  /* Above the fixed 3D layers of the page below it. */
+  position: relative;
+  z-index: 3;
   flex: 0 0 auto;
   display: flex;
   flex-wrap: wrap;
@@ -77,4 +80,18 @@
   .demo-reset {
     padding: 1px 8px;
   }
+}
+/* The popup route: the real popup in a frame the size of the toolbar popup. */
+.demo-popup-stage {
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.demo-popup-frame {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.18), 0 20px 50px rgba(0, 0, 0, 0.6);
 }

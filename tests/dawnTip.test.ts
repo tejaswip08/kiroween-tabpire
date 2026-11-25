@@ -2,7 +2,7 @@
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 import { DAY_MS, dawnKeepReason, dawnTargets, stateOf, type TabInfo } from '../lib/hunger';
-import { dawnTip } from '../entrypoints/newtab/components/DawnButton';
+import { dawnHeaderTip } from '../lib/tips';
 
 const NOW = 1_800_000_000_000;
 const tabArb: fc.Arbitrary<TabInfo> = fc.record({
@@ -40,19 +40,13 @@ describe('dawnKeepReason', () => {
   });
 });
 
-describe('dawnTip', () => {
-  it('explains why there is nothing to close', () => {
-    expect(dawnTip(0, false, ['pinned'])).toBe('Dawn: nothing to close. 1 starving tab is kept safe (pinned).');
-    expect(dawnTip(0, false, ['pinned', 'not a web page', 'pinned'])).toBe(
-      'Dawn: nothing to close. 3 starving tabs are kept safe (pinned, not a web page).',
-    );
-  });
-  it('mentions the tabs it keeps when it does close some', () => {
-    expect(dawnTip(2, false, ['pinned'])).toBe('Dawn: close 2 starving tabs and save them to the Crypt. 1 more is kept safe (pinned).');
-  });
-  it('keeps the old text when nothing is starving or nothing is kept', () => {
-    expect(dawnTip(0, false)).toBe('Dawn: no starving tabs to close right now.');
-    expect(dawnTip(1, false, [])).toBe('Dawn: close 1 starving tab and save it to the Crypt.');
-    expect(dawnTip(3, true, ['pinned'])).toBe('Dawn is running. Please wait.');
+describe('the Dawn tip names the starving tabs it keeps', () => {
+  it('adds which and why', () => {
+    expect(dawnHeaderTip(0, 0, ['pinned']).points).toEqual([
+      'Nothing is starving right now. Dawn closes tabs that have been idle for over a day.',
+      '1 starving tab is kept safe (pinned).',
+    ]);
+    expect(dawnHeaderTip(2, 500, ['pinned']).points[1]).toBe('1 starving tab is kept safe (pinned).');
+    expect(dawnHeaderTip(3, 0, ['pinned'], true).points).toEqual(['Dawn is running. Please wait.']);
   });
 });

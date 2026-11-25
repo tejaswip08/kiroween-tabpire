@@ -18,5 +18,6 @@ describe('extension icons', () => {
     for (const size of SIZES) expect(config).toContain(`${size}: 'icon/${size}.png'`);
     expect(config).toMatch(/icons: ICONS/);
     expect(config).toMatch(/default_icon: ICONS/);
+    expect(config).toMatch(/default_popup: 'popup.html'/);
   });
 });

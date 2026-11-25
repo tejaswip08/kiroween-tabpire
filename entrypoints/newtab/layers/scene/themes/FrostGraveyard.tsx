@@ -24,8 +24,8 @@ export function FrostGraveyard({ plan }: { plan: FrostPlan }) {
     const halo = new MeshBasicMaterial({ color: new Color('#ff9a3d'), transparent: true, opacity: 0.22, depthWrite: false, blending: AdditiveBlending, fog: false });
     const at = plan.lanterns.map((l) => placeAt(l.x, 0, l.z, l.rotY));
     const all: InstancedMesh[] = [
-      makeInstanced(buildSlab(), litMaterial('#14305a', 0.4), slab.map(stoneAt), 'frost-stones-slab', { castShadow: true, receiveShadow: true }),
-      makeInstanced(buildCross(), litMaterial('#14305a', 0.4), cross.map(stoneAt), 'frost-stones-cross', { castShadow: true, receiveShadow: true }),
+      makeInstanced(buildSlab(), litMaterial('#0c1d38', 0.22), slab.map(stoneAt), 'frost-stones-slab', { castShadow: true, receiveShadow: true }),
+      makeInstanced(buildCross(), litMaterial('#0c1d38', 0.22), cross.map(stoneAt), 'frost-stones-cross', { castShadow: true, receiveShadow: true }),
       makeInstanced(buildLanternPost(), litMaterial('#10203a', 0.4), at, 'frost-lanterns', { castShadow: true }),
       makeInstanced(buildFlameBox(), new MeshBasicMaterial({ color: '#ffa84d', fog: false }), at, 'frost-lantern-flames'),
       makeInstanced(buildLanternHalo(), halo, at, 'frost-lantern-halos', { renderOrder: 3 }),

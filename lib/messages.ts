@@ -3,7 +3,7 @@ import type { ActionResult, DawnResult, FailReason } from './tabs';
 import { formatMb } from './hunger';
 
 export type Notice = { kind: 'ok' | 'error'; text: string };
-export type ActionName = 'stake' | 'coffin' | 'crypt' | 'garlic' | 'ungarlic';
+export type ActionName = 'stake' | 'coffin' | 'crypt' | 'garlic' | 'ungarlic' | 'wake';
 
 const MAX_TITLE = 40;
 
@@ -29,26 +29,23 @@ export function actionNotice(
   if (!result.ok) return { kind: 'error', text: FAIL_TEXT[result.reason] };
 
   const name = shortTitle(ctx.title) || ctx.site || 'this tab';
-  const site = ctx.site ?? 'This site';
-  const freed = `About ${formatMb(result.mb)} freed.`;
-
+  const site = ctx.site ?? 'this site';
+  const mb = formatMb(result.mb);
   switch (action) {
     case 'stake':
-      return { kind: 'ok', text: `Closed "${name}". ${freed}` };
+      return { kind: 'ok', text: `Staked ${name} \u00b7 ${mb} reclaimed` };
     case 'coffin':
-      return { kind: 'ok', text: `Put "${name}" to sleep. ${freed}` };
+      return { kind: 'ok', text: `${name} sleeps in its coffin \u00b7 ${mb} freed` };
     case 'crypt':
-      return { kind: 'ok', text: `Saved "${name}" to the Crypt and closed it.` };
+      return { kind: 'ok', text: `Sealed ${name} in the crypt \u00b7 ${mb} reclaimed` };
     case 'garlic':
-      return {
-        kind: 'ok',
-        text: result.changed ? `${site} is now protected.` : `${site} was already protected.`,
-      };
+      return { kind: 'ok', text: `Garlic hung on ${site}. It will never be flagged.` };
     case 'ungarlic':
-      return { kind: 'ok', text: `${site} is no longer protected.` };
+      return { kind: 'ok', text: `Garlic removed from ${site}` };
+    case 'wake':
+      return { kind: 'ok', text: `${name} is awake` };
   }
 }
-
 export function dawnNotice(result: DawnResult): Notice {
   if (!result.ok) {
     return {
@@ -60,12 +57,8 @@ export function dawnNotice(result: DawnResult): Notice {
     };
   }
   if (result.closed === 0) return { kind: 'ok', text: 'No tabs were ready to close.' };
-  const what =
-    result.closed === 1 ? '1 tab and saved it' : `${result.closed} tabs and saved them`;
-  return {
-    kind: 'ok',
-    text: `Dawn closed ${what} to the Crypt. About ${formatMb(result.mb)} freed.`,
-  };
+  const what = result.closed === 1 ? '1 vampire' : `${result.closed} vampires`;
+  return { kind: 'ok', text: `Dawn burned ${what} \u00b7 ${formatMb(result.mb)} reclaimed. They rest in the crypt.` };
 }
 
 /** Message for choosing a Crypt item in the search box. */

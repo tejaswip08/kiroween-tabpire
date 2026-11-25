@@ -199,10 +199,10 @@ export const isFrost = (id: string): boolean => id.startsWith('frost_');
 
 export const FROST = {
   color: '#e8f2ff',
-  emissive: '#8fa9c2',
-  emissiveIntensity: 0.5,
-  /** Vertex colours (they multiply the material colour). */
-  body: [0.78, 0.86, 0.94],
+  emissive: '#5a7390',
+  emissiveIntensity: 0.22,
+  /** Vertex colours (they multiply the material colour): dark frosted needles, a snowy top. */
+  body: [0.36, 0.46, 0.54],
   snow: [1, 1, 1],
   trunk: [0.36, 0.42, 0.5],
   /** The top quarter of the model turns to snow; the lowest part of a tree is the trunk. */

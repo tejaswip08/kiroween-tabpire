@@ -118,6 +118,23 @@ export function GarlicIcon(props: IconProps) {
   );
 }
 
+/** Wake: an open eye with a warm iris, rising out of the coffin's sleep. */
+export function WakeIcon(props: IconProps) {
+  const id = useId();
+  return (
+    <Svg {...props}>
+      <defs>
+        <Grad id={`${id}w`} from="#fff3c4" to="#f2a65a" />
+        <Grad id={`${id}i`} from="#ff8fab" to="#b0244a" />
+      </defs>
+      <path d="M3 17c3.600-6 8-9 13-9s9.400 3 13 9c-3.600 6-8 9-13 9S6.600 23 3 17z" fill={`url(#${id}w)`} stroke="#5a2a1a" strokeWidth="1.200" strokeLinejoin="round" />
+      <circle cx="16" cy="17" r="5.200" fill={`url(#${id}i)`} stroke="#5a1a2a" strokeWidth="1" />
+      <circle cx="16" cy="17" r="2" fill="#2a0a12" />
+      <circle cx="14.200" cy="15.200" r="1.100" fill="#fff" />
+      <path d="M16 2.500v3M7.500 5.500l1.800 2.400M24.500 5.500l-1.800 2.400" stroke="#ffd36e" strokeWidth="1.600" strokeLinecap="round" />
+    </Svg>
+  );
+}
 /** Remove garlic: the bulb with a slash. */
 export function RemoveGarlicIcon(props: IconProps) {
   return (

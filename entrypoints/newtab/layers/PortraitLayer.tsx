@@ -10,7 +10,7 @@ import { SceneThemeContext, sceneThemeFor } from './scene/themeColors';
 import { useCardSlots } from './portraits/useCardSlots';
 import { fpsStore } from './fpsStore';
 import { clearPortraitsReady } from './portraitReady';
-import { reportContextLost, reportContextRestored, useWebgl } from './useWebgl';
+import { useWebgl, watchContext } from './useWebgl';
 
 /** Feeds the #fps readout with the draw calls and triangles of all views in one frame. */
 function PortraitStats() {
@@ -59,12 +59,7 @@ export default function PortraitLayer({ themeId = DEFAULT_THEME }: { themeId?: T
       frameloop={!visible || lost ? 'never' : reduced ? 'demand' : 'always'}
       onCreated={({ gl }) => {
         gl.setClearColor(0x000000, 0);
-        const el = gl.domElement;
-        el.addEventListener('webglcontextlost', (e) => {
-          e.preventDefault();
-          reportContextLost();
-        });
-        el.addEventListener('webglcontextrestored', () => reportContextRestored());
+        watchContext(gl.domElement);
       }}
     >
       <PortraitStats />

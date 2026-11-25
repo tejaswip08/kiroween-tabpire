@@ -15,10 +15,13 @@
 - `npm run build` / `npm run build:firefox`: the extension in `.output/`.
 - `npm run demo:build`: the web demo in `demo/dist`. `npm run layout:check` then checks the real page layout in headless Chrome
   (800x600 up to 1920x1080, 19 tabs; no screenshots). `-- --write` records the card areas for `tests/pageLayout.test.ts`.
+- `npm run console:check` (after `npm run demo:build`): opens the demo in headless Chrome, switches through every enabled
+  theme and presses Reset demo; fails on any console error (a shader that does not compile) or if the 3D layers are gone.
 - `node tools/make-icons.mjs`: the extension icons in `public/icon/` from `tools/icon/bat.svg`.
 - `node tools/check-css-animations.mjs`: keyframes animate only transform and opacity (also run by a hook on CSS save).
 
 ## Tests
+- Every custom shader string is scanned for GLSL ES 3.00 reserved words used as names (`tests/glslReserved.test.ts`).
 - Vitest, Testing Library (jsdom for UI tests: `// @vitest-environment jsdom`) and fast-check property tests.
 - Pure rules live in `lib/` with no browser APIs and no `Date.now()`: time is passed in. Test them with properties
   (every tab has one state, Dawn never touches the active, pinned, audible or garlic tabs, estimates are stable).

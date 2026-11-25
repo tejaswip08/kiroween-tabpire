@@ -102,7 +102,7 @@ export function isCardTab(
   return true;
 }
 
-/** Cards for every other tab, hungriest first, then by id. */
+/** Cards for every other tab, in `compareCards` order. */
 export function buildCards(
   tabs: readonly RawTab[],
   currentTabId: number | undefined,
@@ -123,7 +123,23 @@ export function buildCards(
         mb: estimateMb(info),
       };
     })
-    .sort((a, b) => b.hungerMs - a.hungerMs || a.tab.id - b.tab.id);
+    .sort(compareCards);
+}
+/** Card order by state: the ones to deal with first. */
+export const STATE_ORDER: readonly VampireState[] = ['starving', 'awake', 'asleep', 'protected'];
+/**
+ * Starving first, then awake (the tab in use or playing sound first, then the rest), then asleep, then protected.
+ * Inside a state the longest idle comes first; ties keep the tab id order.
+ */
+export function compareCards(a: Card, b: Card): number {
+  const byState = STATE_ORDER.indexOf(a.state) - STATE_ORDER.indexOf(b.state);
+  if (byState !== 0) return byState;
+  if (a.state === 'awake') {
+    const inUse = (c: Card) => (c.info.active || c.info.audible ? 0 : 1);
+    const byUse = inUse(a) - inUse(b);
+    if (byUse !== 0) return byUse;
+  }
+  return b.hungerMs - a.hungerMs || a.tab.id - b.tab.id;
 }
 
 

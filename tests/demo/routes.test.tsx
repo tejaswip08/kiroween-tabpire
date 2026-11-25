@@ -50,11 +50,11 @@ describe('demo routes', () => {
     expect(await screen.findByRole('main')).toBeTruthy();
   });
 
-  it('shows the banner and the placeholder text on #/popup', () => {
+  it('shows the banner and the real popup on #/popup', () => {
     window.location.hash = '#/popup';
     render(<DemoShell />);
     expect(screen.getByText(BANNER_TEXT)).toBeTruthy();
-    expect(screen.getByText('The popup is not built yet.')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Open the Crypt' })).toBeTruthy();
   });
 
   it('switches pages on a hash change and keeps the fake state', async () => {
@@ -63,21 +63,21 @@ describe('demo routes', () => {
     const before = [...fake.tabs.keys()];
     expect(before.length).toBeGreaterThan(0);
     go('#/popup');
-    expect(screen.getByText('The popup is not built yet.')).toBeTruthy();
-    expect(screen.queryByRole('main')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Open the Crypt' })).toBeTruthy();
+    expect(document.querySelector('main.main')).toBeNull();
     go('#/bloodbank');
     expect(await screen.findByRole('main')).toBeTruthy();
     expect([...fake.tabs.keys()]).toEqual(before);
     expect(screen.getByText(BANNER_TEXT)).toBeTruthy();
   });
 
-  it('never calls canvas.getContext on Blood Bank or the placeholder', async () => {
+  it('never calls canvas.getContext on Blood Bank or the popup', async () => {
     const spy = vi.spyOn(HTMLCanvasElement.prototype, 'getContext');
     window.location.hash = '#/bloodbank';
     render(<DemoShell />);
     await screen.findByRole('main');
     go('#/popup');
-    expect(screen.getByText('The popup is not built yet.')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Open the Crypt' })).toBeTruthy();
     expect(spy).not.toHaveBeenCalled();
   });
 
@@ -102,7 +102,7 @@ describe('demo routes', () => {
       expect([...fake.tabs.values()].some((t) => t.lastAccessed === 5_000_000_000_000 - 60 * 1000)).toBe(true),
     );
     expect(window.location.hash).toBe('#/popup');
-    expect(screen.getByText('The popup is not built yet.')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Open the Crypt' })).toBeTruthy();
   });
 });
 

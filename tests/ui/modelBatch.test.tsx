@@ -135,7 +135,7 @@ describe('frost treatment', () => {
       expect(mat.vertexColors).toBe(true);
       expect(mat.color.getHexString()).toBe(new THREE.Color(FROST.color).getHexString());
       expect(mat.emissive.getHexString()).toBe(new THREE.Color(FROST.emissive).getHexString());
-      expect(mat.emissiveIntensity).toBe(0.5);
+      expect(mat.emissiveIntensity).toBe(FROST.emissiveIntensity);
       expect(m.geometry.getAttribute('color')).toBeDefined();
     }
     for (const [url, mat] of shared) {

@@ -1,4 +1,5 @@
-import { useEffect, useId, useRef, useState, type CSSProperties, type FocusEvent } from 'react';
+import { useEffect, useId, useRef, useState, type CSSProperties, type FocusEvent, type ReactNode } from 'react';
+import { ACTION_LABEL, actionTip, cardActions, type TipAction, type TipContent } from '../../../lib/tips';
 import type { VampireState } from '../../../lib/hunger';
 import type { ExitKind } from '../../../lib/scene/exitKinds';
 import { formatMb } from '../../../lib/hunger';
@@ -6,72 +7,71 @@ import { idleLabel, type Card } from '../../../lib/view';
 import { hungerShare, shortAge } from '../../../lib/vampireVoice';
 import { usePortraitReady } from '../layers/portraitReady';
 import { ActionButton } from './ActionButton';
-import { CoffinIcon, CryptIcon, GarlicIcon, RemoveGarlicIcon, StakeIcon, StateShape } from './icons';
+import { CoffinIcon, CryptIcon, GarlicIcon, RemoveGarlicIcon, StakeIcon, StateShape, WakeIcon } from './icons';
 import { PortraitSlot } from './PortraitSlot';
 import { SiteIcon } from './SiteIcon';
 import { CardPopup } from './CardPopup';
 import { HungerBar } from './HungerBar';
 
-export type CardAction = 'stake' | 'coffin' | 'crypt' | 'garlic' | 'ungarlic';
-
+export type CardAction = TipAction;
 const STATE_WORD: Record<VampireState, string> = {
   awake: 'Awake',
   starving: 'Starving',
   asleep: 'Asleep',
   protected: 'Protected',
 };
-
 export function cardTitle(card: Card): string {
   return card.tab.title?.trim() || card.site || 'Untitled tab';
 }
-
-interface ActionSpec {
+export interface ActionSpec {
+  action: CardAction;
   label: string;
-  tip: string;
+  tip: TipContent;
   disabled: boolean;
 }
-
-/** Label, tooltip and enabled state for each button on a card. */
-export function actionSpecs(card: Card, busy: boolean): Record<'stake' | 'coffin' | 'crypt' | 'garlic', ActionSpec> {
-  const wait = 'Please wait: another action is running.';
+/** The buttons of a card, in order, with their rich tip and enabled state. */
+export function actionSpecs(card: Card, busy: boolean): ActionSpec[] {
   const hasSite = card.site !== null;
-  const isProtected = card.state === 'protected';
-  return {
-    stake: {
-      label: 'Stake',
-      tip: busy ? wait : 'Stake: close this tab.',
-      disabled: busy,
-    },
-    coffin: {
-      label: 'Coffin',
-      tip: busy
-        ? wait
-        : card.info.active
-          ? 'Coffin: this tab is in use and cannot be put to sleep.'
-          : card.info.discarded
-            ? 'Coffin: this tab is already asleep.'
-            : 'Coffin: put this tab to sleep to free memory.',
-      disabled: busy || card.info.active || card.info.discarded,
-    },
-    crypt: {
-      label: 'Crypt',
-      tip: busy ? wait : hasSite ? 'Crypt: save this tab for later and close it.' : 'Crypt: only web pages can be saved.',
-      disabled: busy || !hasSite,
-    },
-    garlic: isProtected
-      ? {
-          label: 'Remove garlic',
-          tip: busy ? wait : 'Remove garlic: let this site go hungry again.',
-          disabled: busy,
-        }
-      : {
-          label: 'Garlic',
-          tip: busy ? wait : hasSite ? 'Garlic: protect every tab on this site.' : 'Garlic: only web pages can be protected.',
-          disabled: busy || !hasSite,
-        },
+  const blocked: Record<CardAction, boolean> = {
+    stake: false,
+    coffin: card.info.active || card.info.discarded,
+    crypt: !hasSite,
+    garlic: !hasSite,
+    ungarlic: false,
+    wake: false,
   };
+  return cardActions(card.state).map((action) => ({
+    action,
+    label: ACTION_LABEL[action],
+    tip: actionTip(action, card, busy),
+    disabled: busy || blocked[action],
+  }));
 }
-
+const ICONS: Record<CardAction, () => ReactNode> = {
+  stake: () => <StakeIcon size={32} />,
+  coffin: () => <CoffinIcon size={32} />,
+  crypt: () => <CryptIcon size={32} />,
+  garlic: () => <GarlicIcon size={32} />,
+  ungarlic: () => <RemoveGarlicIcon size={32} />,
+  wake: () => <WakeIcon size={32} />,
+};
+/** The action buttons of a tab: on its card, and on its row in the hidden tabs panel. */
+export function CardActionButtons({ card, busy, onAction }: { card: Card; busy: boolean; onAction: (card: Card, action: CardAction) => void }) {
+  return (
+    <>
+      {actionSpecs(card, busy).map((spec) => (
+        <ActionButton
+          key={spec.action}
+          label={spec.label}
+          tip={spec.tip}
+          disabled={spec.disabled}
+          icon={ICONS[spec.action]()}
+          onClick={() => onAction(card, spec.action)}
+        />
+      ))}
+    </>
+  );
+}
 export function TabCard({
   card,
   busy,
@@ -98,8 +98,6 @@ export function TabCard({
 }) {
   const title = cardTitle(card);
   const idle = idleLabel(card);
-  const specs = actionSpecs(card, busy);
-  const isProtected = card.state === 'protected';
   const portrait3d = usePortraitReady(card.tab.id);
   const popup = useCardPopup(!exiting);
   const popupId = useId();
@@ -144,39 +142,8 @@ export function TabCard({
         <span className="card-memory">{formatMb(card.mb)}</span>
       </p>
       <HungerBar fill={hungerShare(card.hungerMs)} label={`Hunger meter: ${idle}`} />
-      <div className="card-actions">
-        <ActionButton
-          label={specs.stake.label}
-          tip={specs.stake.tip}
-          note={title}
-          disabled={specs.stake.disabled}
-          icon={<StakeIcon size={32} />}
-          onClick={() => onAction(card, 'stake')}
-        />
-        <ActionButton
-          label={specs.coffin.label}
-          tip={specs.coffin.tip}
-          note={title}
-          disabled={specs.coffin.disabled}
-          icon={<CoffinIcon size={32} />}
-          onClick={() => onAction(card, 'coffin')}
-        />
-        <ActionButton
-          label={specs.crypt.label}
-          tip={specs.crypt.tip}
-          note={title}
-          disabled={specs.crypt.disabled}
-          icon={<CryptIcon size={32} />}
-          onClick={() => onAction(card, 'crypt')}
-        />
-        <ActionButton
-          label={specs.garlic.label}
-          tip={specs.garlic.tip}
-          note={title}
-          disabled={specs.garlic.disabled}
-          icon={isProtected ? <RemoveGarlicIcon size={32} /> : <GarlicIcon size={32} />}
-          onClick={() => onAction(card, isProtected ? 'ungarlic' : 'garlic')}
-        />
+      <div className="card-actions" data-count={actionSpecs(card, busy).length}>
+        <CardActionButtons card={card} busy={busy} onAction={onAction} />
       </div>
       {popup.open && <CardPopup card={card} title={title} anchor={popup.anchor} id={popupId} />}
     </li>
@@ -220,9 +187,17 @@ function useCardPopup(enabled: boolean) {
     anchor,
     handlers: {
       onMouseEnter: () => show(POPUP_DELAY_MS),
+      // Over the action buttons their own tips show, so the card's hover box closes and never sits on top of them.
+      onMouseOver: (e: { target: EventTarget }) => {
+        const onButtons = (e.target as Element).closest?.('.card-actions') != null;
+        if (onButtons) close();
+        else if (!open) show(POPUP_DELAY_MS);
+      },
       onMouseLeave: close,
       onFocus: (e: FocusEvent) => {
-        if (keyboardFocus(e)) show(0);
+        // A focused action button shows its own tip instead.
+        if ((e.target as Element).closest?.('.card-actions')) close();
+        else if (keyboardFocus(e)) show(0);
       },
       onBlur: (e: FocusEvent) => {
         if (!ref.current?.contains(e.relatedTarget as Node | null)) close();

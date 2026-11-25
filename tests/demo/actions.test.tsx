@@ -93,8 +93,10 @@ describe('demo actions on the Crypt', () => {
     expect([...fake.tabs.values()].some((t) => t.title === 'Claude')).toBe(false);
 
     await userEvent.click(screen.getByRole('button', { name: 'Blood Bank' }));
-    const tile = (await screen.findByText('In the Crypt')).closest('.bb-tile')!;
-    expect(tile.querySelector('dd')!.textContent).toBe(String(before + 1));
+    const heading = await screen.findByRole('heading', { level: 2, name: /^The crypt · / });
+    await waitFor(() => expect(heading.textContent).toBe(`The crypt · ${before + 1}`));
+    const saved = heading.closest('section')!;
+    expect(within(saved).getByRole('link', { name: 'Claude' })).toBeTruthy();
   });
 
   it('Garlic protects the site and every card of that site shows Protected', async () => {
@@ -128,7 +130,7 @@ describe('demo actions on the Crypt', () => {
     await mountCrypt();
     const cryptBefore = (await store.getCrypt()).length;
     const dawnButton = screen.getByRole('button', { name: /Dawn/ });
-    expect(within(dawnButton).getByLabelText('8 ready')).toBeTruthy();
+    expect(dawnButton.textContent).toBe('Dawn · burn 8');
     await userEvent.click(dawnButton);
     await waitFor(async () => expect(await store.getCrypt()).toHaveLength(cryptBefore + 8), { timeout: 3000 });
     await waitFor(() => expect(cardCount()).toBe(SEEDED_CARDS - 8), { timeout: 3000 });
@@ -168,13 +170,13 @@ describe('demo search, haunts, links and Blood Bank', () => {
   it('Blood Bank shows the earlier stats and log', async () => {
     await mountCrypt();
     await userEvent.click(screen.getByRole('button', { name: 'Blood Bank' }));
-    expect(await screen.findByRole('heading', { name: 'Blood Bank' })).toBeTruthy();
+    expect(await screen.findByRole('heading', { level: 1, name: 'The Blood Bank' })).toBeTruthy();
     expect(window.location.hash).toBe('#/bloodbank');
-    const slain = screen.getByText('Slain').closest('.bb-tile')!;
+    const slain = screen.getByText('Vampires slain').closest('.bb-tile')!;
     await waitFor(() => expect(slain.querySelector('dd')!.textContent).toBe('12'));
-    const log = screen.getByRole('list');
+    const log = screen.getByRole('heading', { level: 2, name: 'Hunt log' }).closest('section')!;
     expect(within(log).getByText('Explore / Twitter')).toBeTruthy();
-    expect(within(log).getAllByText('Closed by Dawn').length).toBe(1);
+    expect(within(log).getAllByText('Dawn').length).toBe(1);
   });
 
   it('a tab suggestion shows a notice and keeps the hash', async () => {

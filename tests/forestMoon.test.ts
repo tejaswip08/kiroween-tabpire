@@ -1,6 +1,6 @@
-// The moon of the Witch's Forest is seen behind the trees: rays from the camera through the disc, against the real tree meshes
-// (the bark of the twisted trees from their files, and the scary trees the scene builds). Some must hit a nearer tree (the
-// branches cross the moon), and most must reach the moon (it is plainly seen), at every usual window shape.
+// The moon of the Witch's Forest is in the clear sky of the upper right corner: rays from the camera through the disc, against
+// the real tree meshes (the bark of the twisted trees from their files, and the scary trees the scene builds), almost all
+// reach the moon at every usual window shape.
 import { expect, it } from 'vitest';
 import { DoubleSide, Matrix4, Mesh, MeshBasicMaterial, Quaternion, Raycaster, Vector3, Euler, type BufferGeometry } from 'three';
 import { loadGlbGeometry } from './helpers/glb';
@@ -11,7 +11,7 @@ import { FOREST_MOON, FOREST_MOON_DEPTH } from '../lib/scene/uniqueScenes/forest
 import { buildScaryTree } from '../entrypoints/newtab/layers/scene/themes/forestShapes';
 import { buildFarTree } from '../entrypoints/newtab/layers/scene/themes/witchHouseShapes';
 const BARK: Record<string, string> = { forest_twisted_a: 'TwistedTree_2_1', forest_twisted_b: 'TwistedTree_1_1', forest_twisted_c: 'TwistedTree_3_1' };
-it('shows the moon behind a few branches, never hidden, at every window shape', async () => {
+it('shows the moon clear of the trees (a few branch tips at most), at every window shape', async () => {
   const spec = themeScene('forest').unique!;
   const geo: Record<string, { g: BufferGeometry; m: Matrix4 }> = {};
   for (const id of Object.keys(BARK)) {
@@ -61,7 +61,7 @@ it('shows the moon behind a few branches, never hidden, at every window shape', 
       if (depth < FOREST_MOON_DEPTH) { covered++; by.set(who, (by.get(who) ?? 0) + 1); }
     }
     const share = covered / total;
-    expect(share, `aspect ${aspect.toFixed(2)}: share of the disc covered by nearer trees (${[...by.keys()].join(', ')})`).toBeGreaterThan(0.1);
-    expect(share, `aspect ${aspect.toFixed(2)}`).toBeLessThan(0.4);
+    // The moon is in the clear sky now: at most a few branch tips may cross its edge.
+    expect(share, `aspect ${aspect.toFixed(2)}: share of the disc covered by nearer trees (${[...by.keys()].join(', ')})`).toBeLessThan(0.15);
   }
 }, 300000);

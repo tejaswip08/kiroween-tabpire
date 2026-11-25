@@ -6,15 +6,14 @@ const ctx = { title: 'My page', site: 'example.com' };
 const ok = (mb: number, changed = true) => ({ ok: true as const, changed, mb });
 
 describe('actionNotice', () => {
-  it('describes each success in plain words', () => {
-    expect(actionNotice('stake', ok(120), ctx)).toEqual({ kind: 'ok', text: 'Closed "My page". About ~120 MB freed.' });
-    expect(actionNotice('coffin', ok(120), ctx)).toEqual({ kind: 'ok', text: 'Put "My page" to sleep. About ~120 MB freed.' });
-    expect(actionNotice('crypt', ok(120), ctx)).toEqual({ kind: 'ok', text: 'Saved "My page" to the Crypt and closed it.' });
-    expect(actionNotice('garlic', ok(0), ctx).text).toBe('example.com is now protected.');
-    expect(actionNotice('garlic', ok(0, false), ctx).text).toBe('example.com was already protected.');
-    expect(actionNotice('ungarlic', ok(0), ctx).text).toBe('example.com is no longer protected.');
+  it('uses the exact toast wording, with one "~" in each memory figure', () => {
+    expect(actionNotice('stake', ok(120), ctx).text).toBe('Staked My page \u00b7 ~120 MB reclaimed');
+    expect(actionNotice('crypt', ok(120), ctx).text).toBe('Sealed My page in the crypt \u00b7 ~120 MB reclaimed');
+    expect(actionNotice('coffin', ok(120), ctx).text).toBe('My page sleeps in its coffin \u00b7 ~120 MB freed');
+    expect(actionNotice('garlic', ok(0), ctx).text).toBe('Garlic hung on example.com. It will never be flagged.');
+    expect(actionNotice('ungarlic', ok(0), ctx).text).toBe('Garlic removed from example.com');
+    for (const a of ['stake', 'crypt', 'coffin'] as const) expect(actionNotice(a, ok(450), ctx).text.match(/~/g)).toHaveLength(1);
   });
-
   it('shows large memory in GB', () => {
     expect(actionNotice('stake', ok(1500), ctx).text).toContain('~1.5 GB');
   });
@@ -34,8 +33,8 @@ describe('actionNotice', () => {
   });
 
   it('falls back to the site, then a generic name, when the title is empty', () => {
-    expect(actionNotice('stake', ok(10), { title: '  ', site: 'a.com' }).text).toContain('"a.com"');
-    expect(actionNotice('stake', ok(10), { title: '', site: null }).text).toContain('"this tab"');
+    expect(actionNotice('stake', ok(10), { title: '  ', site: 'a.com' }).text).toBe('Staked a.com \u00b7 ~10 MB reclaimed');
+    expect(actionNotice('stake', ok(10), { title: '', site: null }).text).toBe('Staked this tab \u00b7 ~10 MB reclaimed');
   });
 });
 
@@ -52,10 +51,10 @@ describe('shortTitle', () => {
 describe('dawnNotice', () => {
   it('uses plural and singular text', () => {
     expect(dawnNotice({ ok: true, closed: 4, mb: 480 }).text).toBe(
-      'Dawn closed 4 tabs and saved them to the Crypt. About ~480 MB freed.',
+      'Dawn burned 4 vampires \u00b7 ~480 MB reclaimed. They rest in the crypt.',
     );
     expect(dawnNotice({ ok: true, closed: 1, mb: 120 }).text).toBe(
-      'Dawn closed 1 tab and saved it to the Crypt. About ~120 MB freed.',
+      'Dawn burned 1 vampire \u00b7 ~120 MB reclaimed. They rest in the crypt.',
     );
   });
   it('says so when nothing was ready', () => {

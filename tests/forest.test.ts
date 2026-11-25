@@ -23,7 +23,7 @@ import {
 import { VIEW_ASPECTS, distToPath, solidFootprint, type UniqueSceneSpec } from '../lib/scene/uniqueScenes/types';
 import { themeById } from '../lib/themes';
 import { weatherTriangles } from '../lib/scene/weather';
-import { moonScreenRadiusScaled } from '../lib/scene/sky';
+import { clearSkyMoon, moonScreenRadiusScaled } from '../lib/scene/sky';
 import { TREE_LINE_Z } from '../lib/scene/uniqueScenes/forestHouse';
 const spec = themeScene('forest').unique!;
 const forest = spec.forest!;
@@ -81,7 +81,8 @@ describe('the scary trees and thorn bushes that fill the ground', () => {
   it('has dozens of dead trees of three shapes and thorn bushes, on both sides, never on the path or in a solid prop', () => {
     expect(forest.scary.length).toBeGreaterThanOrEqual(SCARY_COUNT - 6);
     expect(forest.scary.length).toBeLessThanOrEqual(SCARY_COUNT);
-    expect(forest.thorns.length).toBeGreaterThanOrEqual(30);
+    // With the moon in the upper right corner more scary trees fit, so a few less thorn bushes find room (25 for the seed).
+    expect(forest.thorns.length).toBeGreaterThanOrEqual(24);
     expect(forest.thorns.length).toBeLessThanOrEqual(THORN_COUNT);
     // Fallen logs and more graves lie on the rest of the ground.
     expect(forest.logs.length).toBeGreaterThanOrEqual(6);
@@ -427,7 +428,7 @@ describe('the colour and the light', () => {
   });
 });
 describe('the moon, and no clouds or Crypt sky life', () => {
-  it('shows a big pale yellow-green moon low behind the house, below the search box, that the branches may cross, and turns the other sky layers off', () => {
+  it('shows a big pale yellow-green moon in the clear sky of the upper right corner, and turns the other sky layers off', () => {
     expect(spec.layers.moon).not.toBe(false);
     expect(spec.moon).toBe(FOREST_MOON);
     expect(FOREST_MOON.seeThrough).toBe(true);
@@ -435,11 +436,9 @@ describe('the moon, and no clouds or Crypt sky life', () => {
     expect(FOREST_MOON.scale).toBeGreaterThan(1.2);
     for (const aspect of VIEW_ASPECTS) {
       const t = FOREST_MOON.target(aspect);
-      // On the middle of the screen, low: its top stays below the search box (which ends near 0.24 of the height).
-      expect(t.x).toBeGreaterThan(0.45);
-      expect(t.x).toBeLessThan(0.62);
-      expect(t.y - moonScreenRadiusScaled(aspect, FOREST_MOON.scale).disc).toBeGreaterThan(0.235);
-      expect(t.y).toBeLessThan(0.42);
+      // The clear sky zone, like every theme (tests/moonZone.test.ts checks it against the measured page).
+      expect(t).toEqual(clearSkyMoon(aspect, FOREST_MOON.scale));
+      expect(t.x + moonScreenRadiusScaled(aspect, FOREST_MOON.scale).disc / aspect).toBeLessThan(1);
     }
     expect(spec.layers.clouds).toBe(false);
     expect(spec.layers.witch).toBe(false);

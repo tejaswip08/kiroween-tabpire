@@ -20,8 +20,8 @@
   --card-edge: rgba(255, 255, 255, 0.16);
   --card-highlight: rgba(255, 255, 255, 0.1);
   --panel-solid: #2a1636;
-  --panel-fill-top: rgba(70, 40, 88, 0.55);
-  --panel-fill-bottom: rgba(34, 17, 46, 0.55);
+  --panel-fill-top: rgba(43, 23, 56, 0.82);
+  --panel-fill-bottom: rgba(34, 17, 46, 0.84);
   --panel-fill-fallback: rgba(34, 17, 46, 0.92);
   --button-top: #3d2350;
   --button-bottom: #26122f;
@@ -84,8 +84,8 @@
   --card-edge: rgba(255, 255, 255, 0.16);
   --card-highlight: rgba(255, 255, 255, 0.1);
   --panel-solid: #34200f;
-  --panel-fill-top: rgba(76, 59, 44, 0.55);
-  --panel-fill-bottom: rgba(37, 20, 10, 0.55);
+  --panel-fill-top: rgba(47, 30, 18, 0.82);
+  --panel-fill-bottom: rgba(37, 20, 10, 0.84);
   --panel-fill-fallback: rgba(37, 20, 10, 0.92);
   --button-top: #4f2d17;
   --button-bottom: #2f180b;
@@ -132,8 +132,8 @@
   --card-edge: rgba(255, 255, 255, 0.16);
   --card-highlight: rgba(255, 255, 255, 0.1);
   --panel-solid: #183229;
-  --panel-fill-top: rgba(52, 75, 67, 0.55);
-  --panel-fill-bottom: rgba(15, 36, 30, 0.55);
+  --panel-fill-top: rgba(24, 46, 39, 0.82);
+  --panel-fill-bottom: rgba(15, 36, 30, 0.84);
   --panel-fill-fallback: rgba(15, 36, 30, 0.92);
   --button-top: #244a3f;
   --button-bottom: #12302a;
@@ -180,8 +180,8 @@
   --card-edge: rgba(255, 255, 255, 0.16);
   --card-highlight: rgba(255, 255, 255, 0.1);
   --panel-solid: #1f3750;
-  --panel-fill-top: rgba(58, 79, 101, 0.55);
-  --panel-fill-bottom: rgba(19, 34, 49, 0.55);
+  --panel-fill-top: rgba(29, 45, 62, 0.82);
+  --panel-fill-bottom: rgba(19, 34, 49, 0.84);
   --panel-fill-fallback: rgba(19, 34, 49, 0.92);
   --button-top: #2d4d6b;
   --button-bottom: #193046;
@@ -228,8 +228,8 @@
   --card-edge: rgba(255, 255, 255, 0.16);
   --card-highlight: rgba(255, 255, 255, 0.1);
   --panel-solid: #341020;
-  --panel-fill-top: rgba(76, 45, 59, 0.55);
-  --panel-fill-bottom: rgba(37, 8, 19, 0.55);
+  --panel-fill-top: rgba(47, 17, 29, 0.82);
+  --panel-fill-bottom: rgba(37, 8, 19, 0.84);
   --panel-fill-fallback: rgba(37, 8, 19, 0.92);
   --button-top: #51172c;
   --button-bottom: #300c19;
@@ -276,8 +276,8 @@
   --card-edge: rgba(255, 255, 255, 0.16);
   --card-highlight: rgba(255, 255, 255, 0.1);
   --panel-solid: #2a2f40;
-  --panel-fill-top: rgba(68, 72, 87, 0.55);
-  --panel-fill-bottom: rgba(29, 33, 48, 0.55);
+  --panel-fill-top: rgba(39, 43, 58, 0.82);
+  --panel-fill-bottom: rgba(29, 33, 48, 0.84);
   --panel-fill-fallback: rgba(29, 33, 48, 0.92);
   --button-top: #3d4357;
   --button-bottom: #262a3a;

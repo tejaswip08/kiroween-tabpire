@@ -1,0 +1,103 @@
+/* The toolbar popup. Colours come from the shared tokens, so it follows the active theme. */
+html.popup-page,
+html.popup-page body,
+html.popup-page #root {
+  height: auto;
+}
+.popup {
+  width: 320px;
+  padding: 18px 18px 16px;
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  text-align: center;
+  background: linear-gradient(180deg, var(--card-top), var(--card-bottom));
+}
+.popup-portrait {
+  display: grid;
+  place-items: center;
+  width: 96px;
+  height: 96px;
+  border-radius: 48px 48px 14px 14px;
+  border: 2px solid var(--state-awake);
+  background: radial-gradient(circle at 50% 35%, color-mix(in srgb, var(--state-awake) 25%, transparent), transparent 70%), var(--shade);
+  overflow: hidden;
+}
+.popup[data-state='starving'] .popup-portrait {
+  border-color: var(--state-starving);
+  background: radial-gradient(circle at 50% 35%, color-mix(in srgb, var(--state-starving) 35%, transparent), transparent 70%), var(--shade);
+}
+.popup-portrait .emblem {
+  width: 80px;
+  height: auto;
+}
+.popup-eyebrow {
+  margin-top: 6px;
+  font-family: var(--font-label);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+.popup-heading {
+  font-family: var(--font-title);
+  font-weight: 800;
+  font-size: 34px;
+  line-height: 1;
+}
+.popup-sub {
+  font-size: 14px;
+  color: var(--ink-dim);
+}
+.popup-dawn {
+  width: 100%;
+  margin-top: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 16px;
+  border: 0;
+  border-radius: 999px;
+  font-family: var(--font-label);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+  background: linear-gradient(180deg, var(--dawn-top), var(--dawn-bottom));
+  box-shadow: var(--shadow-button), 0 0 0 1px var(--card-edge) inset;
+  transition: transform 0.14s ease;
+}
+.popup-dawn:hover {
+  transform: translateY(-1px);
+}
+.popup-dawn[aria-disabled='true'] {
+  opacity: 0.55;
+  transform: none;
+}
+.popup-note {
+  min-height: 1.2em;
+  font-size: 12px;
+  color: var(--ink-dim);
+}
+.popup-row {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+}
+.popup-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 14px;
+  border: 0;
+  border-radius: 999px;
+  font-family: var(--font-label);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  background: linear-gradient(180deg, var(--button-top), var(--button-bottom));
+  box-shadow: var(--shadow-button), 0 0 0 1px var(--card-edge) inset;
+}

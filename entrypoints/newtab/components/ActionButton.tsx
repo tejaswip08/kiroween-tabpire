@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import type { TipContent } from '../../../lib/tips';
 import { Tooltip } from './Tooltip';
 
 /**
@@ -16,8 +17,8 @@ export function ActionButton({
 }: {
   /** Accessible name, e.g. "Stake". */
   label: string;
-  /** Tooltip text: the explanation, or the reason when disabled. */
-  tip: string;
+  /** Tooltip: plain text, or a rich tip (title, the vampire's line, points, note). */
+  tip: string | TipContent;
   icon: ReactNode;
   /** Extra line in the tooltip. The card passes the full tab title here. */
   note?: string;
@@ -26,7 +27,7 @@ export function ActionButton({
   tone?: string;
 }) {
   return (
-    <Tooltip text={tip} note={note}>
+    <Tooltip {...(typeof tip === 'string' ? { text: tip, note } : { content: tip })}>
       {(describedBy) => (
         <button
           type="button"

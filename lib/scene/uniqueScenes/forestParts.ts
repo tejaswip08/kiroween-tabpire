@@ -73,10 +73,11 @@ export interface GhostSpot {
 }
 /** Small bright green ghosts high among the branches on the right. */
 export const GHOSTS: readonly GhostSpot[] = [
-  { x: 6.2, y: 6.2, z: -9, scale: 1.25, phase: 0 },
-  { x: 8.8, y: 7.2, z: -11, scale: 1.0, phase: 0.3 },
-  { x: 4.8, y: 8.4, z: -14, scale: 1.0, phase: 0.55 },
-  { x: 11, y: 6.0, z: -13, scale: 0.9, phase: 0.8 },
+  // On the right, below the search box and the header buttons and left of the moon (tests/moonZone.test.ts).
+  { x: 11, y: 5.1, z: -12, scale: 1.15, phase: 0 },
+  { x: 12, y: 5.4, z: -18, scale: 1.0, phase: 0.3 },
+  { x: 13, y: 5.1, z: -22, scale: 1.0, phase: 0.55 },
+  { x: 12, y: 5.1, z: -15, scale: 0.9, phase: 0.8 },
 ];
 /** The faint orange wisp on the left. */
 export const WISP: GhostSpot = { x: -4.6, y: 4.6, z: -9, scale: 1, phase: 0.5 };

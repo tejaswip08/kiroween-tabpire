@@ -1,4 +1,5 @@
 import type { ReactNode, Ref } from 'react';
+import type { TipContent } from '../../../lib/tips';
 import { Tooltip } from './Tooltip';
 
 /** Pill button for the header. Disabled buttons stay focusable so the tooltip can be read. */
@@ -18,7 +19,7 @@ export function HeaderButton({
 }: {
   label: string;
   icon: ReactNode;
-  tip: string;
+  tip: string | TipContent;
   disabled?: boolean;
   busy?: boolean;
   badge?: number;
@@ -32,7 +33,7 @@ export function HeaderButton({
   tipHidden?: boolean;
 }) {
   return (
-    <Tooltip text={tip} placement="bottom" hidden={tipHidden}>
+    <Tooltip {...(typeof tip === 'string' ? { text: tip } : { content: tip })} placement="bottom" hidden={tipHidden}>
       {(describedBy) => (
         <button
           type="button"

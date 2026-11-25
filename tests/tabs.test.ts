@@ -8,7 +8,7 @@ vi.mock('wxt/browser', async () => {
 import { fake } from './helpers/fakeBrowser';
 import { estimateMb, stateOf, type TabInfo } from '../lib/hunger';
 import { store } from '../lib/store';
-import { LOG_LIMIT, coffin, crypt, dawn, recordActions, garlic, resurrect, stake, ungarlic } from '../lib/tabs';
+import { LOG_LIMIT, coffin, crypt, dawn, recordActions, garlic, resurrect, stake, ungarlic, wake } from '../lib/tabs';
 import { toTabInfo } from '../lib/tabinfo';
 
 const NOW = 1_700_000_000_000;
@@ -34,7 +34,7 @@ describe('stake', () => {
     expect(stats.staked).toBe(1);
     expect(stats.mbFreed).toBe(mb);
     expect(await store.getLog()).toEqual([
-      { at: NOW, action: 'stake', site: 'chatgpt.com', title: 'Chat' },
+      { at: NOW, action: 'stake', site: 'chatgpt.com', title: 'Chat', mb },
     ]);
   });
 
@@ -61,6 +61,20 @@ describe('stake', () => {
   });
 });
 
+describe('wake', () => {
+  it('switches to a sleeping tab, which loads it again, and logs nothing', async () => {
+    const tab = fake.addTab({ url: 'https://a.com/', discarded: true, lastAccessed: NOW - 5 * 86400_000, windowId: 3 });
+    expect(await wake(tab.id)).toEqual({ ok: true, changed: true, mb: 0 });
+    const after = fake.tabs.get(tab.id)!;
+    expect(after.active).toBe(true);
+    expect(after.discarded).toBe(false);
+    expect(fake.focusedWindows).toContain(3);
+    expect(await store.getLog()).toEqual([]);
+  });
+  it('fails for a tab that is gone', async () => {
+    expect(await wake(999)).toEqual({ ok: false, reason: 'no-tab' });
+  });
+});
 describe('coffin', () => {
   it('discards the tab and counts its memory from before the discard', async () => {
     const tab = fake.addTab({ url: 'https://claude.ai/chat', title: 'Claude' });

@@ -2,6 +2,7 @@
 // the left, a snowy path with lanterns and neat rows of tombstones, one big pine and a bare tree in the foreground corners. Pure and seeded.
 // Coordinates: x right, y up, z toward the camera (the camera is at z = 16).
 import { AURORA_TRIS } from '../aurora';
+import { clearSkyMoon } from '../sky';
 import { type ModelId, type Placement } from '../layout';
 import { WEATHER } from '../weather';
 import { ICICLE_TRIS, LAKE_SEGMENTS, MOUND_TRIS, moundSet } from './frostIce';
@@ -12,7 +13,7 @@ export const FROST_SEED = 7321;
 
 /** A cold silver-white moon in the open sky at the upper right, right of the search box and below the header buttons. Crisp: sharp patches and a firm edge. */
 export const FROST_MOON: UniqueMoon = {
-  target: () => ({ x: 0.85, y: 0.27 }),
+  target: (aspect) => clearSkyMoon(aspect, 1.05),
   scale: 1.05,
   crisp: true,
 };
@@ -97,6 +98,7 @@ export function buildFrozenCemetery(seed: number): UniqueSceneSpec {
       calls: FROST_PARTS.calls,
     },
     frost: { plan, attached, drifts, lanternSpots: lanterns },
-    fogScale: 0.8,
+    // Little haze, so the chapel on the right and the pond on the left read clearly.
+    fogScale: 0.45,
   };
 }

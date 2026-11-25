@@ -39,8 +39,9 @@ per-tab memory to extensions) and a hunger bar that fills over one day. Then you
 Property-based tests check this against more than a thousand random tab sets.
 
 Saved tabs come back with **Resurrect** from the search box, which suggests your open tabs, pinned
-pages and the Crypt before web results. The toolbar badge shows how many tabs are starving and
-refreshes every minute.
+pages and the Crypt before web results, or from the **Blood Bank**. A sleeping tab has **Wake**. The toolbar
+badge shows how many tabs are starving and refreshes every minute, and the toolbar **popup** shows the
+starving count with a Dawn button. Every button and state chip has a tip in the vampire's own voice.
 
 <table>
   <tr>
@@ -69,8 +70,8 @@ used on every Tabpire page.
 <p align="center"><img src="docs/screenshots/picker.jpg" alt="The Themes panel listing the four themes" width="420"></p>
 ## Try it without installing
 
-The [web demo](https://tejaswip08.github.io/kiroween-tabpire/) runs the real new tab page and Blood Bank
-in an ordinary browser tab, against an in-memory fake browser with about 20 sample tabs. Every action
+The [web demo](https://tejaswip08.github.io/kiroween-tabpire/) runs the real new tab page, Blood Bank and
+popup in an ordinary browser tab, against an in-memory fake browser with about 20 sample tabs. Every action
 and theme works, and nothing leaves your browser. **Reset demo** brings the sample tabs back.
 
 ## Install

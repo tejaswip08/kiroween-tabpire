@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { ACTION_BUTTON_PX, CARD_GAP, CARD_H, CARD_W, MAX_SCALE, MIN_BUTTON_PX, MIN_SCALE, capacityAt, fitCards } from '../lib/cardFit';
+import { ACTION_BUTTON_PX, CARD_H, CARD_W, COMPACT_BELOW, MAX_ROWS, MAX_SCALE, MIN_BUTTON_PX, MIN_SCALE, buttonPxAt, capacityAt, fitCards, gapAt } from '../lib/cardFit';
 
 describe('fitCards', () => {
   it('shows every card at full size when they fit', () => {
@@ -16,8 +16,8 @@ describe('fitCards', () => {
       const { cols, rows } = capacityAt(1400, 640, fit.scale);
       expect(cols * rows).toBeGreaterThanOrEqual(n);
       // The grid is no taller than the space.
-      expect(Math.ceil(n / cols) * (CARD_H * fit.scale + CARD_GAP) - CARD_GAP).toBeLessThanOrEqual(640);
-      expect(cols * (CARD_W * fit.scale + CARD_GAP) - CARD_GAP).toBeLessThanOrEqual(1400);
+      expect(Math.ceil(n / cols) * (CARD_H * fit.scale + gapAt(fit.scale)) - gapAt(fit.scale)).toBeLessThanOrEqual(640);
+      expect(cols * (CARD_W * fit.scale + gapAt(fit.scale)) - gapAt(fit.scale)).toBeLessThanOrEqual(1400);
     }
   });
   it('picks the largest scale that fits (more tabs never make cards bigger)', () => {
@@ -50,11 +50,23 @@ describe('fitCards', () => {
   });
 });
 describe('the action buttons', () => {
-  it('are never smaller than 28 px on screen', () => {
-    expect(ACTION_BUTTON_PX * MIN_SCALE).toBeGreaterThanOrEqual(MIN_BUTTON_PX);
+  it('are never smaller than 28 px on screen: below 0.78 they grow inside the card', () => {
+    expect(buttonPxAt(1)).toBe(ACTION_BUTTON_PX);
+    expect(buttonPxAt(MIN_SCALE)).toBeCloseTo(MIN_BUTTON_PX, 9);
+    expect(COMPACT_BELOW).toBeCloseTo(28 / 36, 9);
     for (const [w, h, n] of [[1400, 480, 40], [800, 300, 19], [2560, 1300, 60]] as const) {
-      expect(ACTION_BUTTON_PX * fitCards(w, h, n).scale).toBeGreaterThanOrEqual(28);
+      expect(buttonPxAt(fitCards(w, h, n).scale)).toBeGreaterThanOrEqual(28 - 1e-9);
     }
+    // Four of them fit across the smallest card: its width less the border (3 px each side) and 2 px each side.
+    expect(4 * (MIN_BUTTON_PX / MIN_SCALE) + 3 * 2).toBeLessThanOrEqual(CARD_W - 6 - 4);
+  });
+  it('the compact buttons in cards.css use the same rule', () => {
+    const css = readFileSync('entrypoints/newtab/styles/cards.css', 'utf8');
+    expect(css).toMatch(/\.card-grid\[data-compact\] \.card-actions \.icon-btn \{\s*width: calc\(28px \/ var\(--card-scale\)\);/);
+  });
+  it('uses at most two rows', () => {
+    expect(MAX_ROWS).toBe(2);
+    expect(capacityAt(1400, 5000, MIN_SCALE).rows).toBe(2);
   });
   it('match the size in cards.css', () => {
     const css = readFileSync('entrypoints/newtab/styles/cards.css', 'utf8');
@@ -63,8 +75,8 @@ describe('the action buttons', () => {
 });
 describe('using the whole free height when the tabs do not fit in the share', () => {
   it('shows more cards, never fewer', () => {
-    const share = fitCards(1400, 560, 19);
-    const full = fitCards(1400, 560, 19, 700);
+    const share = fitCards(1400, 220, 30);
+    const full = fitCards(1400, 220, 30, 700);
     expect(full.shown).toBeGreaterThan(share.shown);
     expect(fitCards(1400, 560, 3, 700)).toEqual(fitCards(1400, 560, 3));
   });

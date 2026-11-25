@@ -10,12 +10,15 @@ entrypoints/
     layers/                the two WebGL canvases: scene/ (graveyard and themes/), portraits/ (the card vampires)
     styles/                plain CSS; tokens.css holds every colour, per theme
   bloodbank/               the Blood Bank page
+  popup/                   the toolbar popup
 lib/                       pure logic, no React; browser APIs only in store.ts, tabs.ts, nav.ts, badge.ts and friends
   hunger.ts                tab states, hunger, memory estimates, Dawn targets (no browser APIs, time passed in)
   store.ts                 owns browser.storage.local
   tabs.ts                  Stake, Coffin, Crypt, Garlic, Resurrect, Dawn
   themes.ts                theme palettes, THEME_IDS, DISABLED_THEMES, ENABLED_THEME_IDS
   cardFit.ts               how many cards fit and at what scale
+  tips.ts                  every text of the rich hover tips and the card hover quote
+  bloodbank.ts             what the Blood Bank page shows (pure)
   scene/                   pure 3D layout data and maths (camera, sky, moon, layouts); uniqueScenes/ has one builder per theme
 demo/                      Vite web demo: the real pages against lib/fakeBrowser.ts and sample tabs (demo/src/seed.ts)
 public/models/             CC0 GLB models (Kenney, KayKit, Quaternius) and vampire.glb, with licence files

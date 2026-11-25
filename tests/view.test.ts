@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import fc from 'fast-check';
 import { DAY_MS, formatMb } from '../lib/hunger';
 import {
+  STATE_ORDER,
   VIAL_FULL_MS,
   VIAL_TICK,
   buildCards,
@@ -58,15 +59,16 @@ const raw = (over: Partial<RawTab> = {}): RawTab => ({
 });
 
 describe('buildCards', () => {
-  it('sorts by hunger then id, and leaves out the page itself, own pages and blank tabs', () => {
+  it('sorts starving, awake (in use first), asleep, protected, longest idle first, and leaves out the page itself, own pages and blank tabs', () => {
     fc.assert(
-      fc.property(tabsArb, nowArb, fc.integer({ min: 1, max: 500 }), (tabs, now, currentId) => {
-        const cards = buildCards(tabs, currentId, OWN, [], now);
+      fc.property(tabsArb, nowArb, fc.integer({ min: 1, max: 500 }), fc.subarray(['a.com', 'b.com', 'example.com']), (tabs, now, currentId, garlic) => {
+        const cards = buildCards(tabs, currentId, OWN, garlic, now);
+        const rank = (c: (typeof cards)[number]) => STATE_ORDER.indexOf(c.state) * 2 + (c.state === 'awake' && !(c.info.active || c.info.audible) ? 1 : 0);
 
         for (let i = 1; i < cards.length; i++) {
           const a = cards[i - 1]!;
           const b = cards[i]!;
-          expect(a.hungerMs > b.hungerMs || (a.hungerMs === b.hungerMs && a.tab.id < b.tab.id)).toBe(true);
+          expect(rank(a) < rank(b) || (rank(a) === rank(b) && (a.hungerMs > b.hungerMs || (a.hungerMs === b.hungerMs && a.tab.id < b.tab.id)))).toBe(true);
         }
         for (const c of cards) {
           expect(c.tab.id).not.toBe(currentId);
@@ -89,6 +91,25 @@ describe('buildCards', () => {
     );
   });
 
+  it('puts starving first, then the tab playing sound, the other awake tabs, asleep, then protected', () => {
+    const now = 10 * DAY_MS;
+    const cards = buildCards(
+      [
+        raw({ id: 1, discarded: true, lastAccessed: now - 9 * DAY_MS }),
+        raw({ id: 2, url: 'https://g.com/', lastAccessed: now - 8 * DAY_MS }),
+        raw({ id: 3, lastAccessed: now - 1000 }),
+        raw({ id: 4, audible: true, lastAccessed: now - 5000 }),
+        raw({ id: 5, lastAccessed: now - 2 * DAY_MS }),
+        raw({ id: 6, lastAccessed: now - 3 * DAY_MS }),
+        raw({ id: 7, lastAccessed: now - 3 * 3600_000 }),
+      ],
+      undefined,
+      OWN,
+      ['g.com'],
+      now,
+    );
+    expect(cards.map((c) => c.tab.id)).toEqual([6, 5, 4, 7, 3, 1, 2]);
+  });
   it('puts the hungriest tab first', () => {
     const now = 10 * DAY_MS;
     const cards = buildCards(

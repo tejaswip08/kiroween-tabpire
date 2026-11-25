@@ -75,9 +75,9 @@ describe('ActionButton and Tooltip', () => {
 
 describe('tooltip styles', () => {
   const css = readFileSync(join(process.cwd(), 'entrypoints/newtab/styles/controls.css'), 'utf8');
-  it('shows on hover and on keyboard focus only', () => {
-    expect(css).toContain('.tip-wrap:hover:not([data-dismissed]) .tip');
-    expect(css).toContain(':has(:focus-visible)');
+  it('shows only when Tooltip opens it (hover or keyboard focus)', () => {
+    expect(css).toMatch(/\.tip \{[^}]*opacity: 0;/);
+    expect(css).toMatch(/\.tip\[data-open\] \{[^}]*opacity: 1;/);
   });
 });
 

@@ -1,16 +1,10 @@
 import '../newtab/bootTheme';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import '@fontsource/grenze-gotisch/latin-800.css';
-import '@fontsource/sora/latin-400.css';
-import '@fontsource/sora/latin-600.css';
-import '@fontsource/outfit/latin-400.css';
-import '@fontsource/outfit/latin-500.css';
-import '../newtab/styles/tokens.css';
-import '../newtab/styles/base.css';
+// The same fonts, tokens and component styles as the Crypt (site icons, buttons, tips), so the page follows the theme.
+import '../newtab/styles';
 import { BloodBank } from './BloodBank';
-
-document.title = 'Blood Bank - Tabpire';
+document.title = 'The Blood Bank - Tabpire';
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <BloodBank />

@@ -166,11 +166,7 @@ export function uiRects(w: number, h: number): ScreenRect[] {
  */
 export const MOON_SCALE = 1.2;
 export function moonSpot(aspect: number): { x: number; y: number } {
-  const a = Number.isFinite(aspect) && aspect > 0 ? aspect : 16 / 9;
-  const clear = clearSkyMoon(a, MOON_SCALE);
-  // In a wide window the haunted house comes in from the right edge, so the moon moves in a little to stay clear of its roof.
-  const wide = a > 16 / 9 ? Math.max(0.79, 0.875 - (Math.min(a, 2.4) - 16 / 9) * 0.15) : 1;
-  return { x: Math.min(clear.x, wide), y: clear.y };
+  return clearSkyMoon(aspect, MOON_SCALE);
 }
 /** True when a point (screen fractions) is on the moon's disc, or within `pad` (window heights) of it. */
 export function onMoon(sx: number, sy: number, aspect: number, pad = 0): boolean {
@@ -504,7 +500,8 @@ export function buildFieldCorn(seed: number, line: readonly TrackPoint[], placem
       if (placements.some((p) => footprintsOverlap(f, footprintOf(p), big.has(p.model) ? 1.4 : 0.15))) continue;
       if (reserved.some((r) => footprintsOverlap(f, r, 0.3))) continue;
       const h = FIELD_STALK_H * scale;
-      if (cams.some(({ aspect, cam }) => [h, h * 0.5].some((y) => {
+      // The tops of the leaves reach a little above the stalk (3 per unit of scale), so they are checked too.
+      if (cams.some(({ aspect, cam }) => [3 * scale, h, h * 0.5].some((y) => {
         const q = project([px, y, pz], cam);
         return q !== null && onMoon(q.x, q.y, aspect, 0.03);
       }))) continue;

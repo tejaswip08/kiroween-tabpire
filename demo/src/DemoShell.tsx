@@ -2,7 +2,7 @@ import { Component, useCallback, useEffect, useState } from 'react';
 import type { MouseEvent, ReactNode } from 'react';
 import { App } from '../../entrypoints/newtab/App';
 import { BloodBank } from '../../entrypoints/bloodbank/BloodBank';
-import { PopupPlaceholder } from './PopupPlaceholder';
+import { DemoPopup } from './DemoPopup';
 import { notify, subscribe } from './notice';
 import { resetDemo } from './seed';
 import { useRoute } from './route';
@@ -75,7 +75,7 @@ export function DemoShell({ pageFor }: { pageFor?: (route: Route) => ReactNode }
 
   const page =
     pageFor?.(route) ??
-    (route === 'crypt' ? <App /> : route === 'bloodbank' ? <BloodBank /> : <PopupPlaceholder />);
+    (route === 'crypt' ? <App /> : route === 'bloodbank' ? <BloodBank /> : <DemoPopup />);
 
   return (
     <>

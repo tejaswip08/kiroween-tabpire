@@ -2,34 +2,46 @@
 /** A card at full size, in CSS pixels (the same numbers as --card-width and --card-height in base.css). */
 export const CARD_W = 220;
 export const CARD_H = 380;
-/** Space between cards, in CSS pixels (not scaled). */
+/** Space between cards at full size, in CSS pixels. It shrinks with the cards (`gap` in cards.css). */
 export const CARD_GAP = 16;
+/** The gap between cards at a scale. */
+export const gapAt = (scale: number): number => CARD_GAP * scale;
 /** The action buttons on a card at full size (`.card-actions .icon-btn` in cards.css), in CSS pixels. */
 export const ACTION_BUTTON_PX = 36;
-/** The action buttons never get smaller than this on screen. With many tabs fewer cards are shown instead. */
+/**
+ * The action buttons never get smaller than this on screen: below the scale where 36 px would shrink under 28 px,
+ * cards.css makes the buttons bigger inside the card (`28px / scale`), so on screen they stay 28 px.
+ */
 export const MIN_BUTTON_PX = 28;
-/** Smallest and largest card scale. The smallest keeps the action buttons at least 28 px: at 0.78 a card is 172 x 296 px. */
-export const MIN_SCALE = Math.ceil((MIN_BUTTON_PX / ACTION_BUTTON_PX) * 100) / 100;
+/** The size of an action button on screen at a card scale. */
+export const buttonPxAt = (scale: number): number => Math.max(ACTION_BUTTON_PX, MIN_BUTTON_PX / scale) * scale;
+/**
+ * Below this scale a card is "compact": its action row uses the card's full inner width, so four 28 px buttons fit.
+ * It is the scale where a 36 px button is 28 px on screen.
+ */
+export const COMPACT_BELOW = MIN_BUTTON_PX / ACTION_BUTTON_PX;
+/** Smallest and largest card scale. At 0.56 a card is 123 x 213 px and four 28 px buttons still fit across it. */
+export const MIN_SCALE = 0.56;
 export const MAX_SCALE = 1;
+/** The cards use at most two rows; more tabs shrink the cards, and only below the smallest size are any hidden. */
+export const MAX_ROWS = 2;
 /** The cards use at most this share of the window height, so the path and the gate stay visible above them. */
 export const MAX_HEIGHT_SHARE = 0.52;
-
 export interface CardFit {
   /** Scale of every card, from MIN_SCALE to MAX_SCALE. */
   scale: number;
-  /** How many cards are shown. The rest are the "+N more" card. */
+  /** How many cards are shown. The rest are behind the "+N more" button. */
   shown: number;
   /** Tabs that do not fit at the smallest size (0 when all fit, or when there is no room for any card). */
   more: number;
 }
-
-/** How many cards fit in a row and in a column at `scale`. */
+/** How many cards fit in a row and in a column (at most `MAX_ROWS`) at `scale`. */
 export function capacityAt(width: number, height: number, scale: number): { cols: number; rows: number } {
-  const cols = Math.max(0, Math.floor((width + CARD_GAP) / (CARD_W * scale + CARD_GAP)));
-  const rows = Math.max(0, Math.floor((height + CARD_GAP) / (CARD_H * scale + CARD_GAP)));
+  const g = gapAt(scale);
+  const cols = Math.max(0, Math.floor((width + g + 1e-6) / (CARD_W * scale + g)));
+  const rows = Math.min(MAX_ROWS, Math.max(0, Math.floor((height + g + 1e-6) / (CARD_H * scale + g))));
   return { cols, rows };
 }
-
 /**
  * The largest card scale at which `count` cards fit in `width` x `height` (`fullHeight`: the whole free height, used
  * only when they do not all fit in `height`). If they do not fit even at the

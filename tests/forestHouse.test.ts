@@ -1,5 +1,6 @@
 // The witch's cottage and the filled middle ground of the Witch's Forest: the house is grounded, in view between the status row and
 // the cards, and the things around it keep off the trail and the house lane.
+import { moonScreenRadiusScaled } from '../lib/scene/sky';
 import { Box3, Matrix4, Quaternion, Vector3, Euler } from 'three';
 import { describe, expect, it } from 'vitest';
 import { cameraAt, project } from '../lib/scene/camera';
@@ -41,12 +42,13 @@ describe("the witch's house", () => {
       expect(top.y).toBeLessThan(0.36);
     }
   });
-  it('stands in front of the moon, whose disc is behind the roof', () => {
+  it('never covers the moon, which is now in the clear sky of the upper right corner', () => {
     for (const aspect of VIEW_ASPECTS) {
       const cam = cameraAt(0, aspect, true);
       const t = FOREST_MOON.target(aspect);
       const top = project([WITCH_HOUSE.x, HOUSE_PARTS.height * WITCH_HOUSE.scale, WITCH_HOUSE.z], cam)!;
-      expect(Math.abs(top.x - t.x)).toBeLessThan(0.08);
+      // The roof top is far left of the disc.
+      expect(t.x - top.x - moonScreenRadiusScaled(aspect, FOREST_MOON.scale).disc / aspect).toBeGreaterThan(0.1);
     }
   });
   it('flickers slowly and never goes dark; reduced motion holds it steady', () => {

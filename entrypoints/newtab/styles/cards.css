@@ -26,7 +26,8 @@
   grid-template-columns: repeat(auto-fit, var(--cell-w));
   grid-auto-rows: var(--cell-h);
   justify-content: center;
-  gap: 16px;
+  /* The gap shrinks with the cards (CARD_GAP * scale in lib/cardFit.ts). */
+  gap: calc(16px * var(--card-scale));
   perspective: 1200px;
 }
 
@@ -36,18 +37,26 @@
   transform-origin: 0 0;
 }
 
-/* The last slot when there are more tabs than fit: the hungriest are shown. */
+/* The last slot when there are more tabs than fit: a button that opens the hidden tabs panel. */
 .card-more {
+  display: flex;
+}
+.card-more-btn {
+  flex: 1;
   display: grid;
   place-content: center;
   gap: 4px;
   text-align: center;
   border: 2px dashed var(--card-edge);
-  border-radius: 110px 110px 18px 18px;
+  border-radius: calc(110px * var(--card-scale)) calc(110px * var(--card-scale)) 18px 18px;
   background: linear-gradient(180deg, var(--card-top), var(--card-bottom));
-  opacity: 0.9;
+  color: var(--ink);
+  opacity: 0.92;
+  transition: transform 0.14s ease;
 }
-
+.card-more-btn:hover {
+  transform: translateY(-2px);
+}
 .card-more-count {
   font-family: var(--font-title);
   font-weight: 800;
@@ -56,7 +65,7 @@
 }
 
 .card-more-note {
-  font-size: calc(14px * var(--card-scale));
+  font-size: max(11px, calc(14px * var(--card-scale)));
   color: var(--ink-dim);
 }
 
@@ -405,6 +414,24 @@
   width: 36px;
   height: 36px;
 }
+/*
+ * Small cards: the buttons grow inside the card (28px / scale), so on screen they never get smaller than 28 px,
+ * and the action row uses the card's full inner width so four of them still fit (lib/cardFit.ts, COMPACT_BELOW).
+ */
+.card-grid[data-compact] .card-actions {
+  width: calc(100% + 2 * var(--card-pad-x) - 4px);
+  margin-inline: calc(2px - var(--card-pad-x));
+  padding: 0;
+}
+.card-grid[data-compact] .card-actions .icon-btn {
+  width: calc(28px / var(--card-scale));
+  height: calc(28px / var(--card-scale));
+}
+.card-actions[data-count='1'],
+.card-actions[data-count='2'] {
+  justify-content: center;
+  gap: 14px;
+}
 
 .icon-slash {
   pointer-events: none;
@@ -585,4 +612,136 @@
 
 .popup-facts dd {
   margin: 0;
+}
+
+/* ---------- the hidden tabs panel ---------- */
+.hidden-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.45);
+}
+.hidden-panel {
+  width: min(680px, 100%);
+  max-height: min(78vh, 640px);
+  display: flex;
+  flex-direction: column;
+  border-radius: 20px;
+  border: 1px solid var(--card-edge);
+  background: linear-gradient(180deg, var(--panel-fill-top), var(--panel-fill-bottom)), var(--panel-fill-fallback);
+  box-shadow: var(--shadow-panel), 0 24px 60px rgba(0, 0, 0, 0.6);
+  animation: panel-in 0.18s ease both;
+}
+@keyframes panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.hidden-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px 10px 20px;
+  border-bottom: 1px solid var(--card-edge);
+}
+.hidden-title {
+  font-family: var(--font-title);
+  font-weight: 800;
+  font-size: 26px;
+  line-height: 1.1;
+}
+.hidden-close {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px 6px 10px;
+  border: 0;
+  border-radius: 999px;
+  font-family: var(--font-label);
+  font-size: 13px;
+  font-weight: 600;
+  background: linear-gradient(180deg, var(--button-top), var(--button-bottom));
+  box-shadow: var(--shadow-button), 0 0 0 1px var(--card-edge) inset;
+}
+/* Only the list scrolls, inside the panel. The page itself never scrolls. */
+.hidden-list {
+  list-style: none;
+  margin: 0;
+  padding: 8px 10px 12px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.hidden-row {
+  --rim: var(--state-awake);
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  border-left: 3px solid var(--rim);
+}
+.hidden-row + .hidden-row {
+  margin-top: 4px;
+}
+.hidden-row[data-state='starving'] {
+  --rim: var(--state-starving);
+}
+.hidden-row[data-state='asleep'] {
+  --rim: var(--state-asleep);
+}
+.hidden-row[data-state='protected'] {
+  --rim: var(--state-protected);
+}
+.hidden-text {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+.hidden-row-title {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-weight: 500;
+}
+.hidden-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-label);
+  font-size: 11px;
+  color: var(--ink-dim);
+}
+.hidden-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 8px 1px 6px;
+  border-radius: 999px;
+  border: 1px solid var(--rim);
+  color: var(--ink);
+}
+.hidden-actions.card-actions {
+  width: auto;
+  margin: 0;
+  padding: 0;
+  gap: 6px;
+  justify-content: flex-end;
+}
+.hidden-actions .icon-btn {
+  width: 32px;
+  height: 32px;
+}
+.hidden-actions .icon-btn svg {
+  width: 22px;
+  height: 22px;
 }

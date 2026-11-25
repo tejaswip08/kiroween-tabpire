@@ -5,6 +5,12 @@
   inset: 0;
   pointer-events: none;
 }
+/* React Three Fiber gives its wrapper and canvas pointer-events: auto inline; nothing 3D takes clicks here, so a canvas
+   can never sit over a button (the demo strip, a card). The cursor is read from the window. */
+.scene-host *,
+.portrait-host * {
+  pointer-events: none !important;
+}
 /* Behind everything, over the page gradient. */
 .scene-host {
   z-index: -1;

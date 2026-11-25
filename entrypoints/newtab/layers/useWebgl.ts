@@ -55,6 +55,21 @@ export function reportContextRestored(): void {
   emit();
 }
 
+/**
+ * Reports the context of one layer canvas being lost and restored. A canvas that is no longer in the page is ignored:
+ * when a layer unmounts (a theme remount, or Reset demo remounting the whole page) React Three Fiber gives its
+ * context back with `forceContextLoss()`, and that must not hide the fresh layers that replace it.
+ */
+export function watchContext(el: HTMLCanvasElement): void {
+  el.addEventListener('webglcontextlost', (e) => {
+    if (!el.isConnected) return;
+    e.preventDefault();
+    reportContextLost();
+  });
+  el.addEventListener('webglcontextrestored', () => {
+    if (el.isConnected) reportContextRestored();
+  });
+}
 const subscribe = (l: () => void) => {
   listeners.add(l);
   return () => listeners.delete(l);

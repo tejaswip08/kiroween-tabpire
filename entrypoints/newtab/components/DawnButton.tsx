@@ -1,33 +1,21 @@
 import type { DawnKeepReason } from '../../../lib/hunger';
+import { dawnHeaderTip, dawnLabel } from '../../../lib/tips';
 import { DawnIcon } from './icons';
 import { HeaderButton } from './HeaderButton';
-
 /**
- * The Dawn tooltip. `kept` lists why each starving tab that Dawn will not close is kept (see `dawnKeepReason`), so the
- * header's starving count and the tooltip never seem to disagree.
+ * Sunrise button: "Dawn · burn N". Enabled only when Dawn would close at least one tab. Its tip says how much memory
+ * Dawn frees and, when a starving tab is kept safe (`kept`, see `dawnKeepReason`), which and why.
  */
-export function dawnTip(count: number, busy: boolean, kept: readonly DawnKeepReason[] = []): string {
-  if (busy) return 'Dawn is running. Please wait.';
-  const reasons = [...new Set(kept)].join(', ');
-  if (count === 0) {
-    if (kept.length === 0) return 'Dawn: no starving tabs to close right now.';
-    const tabs = kept.length === 1 ? '1 starving tab is' : `${kept.length} starving tabs are`;
-    return `Dawn: nothing to close. ${tabs} kept safe (${reasons}).`;
-  }
-  const tabs = count === 1 ? '1 starving tab' : `${count} starving tabs`;
-  const close = `Dawn: close ${tabs} and save ${count === 1 ? 'it' : 'them'} to the Crypt.`;
-  if (kept.length === 0) return close;
-  return `${close} ${kept.length === 1 ? '1 more is' : `${kept.length} more are`} kept safe (${reasons}).`;
-}
-
-/** Sunrise button. Enabled only when Dawn would close at least one tab. */
 export function DawnButton({
   count,
+  mb = 0,
   busy,
   onDawn,
   kept = [],
 }: {
   count: number;
+  /** The memory of the tabs Dawn would close. */
+  mb?: number;
   busy: boolean;
   onDawn: () => void;
   /** Why each starving tab that Dawn will not close is kept. */
@@ -35,13 +23,12 @@ export function DawnButton({
 }) {
   return (
     <HeaderButton
-      label="Dawn"
+      label={dawnLabel(count)}
       className="header-btn-dawn"
       icon={<DawnIcon size={26} />}
-      tip={dawnTip(count, busy, kept)}
+      tip={dawnHeaderTip(count, mb, kept, busy)}
       disabled={busy || count === 0}
       busy={busy}
-      badge={count}
       onClick={onDawn}
     />
   );

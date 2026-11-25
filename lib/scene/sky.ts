@@ -9,27 +9,39 @@ export const MOON = {
   haloDeg: 7.5,
 } as const;
 
-/** Share of the window height the header buttons reach down to (at the shortest supported window, 600px). */
-const HEADER_BOTTOM = 0.14;
+/** Share of the window height the header buttons reach down to (measured: 0.15 at 1280x600 and 1440x900, 0.175 at 1366x768). */
+const HEADER_BOTTOM = 0.165;
+/** Space kept between the disc and the window edge or the header buttons, as a share of the window height. */
+const SKY_MARGIN = 0.02;
 /**
- * The clear sky zone: where a moon `scale` times the Crypt's disc appears on screen (0 to 1, y from the top). It is in the upper
- * right, right of the search box and below the header buttons, about 85% across and 27% down. A big moon is moved down and in
- * so its whole disc stays under the header buttons and inside the window. Every theme's moon uses this one helper.
+ * The clear sky zone: where a moon `scale` times the Crypt's disc appears on screen (0 to 1, y from the top). It is the
+ * upper right corner: right of the stats panel, the search box and the pinned pages (they end at about 81 to 85% across),
+ * below the header buttons and above the cards. The disc is kept whole inside the window. Checked against the measured
+ * page at 1280x600, 1366x768, 1440x900 and 1920x1080 in `tests/moonZone.test.ts`. Every theme's moon uses this helper.
  */
 export function clearSkyMoon(aspect: number, scale = 1): { x: number; y: number } {
   const a = Number.isFinite(aspect) && aspect > 0 ? aspect : 16 / 9;
   const r = moonScreenRadiusScaled(a, scale).disc;
-  const y = Math.max(0.27, HEADER_BOTTOM + 0.02 + r);
-  const x = Math.min(0.85, 1 - 0.02 - r / a);
+  const x = Math.min(0.92, 1 - SKY_MARGIN - 0.003 - r / a);
+  const y = Math.max(0.27, HEADER_BOTTOM + SKY_MARGIN + r);
   return { x, y };
 }
 /**
- * Where the Crypt's moon appears on screen (0 to 1, y from the top). The Crypt layout is fixed (it is built around this moon, and
- * `tests/themeBaseline.test.ts` records it), so this does not use `clearSkyMoon`. The other themes' moons do.
+ * Where the Crypt's moon sat before it moved to the clear sky. The Crypt layout is fixed (it was built around this aim, and
+ * `tests/themeBaseline.test.ts` records it), so `buildLayout` still uses it to place its props; the moon itself is drawn
+ * at `moonTarget`, and `tests/moonZone.test.ts` checks that no Crypt prop stands over it there.
  */
-export function moonTarget(aspect: number): { x: number; y: number } {
+export function layoutMoonTarget(aspect: number): { x: number; y: number } {
   const k = clamp((aspect - 0.6) / 0.9, 0, 1);
   return { x: lerp(0.62, 0.72, k), y: lerp(0.2, 0.25, k) };
+}
+/** Direction of the old Crypt moon aim that the Crypt layout was built around. */
+export function layoutMoonDirection(aspect: number): Vec3 {
+  return directionAt(layoutMoonTarget(aspect).x, layoutMoonTarget(aspect).y, cameraAt(0, aspect, true));
+}
+/** Where the Crypt's moon appears on screen (0 to 1, y from the top): in the clear sky, like every theme's moon. */
+export function moonTarget(aspect: number): { x: number; y: number } {
+  return clearSkyMoon(aspect, 1);
 }
 /** Direction of the moon from the camera's rest position, for a window shape. */
 export function moonDirection(aspect: number): Vec3 {

@@ -13,7 +13,7 @@ import { FrameStats } from './scene/FrameStats';
 import { useThemePreload } from './scene/preloadThemes';
 import { ShadowTicker } from './scene/ShadowTicker';
 import { ThemedScene } from './scene/ThemedScene';
-import { reportContextLost, reportContextRestored, useWebgl } from './useWebgl';
+import { useWebgl, watchContext } from './useWebgl';
 
 /** Tells the page the scene has drawn, so the canvas can fade in over the gradient. */
 function ReadySignal({ onReady }: { onReady: () => void }) {
@@ -59,12 +59,7 @@ export default function SceneLayer({ inputs, themeId }: { inputs: SceneInputs; t
       frameloop={frameloop}
       camera={{ fov: BASE_FOV, near: 0.5, far: 600, position: [...CAMERA_REST.position] }}
       onCreated={({ gl }) => {
-        const el = gl.domElement;
-        el.addEventListener('webglcontextlost', (e) => {
-          e.preventDefault();
-          reportContextLost();
-        });
-        el.addEventListener('webglcontextrestored', () => reportContextRestored());
+        watchContext(gl.domElement);
       }}
     >
       <DisplayContext.Provider value={display}>

@@ -28,23 +28,28 @@ const cardFor = async (title: string) => {
   return heading.closest('.card') as HTMLElement;
 };
 const button = (card: HTMLElement, name: string | RegExp) => within(card).getByRole('button', { name });
+/** The text of a button's tip: its title, the vampire's line, the points and the note, joined by " | ". */
 const tipOf = (btn: HTMLElement) =>
-  document.getElementById(btn.getAttribute('aria-describedby')!)!.querySelector('.tip-text')!.textContent;
+  [...document.getElementById(btn.getAttribute('aria-describedby')!)!.querySelectorAll('.tip-title, .tip-says, .tip-point, .tip-note, .tip-text')]
+    .map((e) => e.textContent)
+    .join(' | ');
 const isDisabled = (btn: HTMLElement) => btn.getAttribute('aria-disabled') === 'true';
 
 describe('button enabling and tooltips', () => {
-  it('disables Coffin for a tab in use and for a tab already asleep, with the reason', async () => {
+  it('disables Coffin for a tab in use, with the reason, and gives an asleep tab Wake and Stake only', async () => {
     fake.addTab({ title: 'In use', url: 'https://a.com/', active: true, windowId: 2 });
     fake.addTab({ title: 'Sleeping', url: 'https://b.com/', discarded: true, lastAccessed: OLD() });
     render(<App />);
 
     const inUse = button(await cardFor('In use'), 'Coffin');
     expect(isDisabled(inUse)).toBe(true);
-    expect(tipOf(inUse)).toBe('Coffin: this tab is in use and cannot be put to sleep.');
+    expect(tipOf(inUse)).toBe(
+      'COFFIN · PUT TO SLEEP | “You’re looking at me right now. I can’t sleep while you watch.” | Switch to another tab first, then come back here to coffin this one.',
+    );
 
-    const sleeping = button(await cardFor('Sleeping'), 'Coffin');
-    expect(isDisabled(sleeping)).toBe(true);
-    expect(tipOf(sleeping)).toBe('Coffin: this tab is already asleep.');
+    const sleeping = await cardFor('Sleeping');
+    expect(within(sleeping).getAllByRole('button').map((b) => b.getAttribute('aria-label'))).toEqual(['Wake', 'Stake']);
+    expect(tipOf(button(sleeping, 'Wake'))).toContain('WAKE | “You called? I’m awake… and thirsty.”');
   });
 
   it('enables Coffin for a normal tab', async () => {
@@ -58,9 +63,9 @@ describe('button enabling and tooltips', () => {
     render(<App />);
     const card = await cardFor('Extensions');
     expect(isDisabled(button(card, 'Crypt'))).toBe(true);
-    expect(tipOf(button(card, 'Crypt'))).toBe('Crypt: only web pages can be saved.');
+    expect(tipOf(button(card, 'Crypt'))).toContain('Only web pages can be saved to the crypt.');
     expect(isDisabled(button(card, 'Garlic'))).toBe(true);
-    expect(tipOf(button(card, 'Garlic'))).toBe('Garlic: only web pages can be protected.');
+    expect(tipOf(button(card, 'Garlic'))).toContain('Only web pages can be protected.');
     expect(isDisabled(button(card, 'Stake'))).toBe(false);
   });
 });
@@ -71,7 +76,7 @@ describe('running actions', () => {
     render(<App />);
     await userEvent.click(button(await cardFor('Doomed'), 'Stake'));
 
-    expect(await screen.findByText(/^Closed "Doomed"\. About ~\d+ MB freed\.$/)).toBeTruthy();
+    expect(await screen.findByText(/^Staked Doomed · ~\d+ MB reclaimed$/)).toBeTruthy();
     await waitFor(() => expect(screen.queryByRole('heading', { level: 3, name: 'Doomed' })).toBeNull());
     expect(fake.tabs.size).toBe(1); // only The Crypt itself is left
     const reclaimed = screen.getByText('Blood reclaimed').closest('div')!;
@@ -82,7 +87,7 @@ describe('running actions', () => {
     fake.addTab({ title: 'Napper', url: 'https://a.com/', lastAccessed: FRESH() });
     render(<App />);
     await userEvent.click(button(await cardFor('Napper'), 'Coffin'));
-    expect(await screen.findByText(/^Put "Napper" to sleep\./)).toBeTruthy();
+    expect(await screen.findByText(/^Napper sleeps in its coffin · ~\d+ MB freed$/)).toBeTruthy();
     await waitFor(async () => expect((await cardFor('Napper')).dataset.state).toBe('asleep'));
   });
 
@@ -90,7 +95,7 @@ describe('running actions', () => {
     fake.addTab({ title: 'Keeper', url: 'https://keep.com/page', lastAccessed: FRESH() });
     render(<App />);
     await userEvent.click(button(await cardFor('Keeper'), 'Crypt'));
-    expect(await screen.findByText('Saved "Keeper" to the Crypt and closed it.')).toBeTruthy();
+    expect(await screen.findByText(/^Sealed Keeper in the crypt · ~\d+ MB reclaimed$/)).toBeTruthy();
     expect((await store.getCrypt()).map((i) => i.url)).toEqual(['https://keep.com/page']);
   });
 
@@ -101,14 +106,17 @@ describe('running actions', () => {
     expect(card.dataset.state).toBe('starving');
 
     await userEvent.click(button(card, 'Garlic'));
-    expect(await screen.findByText('safe.com is now protected.')).toBeTruthy();
+    expect(await screen.findByText('Garlic hung on safe.com. It will never be flagged.')).toBeTruthy();
     await waitFor(async () => expect((await cardFor('Protect me')).dataset.state).toBe('protected'));
     card = await cardFor('Protect me');
     expect(within(card).queryByRole('button', { name: 'Garlic' })).toBeNull();
-    expect(tipOf(button(card, 'Remove garlic'))).toBe('Remove garlic: let this site go hungry again.');
+    expect(tipOf(button(card, 'Remove garlic'))).toBe(
+      'REMOVE GARLIC | “Finally, fresh air! I can feel my hunger coming back…” | Tabpire watches every safe.com tab again. | They can starve and be burned by Dawn like any other tab.',
+    );
+    expect(within(card).getAllByRole('button')).toHaveLength(1);
 
     await userEvent.click(button(card, 'Remove garlic'));
-    expect(await screen.findByText('safe.com is no longer protected.')).toBeTruthy();
+    expect(await screen.findByText('Garlic removed from safe.com')).toBeTruthy();
     await waitFor(async () => expect((await cardFor('Protect me')).dataset.state).toBe('starving'));
     expect(await store.getGarlic()).toEqual([]);
   });
@@ -132,11 +140,11 @@ describe('running actions', () => {
 
     await waitFor(() => expect(isDisabled(button(slow, 'Stake'))).toBe(true));
     for (const name of ['Coffin', 'Crypt', 'Garlic']) expect(isDisabled(button(slow, name))).toBe(true);
-    expect(tipOf(button(slow, 'Stake'))).toBe('Please wait: another action is running.');
+    expect(tipOf(button(slow, 'Stake'))).toBe('STAKE · CLOSE FOR GOOD | Please wait: another action is running.');
     expect(isDisabled(button(other, 'Stake'))).toBe(false);
 
     release();
-    await screen.findByText(/^Closed "Slow"/);
+    await screen.findByText(/^Staked Slow/);
     expect(spy).toHaveBeenCalledTimes(1);
     spy.mockRestore();
   });
@@ -179,7 +187,7 @@ describe('Dawn from the page', () => {
     fake.addTab({ title: 'Internal', url: 'chrome://extensions', lastAccessed: OLD() });
     render(<App />);
     await cardFor('Fresh');
-    expect(within(dawnButton()).getByLabelText('2 ready')).toBeTruthy();
+    expect(dawnButton().textContent).toBe('Dawn · burn 2');
     expect(isDisabled(dawnButton())).toBe(false);
   });
 
@@ -188,7 +196,10 @@ describe('Dawn from the page', () => {
     render(<App />);
     await cardFor('Fresh');
     expect(isDisabled(dawnButton())).toBe(true);
-    expect(tipOf(dawnButton())).toBe('Dawn: no starving tabs to close right now.');
+    expect(dawnButton().textContent).toBe('Dawn');
+    expect(tipOf(dawnButton())).toBe(
+      'DAWN | “No one is starving. The sun can wait.” | Nothing is starving right now. Dawn closes tabs that have been idle for over a day. | Never touches the tab you’re on, tabs playing sound, pinned tabs or garlic sites.',
+    );
   });
   it('explains a starving tab it will not close, so the tooltip agrees with the header', async () => {
     fake.addTab({ title: 'Fresh', url: 'https://f.com/', lastAccessed: FRESH() });
@@ -196,7 +207,7 @@ describe('Dawn from the page', () => {
     render(<App />);
     await cardFor('Fresh');
     expect(isDisabled(dawnButton())).toBe(true);
-    expect(tipOf(dawnButton())).toBe('Dawn: nothing to close. 1 starving tab is kept safe (pinned).');
+    expect(tipOf(dawnButton())).toContain('1 starving tab is kept safe (pinned).');
   });
 
   it('closes the starving tabs, saves them, and shows what happened', async () => {
@@ -206,13 +217,34 @@ describe('Dawn from the page', () => {
     await cardFor('Hungry 1');
     await userEvent.click(dawnButton());
 
-    expect(await screen.findByText(/^Dawn closed 2 tabs and saved them to the Crypt\. About ~\d+ MB freed\.$/)).toBeTruthy();
+    expect(await screen.findByText(/^Dawn burned 2 vampires · ~\d+ MB reclaimed\. They rest in the crypt\.$/)).toBeTruthy();
     expect((await store.getCrypt()).map((i) => i.url).sort()).toEqual(['https://hungry1.com/', 'https://hungry2.com/']);
     await waitFor(() => expect(screen.queryByRole('heading', { level: 3, name: 'Hungry 1' })).toBeNull());
     expect(screen.getByRole('heading', { level: 3, name: 'Fresh' })).toBeTruthy();
     await waitFor(() => expect(isDisabled(dawnButton())).toBe(true));
   });
 
+  it('plays the sunrise over the whole screen when Dawn runs, and not under reduced motion', async () => {
+    makeStarving(2);
+    const { unmount } = render(<App />);
+    await cardFor('Hungry 1');
+    expect(screen.queryByTestId('sunrise')).toBeNull();
+    await userEvent.click(dawnButton());
+    expect(screen.getByTestId('sunrise').getAttribute('aria-hidden')).toBe('true');
+    await screen.findByText(/^Dawn burned 2 vampires/);
+    unmount();
+    makeStarving(2);
+    vi.stubGlobal('matchMedia', (q: string) => ({ matches: q.includes('reduce'), addEventListener() {}, removeEventListener() {} }));
+    try {
+      render(<App />);
+      await cardFor('Hungry 1');
+      await userEvent.click(dawnButton());
+      await screen.findByText(/^Dawn burned 2 vampires/);
+      expect(screen.queryByTestId('sunrise')).toBeNull();
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
   it('disables Dawn and every card button while it runs', async () => {
     makeStarving(2);
     let release!: () => void;
@@ -232,7 +264,7 @@ describe('Dawn from the page', () => {
     await userEvent.click(dawnButton());
 
     release();
-    await screen.findByText(/^Dawn closed 2 tabs/);
+    await screen.findByText(/^Dawn burned 2 vampires/);
     expect(spy).toHaveBeenCalledTimes(2); // one per tab, and the second click did nothing
     spy.mockRestore();
   });

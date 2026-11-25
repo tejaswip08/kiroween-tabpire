@@ -1,8 +1,8 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { hungerPercent, lastUsedText, STATE_LABEL, vampireNote } from '../../../lib/vampireVoice';
+import { hungerPercent, lastUsedText, STATE_EXPLANATION, STATE_LABEL } from '../../../lib/vampireVoice';
+import { cardQuote, memoryRow } from '../../../lib/tips';
 import { placePopup } from '../../../lib/popupPlace';
-import { formatMb } from '../../../lib/hunger';
 import type { Card } from '../../../lib/view';
 import { SiteIcon } from './SiteIcon';
 export const POPUP_WIDTH = 320;
@@ -21,7 +21,6 @@ export function CardPopup({ card, title, anchor, id }: { card: Card; title: stri
     const p = placePopup(a, POPUP_WIDTH, el.offsetHeight, window.innerWidth, window.innerHeight);
     setPos({ left: Math.round(p.left), top: Math.round(p.top) });
   }, [anchor, card, title]);
-  const note = vampireNote(card.state, card.hungerMs, card.info);
   return createPortal(
     <div
       ref={ref}
@@ -40,13 +39,13 @@ export function CardPopup({ card, title, anchor, id }: { card: Card; title: stri
         <span className="popup-dot" aria-hidden="true" />
         {STATE_LABEL[card.state]} · Hunger {hungerPercent(card.hungerMs)}%
       </p>
-      <p className="popup-quote">“{note.quote}”</p>
-      <p className="popup-text">{note.explanation}</p>
+      <p className="popup-quote">“{cardQuote(card)}”</p>
+      <p className="popup-text">{STATE_EXPLANATION[card.state]}</p>
       <dl className="popup-facts">
         <dt>Last used</dt>
         <dd>{lastUsedText(card.hungerMs, card.info)}</dd>
         <dt>Memory</dt>
-        <dd>{formatMb(card.mb)}</dd>
+        <dd>{memoryRow(card)}</dd>
       </dl>
     </div>,
     document.body,

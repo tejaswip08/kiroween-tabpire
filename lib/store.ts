@@ -19,6 +19,8 @@ export interface LogEntry {
   action: LogAction;
   site: string | null;
   title?: string;
+  /** The memory this entry reclaimed (an estimate). Missing for entries that freed nothing and for older entries. */
+  mb?: number;
 }
 
 export interface CryptEntry {
@@ -81,7 +83,8 @@ const isLogEntry = (v: unknown): v is LogEntry =>
   isNum(v.at) &&
   isLogAction(v.action) &&
   (v.site === null || isStr(v.site)) &&
-  (v.title === undefined || isStr(v.title));
+  (v.title === undefined || isStr(v.title)) &&
+  (v.mb === undefined || isNum(v.mb));
 
 const isCryptItem = (v: unknown): v is CryptEntry =>
   isRecord(v) && isStr(v.id) && isStr(v.url) && isStr(v.title) && isNum(v.savedAt);

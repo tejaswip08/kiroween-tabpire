@@ -56,38 +56,4 @@ export function lastUsedText(ms: number, t: Timing): string {
   if (ms < MINUTE) return 'Just now';
   return `${shortAge(ms, t)} ago`;
 }
-
-/** An idle time in words, for the vampire's voice: "40 minutes", "15 hours", "a day", "3 days". */
-function spoken(ms: number): string {
-  const plural = (n: number, w: string) => `${n} ${w}${n === 1 ? '' : 's'}`;
-  if (ms < HOUR) return plural(Math.max(1, Math.floor(ms / MINUTE)), 'minute');
-  if (ms < DAY_MS) return plural(Math.floor(ms / HOUR), 'hour');
-  if (ms < 2 * DAY_MS) return 'a day';
-  return plural(Math.floor(ms / DAY_MS), 'day');
-}
-
-export interface VampireNote {
-  /** A short line in the vampire's own voice. */
-  quote: string;
-  /** A plain sentence that explains the state. */
-  explanation: string;
-}
-
-/** The quote and the explanation for a tab, from its state and how long it has been idle. */
-export function vampireNote(state: VampireState, ms: number, t: Timing): VampireNote {
-  const explanation = STATE_EXPLANATION[state];
-  switch (state) {
-    case 'protected':
-      return { quote: "Garlic? Fine, I'll behave.", explanation };
-    case 'asleep':
-      return { quote: "Shh... I'm sleeping in my coffin.", explanation };
-    case 'starving':
-      return { quote: inUse(t) || t.lastAccessed === undefined ? 'I am so hungry. Feed me or stake me.' : `I've waited ${spoken(ms)}. Feed me or stake me.`, explanation };
-    case 'awake':
-    default:
-      if (inUse(t)) return { quote: "You're here with me right now. Stay as long as you like.", explanation };
-      if (t.lastAccessed === undefined) return { quote: "I don't remember when you last came. Come and say hello.", explanation };
-      if (ms < HOUR) return { quote: `You visited me ${spoken(ms)} ago. I'm feeling fine.`, explanation };
-      return { quote: `You visited me ${spoken(ms)} ago. I'm getting a little grey... visit me before tomorrow.`, explanation };
-  }
-}
+// The vampire's own lines (the card hover quote and every tip) are in lib/tips.ts.

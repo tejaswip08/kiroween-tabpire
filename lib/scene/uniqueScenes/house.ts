@@ -5,7 +5,7 @@ import { moonScreenRadiusScaled } from '../sky';
 import { FRAME_WINDOWS, MOON_SCALE, moonSpot } from './autumn';
 
 /** Where the house stands: the middle of its hill on the ground, turned a little toward the camera, and its overall scale. */
-export const HOUSE = { x: 26, z: -25, rotY: -0.4, scale: 0.65 };
+export const HOUSE = { x: 26, z: -25, rotY: -0.4, scale: 0.4 };
 /** The hill: half an ellipsoid sitting on the ground (y = 0), wide and low, so the house stands on a rise. */
 export const HILL = { rx: 7.2, rz: 5.6, h: 1.25 };
 /** The house floor (in the house's own units, before scale) sits this high on the hill, a little below its crown. */

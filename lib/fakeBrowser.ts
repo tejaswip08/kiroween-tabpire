@@ -91,6 +91,15 @@ export const fake = {
     for (const e of [onAlarm, onInstalled, onStartup, onStorageChanged, ...Object.values(tabEvents)]) e.listeners.length = 0;
   },
 
+  /** Wakes a sleeping tab in place, as the browser does when a discarded tab is shown: it loads again and counts as used now. */
+  wakeTab(id: number, now: number = Date.now()): FakeTab | undefined {
+    const tab = this.tabs.get(id);
+    if (!tab) return undefined;
+    tab.discarded = false;
+    tab.lastAccessed = now;
+    if (this.autoEvents) notify(tabEvents.onUpdated, id, { discarded: false }, { ...tab });
+    return tab;
+  },
   addTab(over: Partial<FakeTab> = {}): FakeTab {
     const tab: FakeTab = {
       id: this.nextId++,
@@ -159,6 +168,11 @@ export const browser = {
       if (props && fake.intercept?.({ kind: 'update', tabId: id, props })) return { ...tab };
       if (props?.url !== undefined) tab.url = props.url;
       if (props?.active !== undefined) tab.active = props.active;
+      // Showing a sleeping tab wakes it: the browser loads the page again.
+      if (props?.active === true && tab.discarded) {
+        tab.discarded = false;
+        tab.lastAccessed = Date.now();
+      }
       if (fake.autoEvents && props) notify(tabEvents.onUpdated, tab.id, { ...props }, { ...tab });
       return { ...tab };
     },

@@ -39,7 +39,7 @@ export const SCARECROW = { x: 7.4, z: 1.2, rotY: -0.35, scale: 1, hx: 0.9, hz: 0
  */
 export const EXTRA_TREE_SPOTS: readonly TreeSpot[] = [
   { x: 18, z: -28, scale: 0.58, rotY: 2.4, seed: 4201, clusters: 40 },
-  { x: 31, z: -27, scale: 1.05, rotY: 0.9, seed: 4202, clusters: 64 },
+  { x: 33, z: -21, scale: 0.7, rotY: 0.9, seed: 4202, clusters: 64 },
   { x: -25.5, z: -46, scale: 0.6, rotY: 4.1, seed: 4203, clusters: 36 },
   { x: -31, z: -49, scale: 0.42, rotY: 5.3, seed: 4204, clusters: 30 },
 ];

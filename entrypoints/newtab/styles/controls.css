@@ -4,13 +4,15 @@
   position: relative;
   display: inline-flex;
 }
-
+/*
+ * The tip box lives in a portal at the end of <body>, placed with fixed coordinates by Tooltip.tsx, so a scaled card
+ * never shrinks it and it never covers the control it belongs to.
+ */
 .tip {
-  position: absolute;
-  left: 50%;
-  z-index: 20;
+  position: fixed;
+  z-index: 60;
   width: max-content;
-  max-width: min(220px, calc(100vw - 32px));
+  max-width: min(240px, calc(100vw - 16px));
   padding: 7px 10px;
   border-radius: 10px;
   font-family: var(--font-label);
@@ -19,62 +21,83 @@
   line-height: 1.35;
   text-align: center;
   color: var(--ink);
-  background: linear-gradient(180deg, var(--button-top), var(--button-bottom));
-  box-shadow: var(--shadow-button), 0 0 0 1px var(--card-edge);
+  background: color-mix(in srgb, var(--card-bottom) 94%, #000);
+  box-shadow: 0 0 0 1px var(--card-edge), 0 10px 24px rgba(0, 0, 0, 0.5);
   pointer-events: none;
   opacity: 0;
+  transform: translateY(4px);
   transition:
     opacity 0.14s ease,
     transform 0.14s ease;
 }
-
-/* --tip-x is -50% (centred on the button). Buttons at the screen edge override it. */
-.tip-text {
+/* Shown on hover and on keyboard focus: Tooltip.tsx sets data-open (never while dismissed with Escape). */
+.tip[data-open] {
+  opacity: 1;
+  transform: none;
+}
+.tip-text,
+.tip-title,
+.tip-says,
+.tip-points,
+.tip-point {
   display: block;
 }
-
-/* Second line: the full tab title, shown with the tooltip on hover and keyboard focus. */
+/* Second line of a plain tip (the full tab title), or the small grey note of a rich tip. */
 .tip-note {
   display: block;
-  margin-top: 5px;
-  padding-top: 5px;
+  margin-top: 6px;
+  padding-top: 6px;
   border-top: 1px solid var(--card-edge);
   font-family: var(--font-body);
+  font-size: 11px;
   font-weight: 400;
   color: var(--ink-dim);
   overflow-wrap: anywhere;
 }
-
-.tip-top {
-  bottom: calc(100% + 8px);
-  transform: translate(var(--tip-x, -50%), 4px);
+/* A rich tip: UPPERCASE title, the vampire's line, a bullet list, a note. */
+.tip-rich {
+  max-width: min(300px, calc(100vw - 16px));
+  padding: 10px 13px 11px;
+  border-radius: 12px;
+  text-align: left;
 }
-
-.tip-bottom {
-  top: calc(100% + 8px);
-  transform: translate(var(--tip-x, -50%), -4px);
+.tip-title {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
-
-.tip-wrap:hover:not([data-dismissed]) .tip,
-.tip-wrap:has(:focus-visible):not([data-dismissed]) .tip {
-  opacity: 1;
-  transform: translate(var(--tip-x, -50%), 0);
+.tip-says {
+  margin-top: 5px;
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  font-style: italic;
+  font-weight: 500;
+  color: color-mix(in srgb, var(--accent-bright) 62%, #fff);
 }
-
-/* First and last buttons: line the tooltip up with the button edge, so it never leaves the screen. */
-.card-actions > .tip-wrap:first-child .tip {
-  --tip-x: 0;
-  left: 0;
+.tip-points {
+  margin-top: 6px;
 }
-
-.card-actions > .tip-wrap:last-child .tip,
-.header-actions > .tip-wrap:last-child .tip,
-.haunts-add .tip-wrap .tip {
-  --tip-x: 0;
-  left: auto;
-  right: 0;
+.tip-point {
+  position: relative;
+  padding-left: 13px;
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 12px;
 }
-
+.tip-point + .tip-point {
+  margin-top: 3px;
+}
+.tip-point::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 0.55em;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+}
 .icon-btn {
   display: grid;
   place-items: center;
