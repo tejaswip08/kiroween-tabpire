@@ -1,6 +1,6 @@
 import { useGLTF } from '@react-three/drei';
 import { useEffect } from 'react';
-import { THEME_IDS, type ThemeId } from '../../../../lib/themes';
+import { ENABLED_THEME_IDS, type ThemeId } from '../../../../lib/themes';
 import { modelFile } from '../../../../lib/scene/layout';
 import { sceneThemeFor } from './themeColors';
 
@@ -43,11 +43,24 @@ const defaults: PreloadDeps = {
 
 /** The files of the other themes that nobody has asked for yet, each once, in theme order. */
 export function pendingFiles(current: ThemeId, seen: ReadonlySet<string>): string[] {
-  const own = new Set(themeFiles(current));
+  let own: Set<string>;
+  try {
+    own = new Set(themeFiles(current));
+  } catch {
+    own = new Set();
+  }
   const out: string[] = [];
-  for (const id of THEME_IDS) {
+  for (const id of ENABLED_THEME_IDS) {
     if (id === current) continue;
-    for (const url of themeFiles(id)) {
+    // One theme that cannot be built must not stop the others from loading.
+    let files: string[];
+    try {
+      files = themeFiles(id);
+    } catch (err) {
+      console.warn(`Tabpire: could not list the files of the ${id} theme.`, err);
+      continue;
+    }
+    for (const url of files) {
       if (own.has(url) || seen.has(url) || out.includes(url)) continue;
       out.push(url);
     }
@@ -66,7 +79,11 @@ export function startThemePreload(current: ThemeId, deps: Partial<PreloadDeps> =
     if (next.length === 0) return;
     for (const url of next) {
       d.asked.add(url);
-      d.preload(url);
+      try {
+        d.preload(url);
+      } catch (err) {
+        console.warn(`Tabpire: could not preload ${url}.`, err);
+      }
     }
     cancel = d.schedule(slot);
   };

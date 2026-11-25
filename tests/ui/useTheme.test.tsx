@@ -9,7 +9,7 @@ vi.mock('wxt/browser', async () => {
 import { browser, fake } from '../helpers/fakeBrowser';
 import { useTheme, type ThemeState } from '../../entrypoints/newtab/components/useTheme';
 import { store, KEYS } from '../../lib/store';
-import { THEME_IDS, type ThemeId } from '../../lib/themes';
+import { ENABLED_THEME_IDS, type ThemeId } from '../../lib/themes';
 import { SKY_CACHE_KEY } from '../../lib/themeCache';
 
 let latest: ThemeState;
@@ -51,13 +51,13 @@ describe('useTheme: start', () => {
 
   it('starts from the cached theme, then follows the saved one', async () => {
     localStorage.setItem(SKY_CACHE_KEY, 'frost');
-    fake.storage.set(KEYS.theme, 'castle');
+    fake.storage.set(KEYS.theme, 'pumpkin');
     render(<Probe />);
     expect(text('theme')).toBe('frost');
     expect(document.documentElement.dataset.theme).toBe('frost');
-    await waitFor(() => expect(text('theme')).toBe('castle'));
-    expect(document.documentElement.dataset.theme).toBe('castle');
-    expect(localStorage.getItem(SKY_CACHE_KEY)).toBe('castle');
+    await waitFor(() => expect(text('theme')).toBe('pumpkin'));
+    expect(document.documentElement.dataset.theme).toBe('pumpkin');
+    expect(localStorage.getItem(SKY_CACHE_KEY)).toBe('pumpkin');
   });
 
   it('corrects a stale cache when nothing is saved', async () => {
@@ -127,11 +127,11 @@ describe('useTheme: setTheme', () => {
       .mockImplementationOnce(() => new Promise<void>((_, rej) => (rejectFirst = rej)))
       .mockResolvedValueOnce(undefined);
     act(() => latest.setTheme('frost'));
-    act(() => latest.setTheme('castle'));
+    act(() => latest.setTheme('pumpkin'));
     expect(spy).toHaveBeenCalledTimes(2);
     await act(async () => rejectFirst(new Error('late')));
-    expect(text('theme')).toBe('castle');
-    expect(document.documentElement.dataset.theme).toBe('castle');
+    expect(text('theme')).toBe('pumpkin');
+    expect(document.documentElement.dataset.theme).toBe('pumpkin');
     expect(text('failed')).toBe('1'); // still reported
   });
 
@@ -143,7 +143,7 @@ describe('useTheme: setTheme', () => {
       .mockResolvedValueOnce(undefined)
       .mockImplementationOnce(() => new Promise<void>((_, rej) => (rejectSecond = rej)));
     act(() => latest.setTheme('frost'));
-    act(() => latest.setTheme('castle'));
+    act(() => latest.setTheme('pumpkin'));
     await act(async () => rejectSecond(new Error('fail')));
     expect(text('theme')).toBe('frost');
   });
@@ -153,7 +153,7 @@ describe('useTheme: setTheme', () => {
     vi.spyOn(store, 'getTheme').mockImplementationOnce(() => new Promise<ThemeId>((res) => (resolveRead = res)));
     render(<Probe />);
     act(() => latest.setTheme('forest'));
-    await act(async () => resolveRead('castle'));
+    await act(async () => resolveRead('pumpkin'));
     expect(text('theme')).toBe('forest');
   });
 });
@@ -162,9 +162,9 @@ describe('useTheme: sync (Property 15)', () => {
   it('applies a theme written by another page', async () => {
     render(<Probe />);
     await act(async () => {});
-    await otherPageWrites(KEYS.theme, 'bloodmoon');
-    await waitFor(() => expect(text('theme')).toBe('bloodmoon'));
-    expect(document.documentElement.dataset.theme).toBe('bloodmoon');
+    await otherPageWrites(KEYS.theme, 'forest');
+    await waitFor(() => expect(text('theme')).toBe('forest'));
+    expect(document.documentElement.dataset.theme).toBe('forest');
   });
 
   it('makes no re-render when the event carries the active theme', async () => {
@@ -186,7 +186,7 @@ describe('useTheme: sync (Property 15)', () => {
     act(() => latest.setTheme('frost'));
     await act(async () => {});
     vi.spyOn(store, 'getTheme').mockRejectedValue(new Error('read failed'));
-    await otherPageWrites(KEYS.theme, 'castle');
+    await otherPageWrites(KEYS.theme, 'pumpkin');
     await waitFor(() => expect(text('failed')).toBe('1'));
     expect(text('theme')).toBe('frost');
   });
@@ -200,22 +200,22 @@ describe('useTheme: sync (Property 15)', () => {
     const handler = added.mock.calls[0]![0];
     let resolveRead: (id: ThemeId) => void = () => {};
     vi.spyOn(store, 'getTheme').mockImplementationOnce(() => new Promise<ThemeId>((res) => (resolveRead = res)));
-    handler({ [KEYS.theme]: { newValue: 'castle' } }, 'local');
+    handler({ [KEYS.theme]: { newValue: 'pumpkin' } }, 'local');
     view.unmount();
     expect(removed).toHaveBeenCalledWith(handler);
     const rendersAfter = renders;
-    await act(async () => resolveRead('castle'));
+    await act(async () => resolveRead('pumpkin'));
     expect(renders).toBe(rendersAfter);
-    expect(document.documentElement.dataset.theme).not.toBe('castle');
+    expect(document.documentElement.dataset.theme).not.toBe('pumpkin');
   });
 
   it('Feature: themes, Property 15: reads once per theme event, never for other keys, ends on the last valid value', async () => {
     const event = fc.oneof(
-      fc.record({ key: fc.constant<string>(KEYS.theme), value: fc.constantFrom<unknown>(...THEME_IDS) }),
+      fc.record({ key: fc.constant<string>(KEYS.theme), value: fc.constantFrom<unknown>(...ENABLED_THEME_IDS) }),
       fc.record({ key: fc.constant<string>(KEYS.theme), value: fc.constantFrom<unknown>('nope', 7, null, { a: 1 }) }),
       fc.record({
         key: fc.constantFrom(KEYS.stats, KEYS.crypt, KEYS.garlic, KEYS.haunts, KEYS.log),
-        value: fc.constantFrom<unknown>('frost', 'castle', 1),
+        value: fc.constantFrom<unknown>('frost', 'pumpkin', 1),
       }),
     );
     await fc.assert(
@@ -240,7 +240,7 @@ describe('useTheme: sync (Property 15)', () => {
           await act(async () => {});
           if (e.key === KEYS.theme) {
             themeEvents++;
-            if ((THEME_IDS as readonly unknown[]).includes(e.value)) expected = e.value as ThemeId;
+            if ((ENABLED_THEME_IDS as readonly unknown[]).includes(e.value)) expected = e.value as ThemeId;
             else expected = 'crypt'; // the store reads an unknown value as the default
           }
         }

@@ -7,7 +7,7 @@ vi.mock('@react-three/fiber', () => ({ useThree: (sel: (s: { invalidate: () => v
 import { C, sceneColorsFor } from '../entrypoints/newtab/layers/scene/colors';
 import { CRYPT_SCENE_THEME, SceneThemeContext, sceneThemeFor, useSceneTheme } from '../entrypoints/newtab/layers/scene/themeColors';
 import { layout } from '../lib/scene/layout';
-import { THEME_IDS, themeById } from '../lib/themes';
+import { ENABLED_THEME_IDS, themeById } from '../lib/themes';
 import baseline from './fixtures/crypt-baseline.json';
 
 const hex = (c: { getHexString(): string }) => '#' + c.getHexString();
@@ -43,7 +43,7 @@ describe('sceneColorsFor', () => {
     }
   });
   it('returns a complete set for every theme, with the same object on repeated calls', () => {
-    for (const id of THEME_IDS) {
+    for (const id of ENABLED_THEME_IDS) {
       const keys = Object.keys(themeById(id).scene).sort();
       const set = sceneColorsFor(id);
       expect(Object.keys(set).sort()).toEqual(keys);
@@ -70,7 +70,7 @@ describe('SceneThemeContext', () => {
     expect(typeof useSceneTheme).toBe('function');
   });
   it('sceneThemeFor is stable per theme and holds that theme\'s colours', () => {
-    for (const id of THEME_IDS) {
+    for (const id of ENABLED_THEME_IDS) {
       expect(sceneThemeFor(id)).toBe(sceneThemeFor(id));
       expect(sceneThemeFor(id).colors).toBe(sceneColorsFor(id));
       expect(sceneThemeFor(id).id).toBe(id);

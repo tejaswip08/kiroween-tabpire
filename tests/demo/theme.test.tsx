@@ -67,17 +67,17 @@ describe('demo theme', () => {
     expect(await store.getTheme()).toBe('frost');
   });
   it('Blood Bank follows the saved theme when the cache is empty', async () => {
-    await store.setTheme('castle');
+    await store.setTheme('pumpkin');
     window.location.hash = '#/bloodbank';
     render(<DemoShell />);
     await screen.findByRole('main');
-    await waitFor(() => expect(root()).toBe('castle'));
+    await waitFor(() => expect(root()).toBe('pumpkin'));
   });
   it('Reset returns data-theme to crypt, the saved theme to the default and clears the cache', async () => {
     render(<DemoShell />);
-    await pick('Blood Moon');
-    await waitFor(() => expect(root()).toBe('bloodmoon'));
-    await waitFor(() => expect(localStorage.getItem(SKY_CACHE_KEY)).toBe('bloodmoon'));
+    await pick('Frozen Cemetery');
+    await waitFor(() => expect(root()).toBe('frost'));
+    await waitFor(() => expect(localStorage.getItem(SKY_CACHE_KEY)).toBe('frost'));
     fireEvent.click(screen.getByRole('button', { name: 'Reset demo' }));
     await waitFor(() => expect(root()).toBe('crypt'));
     await waitFor(() => expect(localStorage.getItem(SKY_CACHE_KEY)).toBe('crypt')); // the remounted hook writes the default
@@ -111,7 +111,7 @@ describe('demo theme', () => {
     await screen.findByRole('main');
     fake.failStorageSet.add(KEYS.theme);
     await act(async () => {
-      await store.setTheme('castle').catch(() => {});
+      await store.setTheme('pumpkin').catch(() => {});
     });
     expect(document.body.textContent).not.toMatch(/save your theme/i);
     expect(screen.queryByRole('alert')).toBeNull();
@@ -119,7 +119,7 @@ describe('demo theme', () => {
   it('the shared hook reverts a failed write (the Crypt shows the notice)', async () => {
     function Probe() {
       const t = useTheme();
-      return <button onClick={() => t.setTheme('castle')}>{`${t.themeId}:${t.saveFailed}`}</button>;
+      return <button onClick={() => t.setTheme('pumpkin')}>{`${t.themeId}:${t.saveFailed}`}</button>;
     }
     render(<Probe />);
     fake.failStorageSet.add(KEYS.theme);

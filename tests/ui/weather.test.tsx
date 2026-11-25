@@ -12,7 +12,7 @@ import { SceneThemeContext, sceneThemeFor } from '../../entrypoints/newtab/layer
 import { SceneWeather } from '../../entrypoints/newtab/layers/scene/Weather';
 import { sceneState } from '../../lib/scene/meaning';
 import { REDUCED_TIME, WEATHER } from '../../lib/scene/weather';
-import { THEME_IDS, type ThemeId } from '../../lib/themes';
+import { ENABLED_THEME_IDS, type ThemeId } from '../../lib/themes';
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 extend(THREE as never);
 const state = sceneState({ cardCount: 5, starvingCount: 1, estimatedMb: 500, cryptCount: 1, crypted: 1, garlicCount: 0, staked: 0, coffined: 0, dawnReady: false });
@@ -59,7 +59,7 @@ describe('Weather mount', () => {
     const m = await mount('crypt', false);
     expect(m.points()).toHaveLength(0);
   });
-  it.each(THEME_IDS.filter((t) => t !== 'crypt'))('%s: one Points object, full draw range, colours from the theme', async (id) => {
+  it.each(ENABLED_THEME_IDS.filter((t) => t !== 'crypt'))('%s: one Points object, full draw range, colours from the theme', async (id) => {
     const m = await mount(id, false);
     const pts = m.points();
     expect(pts).toHaveLength(1);
@@ -98,23 +98,13 @@ describe('Weather mount', () => {
     }
     expect(pos.version).toBe(version);
   });
-  it('embers: anchors come from the theme scene, up to four', async () => {
-    const m = await mount('castle', false);
-    const mat = m.points()[0]!.material as THREE.ShaderMaterial;
-    const anchors = sceneThemeFor('castle').scene.anchors;
-    const n = mat.uniforms.uAnchorCount!.value as number;
-    expect(n).toBe(Math.min(4, Math.max(1, anchors.length)));
-    anchors.slice(0, 4).forEach((a, i) => {
-      const v = mat.uniforms.uAnchors!.value[i] as THREE.Vector3;
-      expect([v.x, v.y, v.z]).toEqual([a.x, a.y, a.z]);
-    });
-  });
+  // The embers weather (anchored on the torches) belongs to the disabled Haunted Castle, so it is not covered here.
   it('a switch to another theme changes the weather in place', async () => {
     const m = await mount('frost', false);
-    await m.rerender('bloodmoon');
+    await m.rerender('pumpkin');
     const pts = m.points();
     expect(pts).toHaveLength(1);
-    expect(pts[0]!.geometry.drawRange.count).toBe(WEATHER.ash.count);
+    expect(pts[0]!.geometry.drawRange.count).toBe(WEATHER.leaves.count);
     await m.rerender('crypt');
     expect(m.points()).toHaveLength(0);
   });

@@ -206,8 +206,9 @@ describe.each(THEME_IDS.filter((id) => themeScene(id).unique))('the plan of uniq
   });
   it('never counts the Crypt village and critters', () => {
     const cryptExtras = Object.values(EXTRAS).reduce((sum, e) => sum + e.tris, 0);
-    // The Witch's Forest builds dozens of trees itself, so its own parts may outweigh the village; the village is still not counted.
-    expect(unique!.extras.tris).toBeLessThan(Math.max(cryptExtras, 48_000));
+    // The Witch's Forest builds dozens of trees itself, and the Pumpkin Patch its tree, skeletons, haunted house and extra trees
+    // (about 59k), so their own parts may outweigh the village; the village is still not counted.
+    expect(unique!.extras.tris).toBeLessThan(Math.max(cryptExtras, 64_000));
   });
   it('stays within the budgets', () => {
     expect(tris).toBeLessThanOrEqual(BUDGET.sceneTriangles);

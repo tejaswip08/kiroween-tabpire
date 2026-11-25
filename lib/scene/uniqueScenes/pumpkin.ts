@@ -28,7 +28,7 @@ const LANE_KEEP = 4.6;
 /** The barn faces the camera; the silo stands behind it on the left, and the windmill on the right, turned toward the camera. */
 export const BARN = { x: -3.8, z: -23, rotY: 0.1, scale: 1.25 };
 export const SILO = { x: -13, z: -27.5, rotY: 0, scale: 1.1 };
-export const WINDMILL = { x: 14, z: -30, rotY: -0.28, scale: 5 };
+export const WINDMILL = { x: 10, z: -30, rotY: -0.28, scale: 5 };
 /** The scarecrow (drawn by `ScarecrowShape`): standing guard in the pumpkin patch on the right. */
 export const SCARECROW = { x: 7.4, z: 1.2, rotY: -0.35, scale: 1, hx: 0.9, hz: 0.9, h: 3.3 };
 
@@ -38,7 +38,7 @@ export const SCARECROW = { x: 7.4, z: 1.2, rotY: -0.35, scale: 1, hx: 0.9, hz: 0
  * of the moon, the cards, the controls and the barn (`tests/house.test.ts`).
  */
 export const EXTRA_TREE_SPOTS: readonly TreeSpot[] = [
-  { x: 19.5, z: -28, scale: 0.58, rotY: 2.4, seed: 4201, clusters: 40 },
+  { x: 18, z: -28, scale: 0.58, rotY: 2.4, seed: 4201, clusters: 40 },
   { x: 31, z: -27, scale: 1.05, rotY: 0.9, seed: 4202, clusters: 64 },
   { x: -25.5, z: -46, scale: 0.6, rotY: 4.1, seed: 4203, clusters: 36 },
   { x: -31, z: -49, scale: 0.42, rotY: 5.3, seed: 4204, clusters: 30 },

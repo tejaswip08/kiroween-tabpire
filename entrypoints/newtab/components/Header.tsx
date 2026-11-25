@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
+import type { DawnKeepReason } from '../../../lib/hunger';
 import type { ThemeId } from '../../../lib/themes';
 import { openBloodBank } from '../../../lib/tabs';
 import { BatMark, BloodOrbIcon, ThemesIcon } from './icons';
@@ -15,6 +16,7 @@ export function Header({
   staked,
   coffined,
   dawnCount,
+  dawnKept = [],
   dawnBusy,
   onDawn,
   themeId,
@@ -27,6 +29,8 @@ export function Header({
   staked: number;
   coffined: number;
   dawnCount: number;
+  /** Why each starving tab that Dawn will not close is kept. */
+  dawnKept?: readonly DawnKeepReason[];
   dawnBusy: boolean;
   onDawn: () => void;
   themeId: ThemeId;
@@ -53,7 +57,7 @@ export function Header({
             ref={themesBtn}
             label="Themes"
             icon={<ThemesIcon size={24} />}
-            tip="Change how Tabpire looks: six themes."
+            tip="Change how Tabpire looks: four themes."
             popup="dialog"
             expanded={themesOpen}
             tipHidden={themesOpen}
@@ -67,7 +71,7 @@ export function Header({
           tip="Blood Bank: your totals, rank and recent deeds."
           onClick={() => void openBloodBank()}
         />
-        <DawnButton count={dawnCount} busy={dawnBusy} onDawn={onDawn} />
+        <DawnButton count={dawnCount} busy={dawnBusy} onDawn={onDawn} kept={dawnKept} />
       </nav>
     </header>
   );

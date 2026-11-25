@@ -190,6 +190,14 @@ describe('Dawn from the page', () => {
     expect(isDisabled(dawnButton())).toBe(true);
     expect(tipOf(dawnButton())).toBe('Dawn: no starving tabs to close right now.');
   });
+  it('explains a starving tab it will not close, so the tooltip agrees with the header', async () => {
+    fake.addTab({ title: 'Fresh', url: 'https://f.com/', lastAccessed: FRESH() });
+    fake.addTab({ title: 'Pinned', url: 'https://p.com/', pinned: true, lastAccessed: OLD() });
+    render(<App />);
+    await cardFor('Fresh');
+    expect(isDisabled(dawnButton())).toBe(true);
+    expect(tipOf(dawnButton())).toBe('Dawn: nothing to close. 1 starving tab is kept safe (pinned).');
+  });
 
   it('closes the starving tabs, saves them, and shows what happened', async () => {
     makeStarving(2);

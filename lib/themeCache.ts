@@ -1,6 +1,6 @@
 // The Sky_Cache: one Theme_Id in localStorage so a new tab paints the right sky at once.
 // The only module that may use localStorage. Every call is inside try/catch. No tab data.
-import { DEFAULT_THEME, isThemeId, type ThemeId } from './themes';
+import { DEFAULT_THEME, isEnabledThemeId, type ThemeId } from './themes';
 
 export const SKY_CACHE_KEY = 'tabpire:sky-theme';
 
@@ -8,7 +8,7 @@ export const SKY_CACHE_KEY = 'tabpire:sky-theme';
 export function readCachedTheme(): ThemeId | null {
   try {
     const v = localStorage.getItem(SKY_CACHE_KEY);
-    return isThemeId(v) ? v : null;
+    return isEnabledThemeId(v) ? v : null;
   } catch {
     return null;
   }

@@ -1,7 +1,7 @@
 // The layout, model list, weather anchors and weather spec of each theme. Pure: no three, no browser APIs.
 // The Crypt is the base layout itself. The other themes start from a copy of it and change only what their
 // prop table says, with their own random stream, so the base placements and the Crypt are never disturbed.
-import { themeById, type PropAdd, type ThemeId, type ZoneName } from '../themes';
+import { DISABLED_THEMES, themeById, type PropAdd, type ThemeId, type ZoneName } from '../themes';
 import { WEATHER, type WeatherSpec } from './weather';
 import {
   LAYOUT_SEED, MODELS, PATH_CLEARANCE, PATH_HALF_WIDTH, blocksMoon, buildLayout, cutByScreenEdge, footprintOf, footprintsOverlap, insideGround,
@@ -70,10 +70,19 @@ const cache = new Map<string, ThemeScene>();
 
 /** The scene data of a theme. Same arguments give the same object. */
 export function themeScene(id: ThemeId, seed: number = LAYOUT_SEED): ThemeScene {
+  // A disabled theme is never built: it shows the Crypt scene.
+  if (DISABLED_THEMES.includes(id)) return themeScene('crypt', seed);
   const key = `${id}:${seed}`;
   let hit = cache.get(key);
   if (!hit) {
-    hit = build(id, seed);
+    try {
+      hit = build(id, seed);
+    } catch (err) {
+      // Tests fail at once. In the app one theme that cannot be built shows the Crypt scene; the other themes are not affected.
+      if (id === 'crypt' || import.meta.env?.MODE === 'test') throw err;
+      console.warn(`Tabpire: the ${id} scene could not be built, showing the Crypt scene instead.`, err);
+      hit = themeScene('crypt', seed);
+    }
     cache.set(key, hit);
   }
   return hit;

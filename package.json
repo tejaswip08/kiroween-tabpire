@@ -14,7 +14,8 @@
     "typecheck": "wxt prepare && tsc --noEmit",
     "test": "vitest run",
     "demo:dev": "vite --config demo/vite.config.ts",
-    "demo:build": "vite build --config demo/vite.config.ts"
+    "demo:build": "vite build --config demo/vite.config.ts",
+    "layout:check": "node tools/layout-check.mjs"
   },
   "dependencies": {
     "@fontsource/grenze-gotisch": "^5.3.0",
@@ -40,6 +41,7 @@
     "@wxt-dev/module-react": "^1.2.2",
     "fast-check": "^4.10.3",
     "jsdom": "^31.0.1",
+    "playwright-core": "^1.65.1",
     "typescript": "^5.9.3",
     "vitest": "^5.1.1",
     "wxt": "^0.21.5"

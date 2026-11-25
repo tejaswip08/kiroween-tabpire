@@ -4,6 +4,7 @@ import { noRemoteDraco } from './build/noRemoteDraco';
 
 
 
+const ICONS = { 16: 'icon/16.png', 32: 'icon/32.png', 48: 'icon/48.png', 128: 'icon/128.png' };
 export default defineConfig({
   modules: ['@wxt-dev/module-react'],
   manifestVersion: 3,
@@ -17,8 +18,10 @@ export default defineConfig({
     host_permissions: ['https://suggestqueries.google.com/*'],
     // The compressed vampire model needs the meshopt WebAssembly decoder.
     content_security_policy: { extension_pages: "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'" },
+    // The pink bat logo, made by tools/make-icons.mjs from tools/icon/bat.svg.
+    icons: ICONS,
     // Required for the toolbar badge (browser.action). No popup yet.
-    action: { default_title: 'Tabpire' },
+    action: { default_title: 'Tabpire', default_icon: ICONS },
     browser_specific_settings: {
       gecko: {
         // Placeholder. Replace with the real add-on id before submission.

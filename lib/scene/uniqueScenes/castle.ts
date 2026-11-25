@@ -5,7 +5,7 @@
 // Coordinates: x right, y up, z toward the camera (the camera is at z = 16).
 import { cameraAt, project } from '../camera';
 import type { Placement, WarmSource } from '../layout';
-import { moonScreenRadiusScaled } from '../sky';
+import { clearSkyMoon, moonScreenRadiusScaled } from '../sky';
 import { WEATHER } from '../weather';
 import {
   CORNER_TOWER, DOOR_Z, FORTRESS, LIGHTNING_SEED, PATH, bannerSpots, facadeWindows, flagSpots, torchRow, torchTop, wallPieces, windowTris,
@@ -20,12 +20,7 @@ export const CASTLE_MOON_SCALE = 1.1;
 /** How far above the top of the tower the middle of the moon sits, as a fraction of the moon's radius (the rest of the disc is behind the tower). */
 export const MOON_OVER_TOWER = 0.3;
 export const CASTLE_MOON: UniqueMoon = {
-  target(aspect) {
-    const cam = cameraAt(0, aspect, true);
-    const p = project([CORNER_TOWER.x, CORNER_TOWER.top, CORNER_TOWER.z], cam)!;
-    const r = moonScreenRadiusScaled(aspect, CASTLE_MOON_SCALE).disc;
-    return { x: p.x, y: p.y - MOON_OVER_TOWER * r };
-  },
+  target: (aspect) => clearSkyMoon(aspect, CASTLE_MOON_SCALE),
   scale: CASTLE_MOON_SCALE,
   inFront: true,
 };

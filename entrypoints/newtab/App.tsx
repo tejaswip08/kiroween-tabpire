@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { dawnTargets, type VampireState } from '../../lib/hunger';
+import { dawnKeepReason, dawnTargets, type DawnKeepReason, type VampireState } from '../../lib/hunger';
 import { filterByState, toggleFilter } from '../../lib/legend';
 import { emitSceneEvent } from '../../lib/scene/bus';
 import { actionNotice, dawnNotice, resurrectNotice } from '../../lib/messages';
@@ -132,6 +132,10 @@ export function App() {
     data.garlic,
     data.now,
   ).length;
+  const dawnKept = useMemo(
+    () => data.cards.map((c) => dawnKeepReason(c.info, data.garlic, data.now)).filter((r): r is DawnKeepReason => r !== null),
+    [data.cards, data.garlic, data.now],
+  );
 
   const onDawn = useCallback(async () => {
     if (dawnRunning.current) return;
@@ -180,6 +184,7 @@ export function App() {
           staked={data.stats.staked}
           coffined={data.stats.coffined}
           dawnCount={dawnCount}
+          dawnKept={dawnKept}
           dawnBusy={dawnBusy}
           onDawn={onDawn}
           themeId={themeId}

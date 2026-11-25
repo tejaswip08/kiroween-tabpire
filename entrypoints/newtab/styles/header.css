@@ -52,14 +52,7 @@
   background: linear-gradient(180deg, var(--panel-fill-top), var(--panel-fill-bottom));
   border: 1px solid var(--card-edge);
   box-shadow: var(--shadow-panel);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-}
-
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .stats-panel {
-    background: var(--panel-fill-fallback);
-  }
+  /* Clean dark translucent fill, no backdrop blur: scene objects behind it stay crisp. */
 }
 
 .stats {

@@ -3,6 +3,7 @@
 // pedestal with a red flame. Cracks in the dark red ground glow like lava, a few dead trees stand at the sides, ash falls and
 // bats fly in a bigger flock. Pure and seeded.
 // Coordinates: x right, y up, z toward the camera (the camera is at z = 16).
+import { clearSkyMoon } from '../sky';
 import { MODELS, type Placement, type WarmSource } from '../layout';
 import { WEATHER } from '../weather';
 import {
@@ -19,7 +20,7 @@ export const BLOOD_SEED = 7431;
  * row. Only the centrepiece group (the ruins, the columns and the pedestal) may stand in front of it.
  */
 export const BLOOD_MOON: UniqueMoon = {
-  target: () => ({ x: 0.5, y: 0.3 }),
+  target: (aspect) => clearSkyMoon(aspect, 2),
   scale: 2,
   inFront: true,
 };

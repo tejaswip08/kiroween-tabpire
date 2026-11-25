@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { store, onStoreChange, KEYS } from '../../../lib/store';
-import { DEFAULT_THEME, isThemeId, type ThemeId } from '../../../lib/themes';
+import { DEFAULT_THEME, isEnabledThemeId, type ThemeId } from '../../../lib/themes';
 import { readCachedTheme, writeCachedTheme } from '../../../lib/themeCache';
 
 export interface ThemeState {
@@ -63,7 +63,7 @@ export function useTheme(): ThemeState {
 
   const setTheme = useCallback(
     (id: ThemeId) => {
-      if (!isThemeId(id)) return;
+      if (!isEnabledThemeId(id)) return;
       const mine = ++choice.current;
       const previous = current.current;
       current.current = id;

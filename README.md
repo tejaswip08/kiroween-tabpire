@@ -53,26 +53,20 @@ refreshes every minute.
   </tr>
 </table>
 
-## Six themes
-
+## Four themes
 Each theme has its own sky, moon, fog and lights, its own props and its own weather. Your choice is saved and
 used on every Tabpire page.
-
 <table>
   <tr>
-    <td width="33%"><img src="docs/screenshots/crypt.jpg" alt="The Crypt theme"><br><b>The Crypt</b>: purple night, a red moon and a quiet graveyard</td>
-    <td width="33%"><img src="docs/screenshots/theme-pumpkin.jpg" alt="Pumpkin Patch theme"><br><b>Pumpkin Patch</b>: orange dusk, a barn, corn and falling leaves</td>
-    <td width="33%"><img src="docs/screenshots/theme-forest.jpg" alt="Witch's Forest theme"><br><b>Witch's Forest</b>: green mist, twisted trees and fireflies</td>
+    <td width="50%"><img src="docs/screenshots/crypt.jpg" alt="The Crypt theme"><br><b>The Crypt</b>: purple night, a red moon and a quiet graveyard</td>
+    <td width="50%"><img src="docs/screenshots/theme-pumpkin.jpg" alt="Pumpkin Patch theme"><br><b>Pumpkin Patch</b>: orange dusk, a barn, corn and falling leaves</td>
   </tr>
   <tr>
+    <td><img src="docs/screenshots/theme-forest.jpg" alt="Witch's Forest theme"><br><b>Witch's Forest</b>: green mist, twisted trees and fireflies</td>
     <td><img src="docs/screenshots/theme-frost.jpg" alt="Frozen Cemetery theme"><br><b>Frozen Cemetery</b>: cold blue night, frosted pines and snow</td>
-    <td><img src="docs/screenshots/theme-bloodmoon.jpg" alt="Blood Moon theme"><br><b>Blood Moon</b>: a deep red sky, old ruins and drifting ash</td>
-    <td><img src="docs/screenshots/theme-castle.jpg" alt="Haunted Castle theme"><br><b>Haunted Castle</b>: grey towers, banners and torch embers</td>
   </tr>
 </table>
-
-<p align="center"><img src="docs/screenshots/picker.jpg" alt="The Themes panel listing the six themes" width="420"></p>
-
+<p align="center"><img src="docs/screenshots/picker.jpg" alt="The Themes panel listing the four themes" width="420"></p>
 ## Try it without installing
 
 The [web demo](https://tejaswip08.github.io/kiroween-tabpire/) runs the real new tab page and Blood Bank
@@ -135,8 +129,9 @@ Permissions: `tabs`, `storage`, `alarms`, `search` and `favicon`, plus access to
 Tabpire was built for the **Kiroween 2026** hackathon with [Kiro](https://kiro.dev), spec by spec. Everything Kiro
 worked from is in [`.kiro/`](.kiro):
 
-- **Steering:** [`product.md`](.kiro/steering/product.md), [`style.md`](.kiro/steering/style.md) and
+- **Steering (product):** [`product.md`](.kiro/steering/product.md), [`style.md`](.kiro/steering/style.md) and
   [`roadmap.md`](.kiro/steering/roadmap.md)
+- **Steering (tech):** [`tech.md`](.kiro/steering/tech.md) and [`structure.md`](.kiro/steering/structure.md)
 - **Specs**, each with requirements, design and tasks:
   [project and tab rules](.kiro/specs/project-and-tab-rules),
   [tab actions, Dawn and badge](.kiro/specs/tab-actions-dawn-badge),
@@ -144,7 +139,13 @@ worked from is in [`.kiro/`](.kiro):
   [3D graveyard](.kiro/specs/graveyard-3d),
   [themes](.kiro/specs/themes) and
   [web demo](.kiro/specs/web-demo)
-- **Hooks:** run the tests and the typecheck when a file is saved
+- **Hooks:** run the tests and the typecheck when a file is saved, and check that CSS keyframes only animate
+  `transform` and `opacity` when a stylesheet is saved
+
+### How this was built
+An earlier prototype of the idea was made with another AI tool before the hackathon. The code in this repository
+was rebuilt from scratch in Kiro for Kiroween, spec by spec. The only pre-existing assets are the CC0 3D models
+(Kenney, KayKit, Quaternius) and the vampire model, listed under [Credits](#credits).
 
 ## Credits
 

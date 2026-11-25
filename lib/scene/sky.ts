@@ -9,12 +9,28 @@ export const MOON = {
   haloDeg: 7.5,
 } as const;
 
-/** Where the moon should appear on screen (0 to 1, y from the top). */
+/** Share of the window height the header buttons reach down to (at the shortest supported window, 600px). */
+const HEADER_BOTTOM = 0.14;
+/**
+ * The clear sky zone: where a moon `scale` times the Crypt's disc appears on screen (0 to 1, y from the top). It is in the upper
+ * right, right of the search box and below the header buttons, about 85% across and 27% down. A big moon is moved down and in
+ * so its whole disc stays under the header buttons and inside the window. Every theme's moon uses this one helper.
+ */
+export function clearSkyMoon(aspect: number, scale = 1): { x: number; y: number } {
+  const a = Number.isFinite(aspect) && aspect > 0 ? aspect : 16 / 9;
+  const r = moonScreenRadiusScaled(a, scale).disc;
+  const y = Math.max(0.27, HEADER_BOTTOM + 0.02 + r);
+  const x = Math.min(0.85, 1 - 0.02 - r / a);
+  return { x, y };
+}
+/**
+ * Where the Crypt's moon appears on screen (0 to 1, y from the top). The Crypt layout is fixed (it is built around this moon, and
+ * `tests/themeBaseline.test.ts` records it), so this does not use `clearSkyMoon`. The other themes' moons do.
+ */
 export function moonTarget(aspect: number): { x: number; y: number } {
   const k = clamp((aspect - 0.6) / 0.9, 0, 1);
   return { x: lerp(0.62, 0.72, k), y: lerp(0.2, 0.25, k) };
 }
-
 /** Direction of the moon from the camera's rest position, for a window shape. */
 export function moonDirection(aspect: number): Vec3 {
   const t = moonTarget(aspect);

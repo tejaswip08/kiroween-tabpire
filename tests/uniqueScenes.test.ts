@@ -129,7 +129,8 @@ describe.each(UNIQUE)('unique scene %s', (id) => {
       expect(cutByScreenEdge(p), `${p.id} is cut by the screen edge`).toBe(false);
       if (w!.cx >= NEAR_MIDDLE_X[0] && w!.cx <= NEAR_MIDDLE_X[1]) expect(w!.top, `${p.id} top`).toBeGreaterThanOrEqual(NEAR_TOP_Y);
     }
-    expect(near).toBeGreaterThan(0);
+    // The Frozen Cemetery was rebuilt as a clear snowy graveyard: nothing stands closer than depth 17, so it has no near props to check.
+    if (id !== 'frost') expect(near).toBeGreaterThan(0);
   });
 
   it('keeps tall props off the moon, and lists exactly its files as the theme models', () => {

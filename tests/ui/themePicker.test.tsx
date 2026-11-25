@@ -12,7 +12,7 @@ import { fake } from '../helpers/fakeBrowser';
 import { ThemePicker, nextThemeIndex } from '../../entrypoints/newtab/ThemePicker';
 import { useTheme } from '../../entrypoints/newtab/components/useTheme';
 import { KEYS } from '../../lib/store';
-import { THEMES, type ThemeId } from '../../lib/themes';
+import { ENABLED_THEMES as THEMES, type ThemeId } from '../../lib/themes';
 
 // Feature: themes, Property 16: Arrow keys move through the six themes
 describe('nextThemeIndex', () => {
@@ -75,10 +75,10 @@ describe('ThemePicker', () => {
     expect(d.getAttribute('aria-modal')).toBe('true');
   });
 
-  it('lists six themes in order with name, description and a swatch', async () => {
+  it('lists the enabled themes in order with name, description and a swatch', async () => {
     render(<Harness startOpen />);
     const list = items();
-    expect(list).toHaveLength(6);
+    expect(list).toHaveLength(4);
     list.forEach((el, i) => {
       const t = THEMES[i]!;
       expect(within(el).getByText(t.name)).toBeTruthy();
@@ -124,15 +124,15 @@ describe('ThemePicker', () => {
     expect(list[1]!.tabIndex).toBe(0);
     expect(list[0]!.tabIndex).toBe(-1);
     await userEvent.keyboard('{ArrowUp}{ArrowUp}');
-    expect(document.activeElement).toBe(list[5]);
+    expect(document.activeElement).toBe(list[3]);
     await userEvent.keyboard('{ArrowRight}');
     expect(document.activeElement).toBe(list[0]);
     await userEvent.keyboard('{End}');
-    expect(document.activeElement).toBe(list[5]);
+    expect(document.activeElement).toBe(list[3]);
     await userEvent.keyboard('{Home}');
     expect(document.activeElement).toBe(list[0]);
     await userEvent.keyboard('{ArrowLeft}');
-    expect(document.activeElement).toBe(list[5]);
+    expect(document.activeElement).toBe(list[3]);
   });
 
   it('selects with Enter and Space, and stays open', async () => {

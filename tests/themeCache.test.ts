@@ -1,6 +1,6 @@
 import fc from 'fast-check';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { THEME_IDS, isThemeId } from '../lib/themes';
+import { ENABLED_THEME_IDS, isThemeId } from '../lib/themes';
 import {
   SKY_CACHE_KEY,
   applyCachedTheme,
@@ -29,7 +29,7 @@ describe('Sky_Cache', () => {
   it('Feature: themes, Property 4: round trip for every id', () => {
     vi.stubGlobal('localStorage', memory());
     fc.assert(
-      fc.property(fc.constantFrom(...THEME_IDS), (id) => {
+      fc.property(fc.constantFrom(...ENABLED_THEME_IDS), (id) => {
         writeCachedTheme(id);
         expect(readCachedTheme()).toBe(id);
         const r = root();
@@ -46,7 +46,7 @@ describe('Sky_Cache', () => {
     const ls = memory();
     vi.stubGlobal('localStorage', ls);
     fc.assert(
-      fc.property(fc.oneof(fc.string(), fc.constantFrom(...THEME_IDS)), (s) => {
+      fc.property(fc.oneof(fc.string(), fc.constantFrom(...ENABLED_THEME_IDS)), (s) => {
         ls.setItem(SKY_CACHE_KEY, s);
         const got = readCachedTheme();
         expect(got === null || isThemeId(got)).toBe(true);
@@ -65,7 +65,7 @@ describe('Sky_Cache', () => {
     };
     vi.stubGlobal('localStorage', { getItem: boom, setItem: boom, removeItem: boom });
     fc.assert(
-      fc.property(fc.constantFrom(...THEME_IDS), (id) => {
+      fc.property(fc.constantFrom(...ENABLED_THEME_IDS), (id) => {
         expect(() => writeCachedTheme(id)).not.toThrow();
         expect(() => clearCachedTheme()).not.toThrow();
         expect(readCachedTheme()).toBeNull();

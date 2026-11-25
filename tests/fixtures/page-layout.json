@@ -1,0 +1,55 @@
+{
+  "tabs": 19,
+  "windows": [
+    {
+      "width": 800,
+      "height": 600
+    },
+    {
+      "width": 1280,
+      "height": 600
+    },
+    {
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "width": 1920,
+      "height": 1080
+    }
+  ],
+  "measured": [
+    {
+      "width": 800,
+      "height": 600,
+      "areaWidth": 752,
+      "areaHeight": 308,
+      "cards": 3,
+      "more": 16
+    },
+    {
+      "width": 1280,
+      "height": 600,
+      "areaWidth": 1232,
+      "areaHeight": 352,
+      "cards": 5,
+      "more": 14
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "areaWidth": 1392,
+      "areaHeight": 517,
+      "cards": 6,
+      "more": 13
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "areaWidth": 1400,
+      "areaHeight": 697,
+      "cards": 13,
+      "more": 6
+    }
+  ]
+}

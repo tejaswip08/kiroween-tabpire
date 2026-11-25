@@ -59,7 +59,7 @@ describe('header buttons', () => {
     expect(btn.getAttribute('aria-haspopup')).toBe('dialog');
     expect(btn.getAttribute('aria-expanded')).toBe('false');
     const tip = document.getElementById(btn.getAttribute('aria-describedby')!)!;
-    expect(tip.textContent).toBe('Change how Tabpire looks: six themes.');
+    expect(tip.textContent).toBe('Change how Tabpire looks: four themes.');
     expect(screen.queryByRole('dialog')).toBeNull();
     await userEvent.click(btn);
     expect(btn.getAttribute('aria-expanded')).toBe('true');

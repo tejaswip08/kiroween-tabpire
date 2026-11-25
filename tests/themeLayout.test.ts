@@ -7,7 +7,7 @@ import {
   FLAT_GROUPS, LAYOUT_SEED, MODELS, PATH_HALF_WIDTH, blocksMoon, buildLayout, footprintOf, footprintsOverlap, insideGround, layout, type Placement,
 } from '../lib/scene/layout';
 import { DOOR_CLEARANCE, themeScene } from '../lib/scene/themeLayout';
-import { THEMES, THEME_IDS, themeById, type ThemeId } from '../lib/themes';
+import { ENABLED_THEMES, THEMES, ENABLED_THEME_IDS as THEME_IDS, themeById, type ThemeId } from '../lib/themes';
 import { WEATHER } from '../lib/scene/weather';
 import { UNIQUE_SCENES } from '../lib/scene/uniqueScenes';
 // The themes that are still built from a copy of the Crypt layout. A theme in UNIQUE_SCENES is its own scene and is
@@ -44,7 +44,7 @@ describe('themes that are their own scene do not reuse the Crypt base', () => {
     expect(out.ghostSpots).not.toBe(base.ghostSpots);
     expect(out.lights.every((l) => l.kind !== 'cryptDoor')).toBe(true);
   });
-  it('the moved themes and the others together are the five themes', () => {
+  it('the moved themes and the others together are the enabled themes', () => {
     expect([...MOVED, ...OTHERS].sort()).toEqual(THEME_IDS.filter((t) => t !== 'crypt').sort());
   });
 });
@@ -190,7 +190,6 @@ describe('per-theme counts (design table)', () => {
     pumpkin: [['farm_barn', 1, 1], ['farm_silo', 1, 1], ['farm_corn', 8, 6], ['farm_pumpkin', 6, 4], ['farm_fence', 3, 2]],
     forest: [['forest_mushroom_king', 2, 1], ['forest_potion_a', 1, 1], ['forest_potion_b', 1, 1], ['forest_rock_large', 2, 1], ['forest_rocks', 1, 1]],
     frost: [['frost_pine_a', 1, 1]],
-    bloodmoon: [['blood_ruins', 1, 1], ['blood_column', 4, 3], ['blood_column_round', 3, 2], ['blood_pedestal', 2, 1]],
   };
   it.each(OTHERS)('%s places the design counts within tolerance', (id) => {
     const ps = themeScene(id).layout.placements;
@@ -208,15 +207,10 @@ describe('per-theme counts (design table)', () => {
     const swapped = out.filter((p) => p.model.startsWith('frost_pine_') && layout().placements.some((b) => b.group === 'tree' && b.x === p.x && b.z === p.z));
     expect(swapped.length).toBeLessThanOrEqual(2);
   });
-  it('the castle has one weather anchor per torch (its own scene, see tests/castle.test.ts), and no other theme has any', () => {
-    const s = themeScene('castle');
-    const torches = s.layout.placements.filter((p) => p.model === 'castle_torch');
-    expect(s.anchors).toHaveLength(torches.length);
-    expect(s.layout.glows.filter((g) => g.kind === 'torch')).toHaveLength(torches.length);
-    expect(s.layout.lights).not.toBe(layout().lights);
-    for (const id of THEME_IDS) if (id !== 'castle') expect(themeScene(id).anchors).toEqual([]);
+  it('no enabled theme has weather anchors (the torch anchors belong to the disabled Haunted Castle)', () => {
+    for (const id of THEME_IDS) expect(themeScene(id).anchors).toEqual([]);
   });
   it('returns the weather spec of the theme', () => {
-    for (const t of THEMES) expect(themeScene(t.id).weather).toBe(t.weather ? WEATHER[t.weather] : null);
+    for (const t of ENABLED_THEMES) expect(themeScene(t.id).weather).toBe(t.weather ? WEATHER[t.weather] : null);
   });
 });

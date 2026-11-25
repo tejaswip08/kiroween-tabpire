@@ -1,0 +1,84 @@
+/*
+ * Short windows (down to 800 x 600). The header, search box, pinned pages and chips get tighter, so at least one row of
+ * cards at the smallest size (172 x 296 px, action buttons 28 px) fits below them. Nothing overlaps and the page never
+ * scrolls: `fitCards` shows the hungriest cards that fit plus a "+N more" card. Windows taller than 760 px are unchanged.
+ */
+@media (max-height: 760px) {
+  .header {
+    padding: 8px 0 4px;
+    row-gap: 6px;
+  }
+  .brand-name {
+    font-size: 30px;
+  }
+  .brand-tagline {
+    display: none;
+  }
+  .stats-panel {
+    padding: 4px 8px;
+  }
+  .stat-value {
+    margin: 0;
+    font-size: 20px;
+    line-height: 1.2;
+  }
+  .stat-note {
+    margin: 0;
+    line-height: 1.2;
+  }
+  .stat-bar {
+    margin-top: 3px;
+  }
+  .main {
+    gap: 8px;
+    padding-bottom: 8px;
+  }
+  .search-field {
+    height: 42px;
+  }
+  .haunts-tile {
+    padding: 3px 12px 3px 5px;
+  }
+  .add-page-btn {
+    padding: 5px 14px 5px 10px;
+  }
+  .legend-chip {
+    padding: 3px 12px 3px 9px;
+  }
+}
+/* Narrow and short: the stats share the first row with the brand and the buttons, in a compact panel. */
+@media (max-height: 760px) and (max-width: 1100px) {
+  .header {
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas: 'brand stats actions';
+    column-gap: 12px;
+  }
+  .brand {
+    gap: 8px;
+  }
+  .brand-mark {
+    width: 34px;
+    height: 34px;
+  }
+  .brand-name {
+    font-size: 26px;
+  }
+  .stats-panel {
+    justify-self: center;
+    padding: 3px 4px;
+  }
+  .stat {
+    min-width: 0;
+    padding: 1px 10px;
+  }
+  .stat-label {
+    font-size: 10px;
+    letter-spacing: 0.03em;
+  }
+  .stat-value {
+    font-size: 17px;
+  }
+  .stat-note {
+    font-size: 10px;
+  }
+}

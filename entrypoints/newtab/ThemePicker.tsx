@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent, type RefObject } from 'react';
-import { THEMES, type ThemeId } from '../../lib/themes';
+import { ENABLED_THEMES as THEMES, type ThemeId } from '../../lib/themes';
 
 /** The next focused item for a key, with wrap-around. Any other key keeps the index. */
 export function nextThemeIndex(index: number, key: string, count: number): number {
@@ -21,7 +21,7 @@ export function nextThemeIndex(index: number, key: string, count: number): numbe
 }
 
 /**
- * The Themes panel. It sits under the Themes button, lists the six themes and keeps
+ * The Themes panel. It sits under the Themes button, lists the four enabled themes and keeps
  * itself open while the user picks, so themes can be compared.
  */
 export function ThemePicker({

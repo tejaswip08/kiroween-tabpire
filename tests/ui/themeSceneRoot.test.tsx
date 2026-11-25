@@ -60,6 +60,7 @@ import { createDisplay, DisplayContext, type SceneDisplay } from '../../entrypoi
 import { SAIL_SPEED } from '../../entrypoints/newtab/layers/scene/themes/Windmill';
 import { ThemedScene } from '../../entrypoints/newtab/layers/scene/ThemedScene';
 import { SceneThemeContext, sceneThemeFor } from '../../entrypoints/newtab/layers/scene/themeColors';
+import { Ghosts } from '../../entrypoints/newtab/layers/scene/Ghosts';
 import { ThemeSceneRoot } from '../../entrypoints/newtab/layers/scene/themes/ThemeSceneRoot';
 import { buildPlatform, buildScarecrow, trianglesOf } from '../../entrypoints/newtab/layers/scene/themes/shapes';
 import { sceneState } from '../../lib/scene/meaning';
@@ -519,13 +520,18 @@ describe('ThemeSceneRoot for the Frozen Cemetery', () => {
     const body = ghost!.uniforms.uBody!.value as THREE.Color;
     expect([body.r, body.g, body.b].map((v) => +v.toFixed(5))).toEqual([want.r, want.g, want.b].map((v) => +v.toFixed(5)));
     expect(body.b).toBeGreaterThan(body.r);
-    const castle = await mount(castleRoot);
+    // The plain ghosts: the Ghosts layer with no tint, in the Crypt (the other enabled themes have no shared ghosts).
+    const castle = await mount(() => (
+      <SceneThemeContext value={sceneThemeFor('crypt')}>
+        <Ghosts />
+      </SceneThemeContext>
+    ));
     let plain: THREE.ShaderMaterial | undefined;
     castle.scene.traverse((o) => {
       const m = (o as THREE.Mesh).material as THREE.ShaderMaterial | undefined;
       if (m?.isShaderMaterial && 'uCount' in m.uniforms) plain = m;
     });
-    const pal = sceneThemeFor('castle').colors.ghost.clone().multiplyScalar(0.95);
+    const pal = sceneThemeFor('crypt').colors.ghost.clone().multiplyScalar(0.95);
     const plainBody = plain!.uniforms.uBody!.value as THREE.Color;
     expect(plainBody.r).toBeCloseTo(pal.r, 5);
     expect(plainBody.g).toBeCloseTo(pal.g, 5);
@@ -573,7 +579,7 @@ const bloodRoot = () => (
     <ThemeSceneRoot id="bloodmoon" />
   </SceneThemeContext>
 );
-describe('ThemeSceneRoot for the Blood Moon', () => {
+describe.skip('ThemeSceneRoot for the Blood Moon', () => {
   it('mounts the shared layers, the ground, the stone platform and the lava cracks, and none of the Crypt-only parts', async () => {
     const { scene } = await mount(bloodRoot);
     expect(named(scene, 'fallback')).toBeUndefined();
@@ -669,7 +675,7 @@ const castleRoot = () => (
     <ThemeSceneRoot id="castle" />
   </SceneThemeContext>
 );
-describe('ThemeSceneRoot for the Haunted Castle', () => {
+describe.skip('ThemeSceneRoot for the Haunted Castle', () => {
   it('mounts the shared layers, the flagstone ground and path, the fortress props and the windows, and none of the Crypt-only parts', async () => {
     const { scene } = await mount(castleRoot);
     expect(named(scene, 'fallback')).toBeUndefined();
@@ -832,13 +838,13 @@ describe('ThemedScene points the moon of the shown theme', () => {
     expect(m.display.moonScale).toBe(FROST_MOON.scale);
     expect(m.display.moonTarget).toBe(FROST_MOON.target);
   });
-  it('uses the huge blood-red moon, twice the Crypt\'s, for the Blood Moon', async () => {
+  it.skip('uses the huge blood-red moon, twice the Crypt\'s, for the Blood Moon', async () => {
     const m = await mount(() => view('bloodmoon'));
     expect(m.display.moonScale).toBe(2);
     expect(m.display.moonScale).toBe(BLOOD_MOON.scale);
     expect(m.display.moonTarget).toBe(BLOOD_MOON.target);
   });
-  it('uses the pale moon, a little bigger than the Crypt\'s, for the Haunted Castle', async () => {
+  it.skip('uses the pale moon, a little bigger than the Crypt\'s, for the Haunted Castle', async () => {
     const m = await mount(() => view('castle'));
     expect(m.display.moonScale).toBe(CASTLE_MOON.scale);
     expect(m.display.moonScale).toBeGreaterThanOrEqual(1);

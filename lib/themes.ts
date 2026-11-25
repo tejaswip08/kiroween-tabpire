@@ -7,8 +7,12 @@ export type ThemeId = (typeof THEME_IDS)[number];
 /** Hidden from the picker and treated as unknown when stored. Their scenes and tests stay in place. Remove an id here to bring it back. */
 export const DISABLED_THEMES: readonly ThemeId[] = ['bloodmoon', 'castle'];
 export const DEFAULT_THEME: ThemeId = 'crypt';
+/** The themes that are on: the picker lists them, and only they are ever built or preloaded. */
+export const ENABLED_THEME_IDS: readonly ThemeId[] = THEME_IDS.filter((id) => !DISABLED_THEMES.includes(id));
 export const isThemeId = (v: unknown): v is ThemeId =>
   typeof v === 'string' && (THEME_IDS as readonly string[]).includes(v);
+/** A known theme that is switched on. A saved theme that is not enabled falls back to the Crypt. */
+export const isEnabledThemeId = (v: unknown): v is ThemeId => isThemeId(v) && !DISABLED_THEMES.includes(v);
 
 type Hex = `#${string}`;
 /** Linear RGB, the numbers a shader uses. */

@@ -57,7 +57,7 @@ void main() {
   // Sphere shading: a little light from the upper left, and a darker limb.
   col *= 0.85 + 0.2 * dot(normalize(vec3(p, z)), normalize(vec3(-0.35, 0.4, 0.85)));
   col *= mix(mix(0.4, 0.85, uCrisp), 1.0, pow(z, 0.5));
-  gl_FragColor = vec4(col, a);
+  gl_FragColor = vec4(col, 1.0);
 }`;
 const forward = new Vector3();
 /**
@@ -74,7 +74,7 @@ export function Moon({ behind }: { behind?: number } = {}) {
   const group = useRef<Group>(null);
   const uniforms = useMemo(() => {
     const crypt = sceneColorsFor('crypt');
-    return { uLight: { value: crypt.moonLight.clone() }, uDark: { value: crypt.moonDark.clone() }, uCrisp: { value: 0 }, uCut: { value: placed ? 0.5 : 0 } };
+    return { uLight: { value: crypt.moonLight.clone() }, uDark: { value: crypt.moonDark.clone() }, uCrisp: { value: 0 }, uCut: { value: 0.5 } };
   }, []);
   useColorSync((c) => {
     uniforms.uLight.value.copy(c.moonLight);
@@ -97,7 +97,7 @@ export function Moon({ behind }: { behind?: number } = {}) {
     <group ref={group} renderOrder={-90}>
       <mesh renderOrder={-90}>
         <planeGeometry args={[radiusAt(MOON.discDeg) * 2, radiusAt(MOON.discDeg) * 2]} />
-        <shaderMaterial vertexShader={vertex} fragmentShader={discFragment} uniforms={uniforms} transparent={!placed} depthWrite={placed} depthTest={placed} toneMapped={false} fog={false} />
+        <shaderMaterial vertexShader={vertex} fragmentShader={discFragment} uniforms={uniforms} transparent={false} depthWrite={placed} depthTest={placed} toneMapped={false} fog={false} />
       </mesh>
     </group>
   );

@@ -19,7 +19,7 @@ export function CardGrid({
   const display = useExitingCards(cards);
   const [area, size] = useAreaSize<HTMLDivElement>();
   // The cards never scroll: they shrink to fit, and if there are too many the hungriest are shown plus "+N more".
-  const fit = fitCards(size.w, size.h, display.length);
+  const fit = fitCards(size.w, size.h, display.length, size.full);
   const shown = display.slice(0, fit.shown);
   return (
     <section className="cards-area" ref={area} aria-labelledby="open-tabs-heading">

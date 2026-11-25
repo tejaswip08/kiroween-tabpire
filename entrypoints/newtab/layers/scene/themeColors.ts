@@ -1,7 +1,7 @@
 import { useThree } from '@react-three/fiber';
 import { createContext, useContext, useLayoutEffect, useRef } from 'react';
 import { themeScene, type ThemeScene } from '../../../../lib/scene/themeLayout';
-import type { ThemeId } from '../../../../lib/themes';
+import { DEFAULT_THEME, DISABLED_THEMES, type ThemeId } from '../../../../lib/themes';
 import { sceneColorsFor, type SceneColors } from './colors';
 
 export type { ThemeScene };
@@ -12,7 +12,9 @@ export interface SceneTheme {
 }
 const cache = new Map<ThemeId, SceneTheme>();
 /** The scene data of one theme, built once per theme so a switch changes the context value only once. */
-export function sceneThemeFor(id: ThemeId): SceneTheme {
+export function sceneThemeFor(requested: ThemeId): SceneTheme {
+  // A disabled theme is never built: it is the Crypt.
+  const id = DISABLED_THEMES.includes(requested) ? DEFAULT_THEME : requested;
   let hit = cache.get(id);
   if (!hit) {
     hit = { id, colors: sceneColorsFor(id), scene: themeScene(id) };

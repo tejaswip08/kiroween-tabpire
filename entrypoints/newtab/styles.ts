@@ -17,3 +17,4 @@ import './styles/layers.css';
 import './styles/toasts.css';
 import './styles/fps.css';
 import './styles/themePicker.css';
+import './styles/compact.css';

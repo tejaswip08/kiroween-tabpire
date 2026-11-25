@@ -102,8 +102,8 @@ describe('one boundary per model', () => {
     const scene = await mount('frost');
     const names = new Set(instanced(scene).map((m) => m.name));
     expect(names.has('frost_pine_a')).toBe(false);
-    expect(names.has('frost_pine_b')).toBe(true);
-    expect(names.has('frost_rock')).toBe(true);
+    // The Frozen Cemetery was rebuilt as a clear graveyard: its only file models are frost_pine_a and tree_dead_large.
+    expect(names.has('tree_dead_large')).toBe(true);
     const logged = warn.mock.calls.map((c: unknown[]) => String(c[0])).filter((l: string) => l.startsWith('Tabpire:'));
     expect(logged.filter((l: string) => l.includes('frost_pine_a.glb'))).toHaveLength(1);
     expect(logged[0]).toBe('Tabpire: model failed to load: frost_pine_a.glb');
@@ -111,7 +111,8 @@ describe('one boundary per model', () => {
 
   it('loads each model of a theme on its own, never as a list', async () => {
     await mount('frost');
-    expect(calls.length).toBeGreaterThan(3);
+    // One file load for each of the two models of the rebuilt Frozen Cemetery.
+    expect(calls.length).toBeGreaterThanOrEqual(2);
     expect(calls.every((c) => typeof c === 'string')).toBe(true);
   });
 

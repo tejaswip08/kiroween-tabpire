@@ -71,7 +71,7 @@ import { sceneThemeFor, useSceneTheme } from '../../entrypoints/newtab/layers/sc
 import { sceneState } from '../../lib/scene/meaning';
 import { MODELS, modelFile } from '../../lib/scene/layout';
 import { UNIQUE_SCENES } from '../../lib/scene/uniqueScenes';
-import { THEME_IDS, type ThemeId } from '../../lib/themes';
+import { ENABLED_THEME_IDS, type ThemeId } from '../../lib/themes';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 extend(THREE as never);
@@ -270,7 +270,7 @@ describe.each<Mode>(['deferred', 'gate'])('a theme switch with %s', (mode) => {
   // Property 18
   it('Property 18: for any two themes the old scene stays until the new one is loaded, then the new one shows', async () => {
     await fc.assert(
-      fc.asyncProperty(fc.constantFrom(...THEME_IDS), fc.constantFrom(...THEME_IDS), async (a, b) => {
+      fc.asyncProperty(fc.constantFrom(...ENABLED_THEME_IDS), fc.constantFrom(...ENABLED_THEME_IDS), async (a, b) => {
         fc.pre(a !== b && onlyIn(b, a).length > 0);
         ctl.reset();
         mounted.length = 0;
@@ -405,10 +405,10 @@ describe('useThemeGate', () => {
       return shown;
     }, { initialProps: { id: 'crypt' as ThemeId } });
     rerender({ id: 'frost' });
-    rerender({ id: 'castle' });
-    await act(async () => waits.get('castle')!.resolve());
+    rerender({ id: 'forest' });
+    await act(async () => waits.get('forest')!.resolve());
     await act(async () => waits.get('frost')!.resolve());
-    expect(result.current).toBe('castle');
+    expect(result.current).toBe('forest');
     expect(seen).not.toContain('frost');
   });
   it('is off when disabled: the id passes straight through', () => {

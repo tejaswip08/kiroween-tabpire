@@ -67,3 +67,14 @@
   padding: 24px;
   text-align: center;
 }
+/* Short windows: a one-line strip, so the page below keeps room for a row of cards. */
+@media (max-height: 760px) {
+  .demo-strip {
+    padding: 2px 12px;
+    font-size: 12px;
+    line-height: 1.3;
+  }
+  .demo-reset {
+    padding: 1px 8px;
+  }
+}

@@ -314,6 +314,8 @@ export interface PlacerOptions {
   path: { centre: readonly { x: number; z: number }[]; halfWidth: number };
 }
 export const PATH_CLEARANCE = 0.5;
+/** Fixed-prop problems already logged, so each is logged once. */
+const warned = new Set<string>();
 
 /**
  * Collects placements one by one. Each placement is tried against the same rules the tests check: inside the ground,
@@ -367,7 +369,16 @@ export class Placer {
   /** A placement that must fit: a bad number fails the tests at once. */
   fixed(p: Placement, opts: PlaceOptions = {}, isCentrepiece = false): Placement {
     const why = this.problem(p, opts, isCentrepiece);
-    if (why) throw new Error(`Fixed ${this.o.id} prop ${p.model} at ${p.x},${p.z}: ${why}`);
+    if (why) {
+      const message = `Fixed ${this.o.id} prop ${p.model} at ${p.x},${p.z}: ${why}`;
+      // Tests fail at once. In the app a bad number must never crash the scene: the prop is skipped and the problem is logged once.
+      if (import.meta.env?.MODE === 'test') throw new Error(message);
+      if (!warned.has(message)) {
+        warned.add(message);
+        console.warn(`Tabpire: skipped a prop. ${message}`);
+      }
+      return p;
+    }
     this.placements.push(p);
     return p;
   }

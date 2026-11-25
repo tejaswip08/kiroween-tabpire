@@ -175,7 +175,7 @@ describe('haunts and the log keep working with data from before the rename', () 
 });
 describe('theme storage', () => {
   it('Feature: themes, Property 3: round trip, and unknown values read as crypt', async () => {
-    const { THEME_IDS } = await import('../lib/themes');
+    const { ENABLED_THEME_IDS: THEME_IDS } = await import('../lib/themes');
     const fc = (await import('fast-check')).default ?? (await import('fast-check'));
     await fc.assert(
       fc.asyncProperty(fc.constantFrom(...THEME_IDS), fc.anything(), async (id, other) => {

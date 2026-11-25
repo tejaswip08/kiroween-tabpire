@@ -9,11 +9,11 @@ vi.mock('@react-three/drei', () => ({ useGLTF: Object.assign(() => ({}), { prelo
 import {
   PRELOAD_FALLBACK_MS, PRELOAD_PER_SLOT, pendingFiles, resetPreloadState, scheduleIdle, startThemePreload, themeFiles, useThemePreload,
 } from '../../entrypoints/newtab/layers/scene/preloadThemes';
-import { THEME_IDS } from '../../lib/themes';
+import { DISABLED_THEMES, THEME_IDS } from '../../lib/themes';
 
 const otherFiles = (current: (typeof THEME_IDS)[number]) => {
   const own = new Set(themeFiles(current));
-  return new Set(THEME_IDS.filter((id) => id !== current).flatMap(themeFiles).filter((u) => !own.has(u)));
+  return new Set(THEME_IDS.filter((id) => id !== current && !DISABLED_THEMES.includes(id)).flatMap(themeFiles).filter((u) => !own.has(u)));
 };
 
 /** A manual idle scheduler: each `run()` is one idle slot. */

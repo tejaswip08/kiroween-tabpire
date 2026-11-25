@@ -4,7 +4,7 @@
 import { cameraAt, directionAt, dot, basis, project } from '../camera';
 import { footprintOf, footprintsOverlap, type Footprint, type Placement } from '../layout';
 import { mulberry32 } from '../rng';
-import { moonScreenRadiusScaled } from '../sky';
+import { clearSkyMoon, moonScreenRadiusScaled } from '../sky';
 
 export type V3 = [number, number, number];
 export interface TrackPoint {
@@ -167,8 +167,10 @@ export function uiRects(w: number, h: number): ScreenRect[] {
 export const MOON_SCALE = 1.2;
 export function moonSpot(aspect: number): { x: number; y: number } {
   const a = Number.isFinite(aspect) && aspect > 0 ? aspect : 16 / 9;
-  const x = a <= 16 / 9 ? 0.875 + (16 / 9 - Math.max(a, 1.6)) * 0.12 : Math.max(0.79, 0.875 - (Math.min(a, 2.4) - 16 / 9) * 0.15);
-  return { x, y: 0.27 };
+  const clear = clearSkyMoon(a, MOON_SCALE);
+  // In a wide window the haunted house comes in from the right edge, so the moon moves in a little to stay clear of its roof.
+  const wide = a > 16 / 9 ? Math.max(0.79, 0.875 - (Math.min(a, 2.4) - 16 / 9) * 0.15) : 1;
+  return { x: Math.min(clear.x, wide), y: clear.y };
 }
 /** True when a point (screen fractions) is on the moon's disc, or within `pad` (window heights) of it. */
 export function onMoon(sx: number, sy: number, aspect: number, pad = 0): boolean {

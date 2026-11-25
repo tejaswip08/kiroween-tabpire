@@ -64,6 +64,23 @@ export function isDawnTarget(
   );
 }
 
+/** Why Dawn leaves a tab open: the words used in the Dawn tooltip. */
+export type DawnKeepReason = 'active' | 'pinned' | 'playing sound' | 'garlic site' | 'not a web page';
+/**
+ * Why Dawn will not close a tab that is starving, or null when Dawn would close it (or it is not starving). The order is
+ * the order of Dawn's safety rules: the active tab, pinned tabs, tabs playing sound, garlic sites, then pages that are not
+ * on the web (Dawn only saves http and https pages). Active, audible and garlic tabs are never starving by `stateOf`, so in
+ * practice the reason is "pinned" or "not a web page"; the other reasons keep the rule complete.
+ */
+export function dawnKeepReason(tab: TabInfo, garlic: readonly string[], now: number): DawnKeepReason | null {
+  if (stateOf(tab, garlic, now) !== 'starving' || isDawnTarget(tab, garlic, now)) return null;
+  const site = siteOf(tab.url);
+  if (tab.active) return 'active';
+  if (tab.pinned) return 'pinned';
+  if (tab.audible) return 'playing sound';
+  if (site !== null && garlic.includes(site)) return 'garlic site';
+  return 'not a web page';
+}
 export function dawnTargets<T extends TabInfo>(
   tabs: readonly T[],
   garlic: readonly string[],

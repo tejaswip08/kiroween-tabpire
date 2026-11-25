@@ -1,7 +1,7 @@
 // The only module that touches browser.storage.local.
 // Local-first: no synced storage and no network calls here.
 import { browser } from 'wxt/browser';
-import { DEFAULT_THEME, isThemeId, type ThemeId } from './themes';
+import { DEFAULT_THEME, isEnabledThemeId, type ThemeId } from './themes';
 
 export interface Stats {
   staked: number;
@@ -142,7 +142,7 @@ export const store = {
   /** An unknown, missing or unreadable value gives the default theme. Never throws. */
   getTheme: async (): Promise<ThemeId> => {
     try {
-      return await read(KEYS.theme, isThemeId, () => DEFAULT_THEME);
+      return await read(KEYS.theme, isEnabledThemeId, () => DEFAULT_THEME);
     } catch {
       return DEFAULT_THEME;
     }

@@ -4,8 +4,12 @@ export const CARD_W = 220;
 export const CARD_H = 380;
 /** Space between cards, in CSS pixels (not scaled). */
 export const CARD_GAP = 16;
-/** Smallest and largest card scale. At 0.55 a card is 121 x 209 px. */
-export const MIN_SCALE = 0.55;
+/** The action buttons on a card at full size (`.card-actions .icon-btn` in cards.css), in CSS pixels. */
+export const ACTION_BUTTON_PX = 36;
+/** The action buttons never get smaller than this on screen. With many tabs fewer cards are shown instead. */
+export const MIN_BUTTON_PX = 28;
+/** Smallest and largest card scale. The smallest keeps the action buttons at least 28 px: at 0.78 a card is 172 x 296 px. */
+export const MIN_SCALE = Math.ceil((MIN_BUTTON_PX / ACTION_BUTTON_PX) * 100) / 100;
 export const MAX_SCALE = 1;
 /** The cards use at most this share of the window height, so the path and the gate stay visible above them. */
 export const MAX_HEIGHT_SHARE = 0.52;
@@ -15,7 +19,7 @@ export interface CardFit {
   scale: number;
   /** How many cards are shown. The rest are the "+N more" card. */
   shown: number;
-  /** Tabs that do not fit at the smallest size (0 when all fit). */
+  /** Tabs that do not fit at the smallest size (0 when all fit, or when there is no room for any card). */
   more: number;
 }
 
@@ -27,20 +31,34 @@ export function capacityAt(width: number, height: number, scale: number): { cols
 }
 
 /**
- * The largest card scale at which `count` cards fit in `width` x `height`. If they do not fit even at the
+ * The largest card scale at which `count` cards fit in `width` x `height` (`fullHeight`: the whole free height, used
+ * only when they do not all fit in `height`). If they do not fit even at the
  * smallest scale, the hungriest ones are shown and one slot becomes the "+N more" card. With no size
  * (the page is not laid out yet) every card is shown at full size.
  */
-export function fitCards(width: number, height: number, count: number): CardFit {
+export function fitCards(width: number, height: number, count: number, fullHeight = height): CardFit {
+  const first = fitIn(width, height, count);
+  // When the tabs do not all fit in the share of the window kept for the cards, the whole free space may be used, so
+  // more of them are shown at the smallest size (the path and the gate are then partly behind the cards).
+  if (first.more === 0 && first.shown === Math.max(0, Math.floor(count))) return first;
+  if (!(fullHeight > height)) return first;
+  const full = fitIn(width, fullHeight, count);
+  return full.shown > first.shown ? full : first;
+}
+function fitIn(width: number, height: number, count: number): CardFit {
   const n = Math.max(0, Math.floor(count));
   if (!(width > 0) || !(height > 0) || n === 0) return { scale: MAX_SCALE, shown: n, more: 0 };
-  for (let s = MAX_SCALE; s >= MIN_SCALE - 1e-9; s -= 0.01) {
+  // Whole hundredths, so the scale returned is exactly the scale that was checked.
+  for (let k = Math.round(MAX_SCALE * 100); k >= Math.round(MIN_SCALE * 100); k--) {
+    const s = k / 100;
     const { cols, rows } = capacityAt(width, height, s);
-    if (cols * rows >= n) return { scale: Math.max(MIN_SCALE, Math.round(s * 100) / 100), shown: n, more: 0 };
+    if (cols * rows >= n) return { scale: s, shown: n, more: 0 };
   }
   const { cols, rows } = capacityAt(width, height, MIN_SCALE);
-  // Always show at least one card and the "+N more" card.
-  const slots = Math.max(2, cols * rows);
+  // The hungriest that fit, and one slot is the "+N more" card. Never more slots than fit, so the cards never overlap
+  // the header, the search box or the chips, and the page never scrolls. With no slot at all nothing is shown.
+  const slots = cols * rows;
+  if (slots === 0) return { scale: MIN_SCALE, shown: 0, more: 0 };
   const shown = slots - 1;
   return { scale: MIN_SCALE, shown, more: n - shown };
 }
