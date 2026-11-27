@@ -7,6 +7,7 @@ import {
 import { mergeVertices } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { MODELS, modelFile, modelInfo, type Group, type ModelId, type Placement } from '../../../../lib/scene/layout';
 import { useDisplay, type SceneDisplay } from './display';
+import { addWind } from './themes/frostWind';
 
 export interface Part {
   geometry: BufferGeometry;
@@ -287,6 +288,34 @@ export interface ModelLook {
   color: string;
   emissive?: string;
   emissiveIntensity?: number;
+  /**
+   * The carved holes of a jack-o'-lantern glow from inside: texels of the file's texture that are dark neutral grey (the
+   * inside of the eyes and mouth) get this emissive colour, times `faceGlowLevel` (a shared, flickering uniform).
+   */
+  faceGlow?: string;
+}
+/** The flicker of every `faceGlow` face (near 1). Written once per frame by the scene that uses it. */
+export const faceGlowLevel = { value: 1 };
+/** Makes the dark grey carved holes of the texture glow `color` from inside, flickering with `faceGlowLevel`. */
+function glowFace(std: MeshStandardMaterial, color: string): void {
+  const glow = new Color(color);
+  std.customProgramCacheKey = () => `faceGlow-${color}`;
+  std.onBeforeCompile = (shader) => {
+    shader.uniforms.uFaceGlow = { value: glow };
+    shader.uniforms.uFaceLevel = faceGlowLevel;
+    shader.fragmentShader = shader.fragmentShader
+      .replace('void main() {', 'uniform vec3 uFaceGlow;\nuniform float uFaceLevel;\nvoid main() {\n  float faceMask = 0.0;')
+      .replace(
+        '#include <map_fragment>',
+        `#include <map_fragment>
+#ifdef USE_MAP
+  float faceHi = max(sampledDiffuseColor.r, max(sampledDiffuseColor.g, sampledDiffuseColor.b));
+  float faceLo = min(sampledDiffuseColor.r, min(sampledDiffuseColor.g, sampledDiffuseColor.b));
+  faceMask = (1.0 - smoothstep(0.05, 0.08, faceHi)) * (1.0 - smoothstep(0.006, 0.016, faceHi - faceLo));
+#endif`,
+      )
+      .replace('vec3 totalEmissiveRadiance = emissive;', 'vec3 totalEmissiveRadiance = emissive + uFaceGlow * faceMask * uFaceLevel;');
+  };
 }
 /** A copy of each material with the look's colours. The geometry and textures are shared with the file; the copies are in `owned`. */
 export function tintLook(parts: readonly Part[], look: ModelLook): { parts: Part[]; owned: Owned } {
@@ -300,6 +329,7 @@ export function tintLook(parts: readonly Part[], look: ModelLook): { parts: Part
       std.color?.set(look.color);
       if (look.emissive) std.emissive?.set(look.emissive);
       if (look.emissiveIntensity !== undefined && 'emissiveIntensity' in std) std.emissiveIntensity = look.emissiveIntensity;
+      if (look.faceGlow) glowFace(std, look.faceGlow);
       mats.set(p.material, material);
       owned.materials.push(material);
     }
@@ -308,7 +338,22 @@ export function tintLook(parts: readonly Part[], look: ModelLook): { parts: Part
   return { parts: out, owned };
 }
 /** The instanced meshes of one model: one per mesh part, every placement of the model in each. */
-export function buildBatches(id: ModelId, root: Object3D, placements: readonly Placement[], look?: ModelLook): { batches: Batch[]; owned: Owned } {
+/**
+ * Swaying in the wind (the Frozen Cemetery's trees): how strongly the top of the model moves, as a share of its height. Each part
+ * gets its own copy of its material that bends with the shared wind clock (`themes/frostWind.ts`).
+ */
+export interface ModelSway {
+  strength: number;
+}
+function swayParts(id: ModelId, parts: readonly Part[], owned: Owned, sway: ModelSway): Part[] {
+  const h = MODELS[id].h;
+  return parts.map((p) => {
+    const material = addWind(p.material.clone(), h / Math.max(1e-6, tmpS.setFromMatrixColumn(p.local, 1).length()), sway.strength);
+    owned.materials.push(material);
+    return { ...p, material };
+  });
+}
+export function buildBatches(id: ModelId, root: Object3D, placements: readonly Placement[], look?: ModelLook, sway?: ModelSway): { batches: Batch[]; owned: Owned } {
   const info = modelInfo(id);
   let parts = collectParts(root, id.startsWith('path_'), id.startsWith('forest_mushroom'), look?.only ?? info.parts, info.recentre === true);
   let owned: Owned = { materials: [], geometries: [] };
@@ -325,6 +370,7 @@ export function buildBatches(id: ModelId, root: Object3D, placements: readonly P
     parts = t.parts;
     owned = t.owned;
   }
+  if (sway) parts = swayParts(id, parts, owned, sway);
   const batches: Batch[] = [];
   for (const part of parts) {
     const mesh = new InstancedMesh(part.geometry, part.material, placements.length);
@@ -397,14 +443,14 @@ export class ModelBoundary extends Component<{ id: ModelId; children: ReactNode 
 }
 
 /** One model of a theme's props, instanced. Suspends while the file loads. */
-export function ModelBatch({ id, placements, look }: { id: ModelId; placements: readonly Placement[]; look?: ModelLook }) {
+export function ModelBatch({ id, placements, look, sway }: { id: ModelId; placements: readonly Placement[]; look?: ModelLook; sway?: ModelSway }) {
   const display = useDisplay();
   const gltf = useGLTF(modelFile(id), false, true);
   const built = useMemo(() => {
     const root = Array.isArray(gltf) ? gltf[0]!.scene : gltf.scene;
-    const { batches, owned } = buildBatches(id, root, placements, look);
+    const { batches, owned } = buildBatches(id, root, placements, look, sway);
     return { batches, owned, dynamic: dynamicOf(batches) };
-  }, [gltf, id, placements, look]);
+  }, [gltf, id, placements, look, sway]);
   useEffect(() => () => disposeBatches(built.batches, built.owned), [built]);
   const last = useMemo<LastCounts>(() => ({ newGraves: -1, coffins: -1, candles: -1 }), []);
   useFrame(() => stepDynamic(built.dynamic, display, last));
@@ -423,10 +469,10 @@ export function ModelBatch({ id, placements, look }: { id: ModelId; placements: 
  * keeps the old scene on screen until every file of the new theme has loaded, instead of committing the new
  * scene with its props missing (Requirement 11.1, 11.3).
  */
-export function SafeModelBatch({ id, placements, look }: { id: ModelId; placements: readonly Placement[]; look?: ModelLook }) {
+export function SafeModelBatch({ id, placements, look, sway }: { id: ModelId; placements: readonly Placement[]; look?: ModelLook; sway?: ModelSway }) {
   return (
     <ModelBoundary id={id}>
-      <ModelBatch id={id} placements={placements} look={look} />
+      <ModelBatch id={id} placements={placements} look={look} sway={sway} />
     </ModelBoundary>
   );
 }

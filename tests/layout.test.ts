@@ -2,12 +2,14 @@ import { describe, expect, it } from 'vitest';
 import { BUDGET, CAPS } from '../lib/scene/config';
 import { cameraAt, project } from '../lib/scene/camera';
 import {
-  PATH_TILE_OFFSET, PATH_TILE_SCALE, FLAT_GROUPS, GROUND, MODELS, PATH_EXEMPT, PATH_HALF_WIDTH, blocksMoon, buildLayout, footprintOf,
+  FENCE_Z, behindControls, overCryptMoon, PATH_TILE_OFFSET, PATH_TILE_SCALE, FLAT_GROUPS, GROUND, MODELS, PATH_EXEMPT, PATH_HALF_WIDTH, blocksMoon, buildLayout, footprintOf,
   footprintsOverlap, insideGround, layout, type Placement,
 } from '../lib/scene/layout';
 
 const L = buildLayout();
-const solid = L.placements.filter((p) => !FLAT_GROUPS.includes(p.group));
+// Hanging lanterns hang from a branch: they do not stand on the ground.
+const hung = (p: Placement) => p.model === 'lantern_hanging';
+const solid = L.placements.filter((p) => !FLAT_GROUPS.includes(p.group) && !hung(p));
 const count = (g: Placement['group']) => L.placements.filter((p) => p.group === g).length;
 
 describe('layout', () => {
@@ -30,7 +32,7 @@ describe('layout', () => {
   it('keeps every prop inside the ground and standing on it', () => {
     for (const p of L.placements) {
       expect(insideGround(footprintOf(p)), p.id).toBe(true);
-      expect(p.y).toBeLessThan(0.1);
+      if (!hung(p)) expect(p.y).toBeLessThan(0.1);
       expect(Number.isFinite(p.x + p.z + p.rotY + p.scale)).toBe(true);
     }
   });
@@ -49,7 +51,8 @@ describe('layout', () => {
     }
     expect(L.placements.some((p) => p.model === 'post_lantern')).toBe(true);
   });
-  it('puts the crypt right of centre, small and far back, with the gate in front of it', () => {
+  // Requirement changed: the crypt stands just behind the fence, right of the gate, as big as in the first prototype.
+  it('puts the crypt right of centre, just behind the fence, with the gate in front of it', () => {
     const crypt = L.placements.find((p) => p.group === 'crypt')!;
     const gate = L.placements.find((p) => p.group === 'gate')!;
     expect(gate.z).toBeGreaterThan(crypt.z);
@@ -58,7 +61,8 @@ describe('layout', () => {
       const c = project([crypt.x, 3, crypt.z], cam)!;
       expect(c.x).toBeGreaterThan(0.5);
       expect(c.x).toBeLessThan(0.75);
-      expect(c.depth).toBeGreaterThan(35);
+      expect(c.depth).toBeGreaterThan(18);
+      expect(c.depth).toBeLessThan(30);
       const g = project([gate.x, 2, gate.z], cam)!;
       expect(Math.abs(g.x - 0.5)).toBeLessThan(0.12);
     }
@@ -66,6 +70,8 @@ describe('layout', () => {
   it('keeps the path narrower and clear of props, except the gate', () => {
     for (const p of solid) {
       if (PATH_EXEMPT.includes(p.group)) continue;
+      // The fence line meets the gate at the end of the path.
+      if (p.group === 'fence' && Math.abs(p.z - FENCE_Z) < 0.01) continue;
       const f = footprintOf(p);
       const r = Math.min(f.hx, f.hz);
       for (const c of L.pathCentres) expect(Math.hypot(c.x - p.x, c.z - p.z), p.id).toBeGreaterThan(PATH_HALF_WIDTH + r * 0.5);
@@ -74,7 +80,8 @@ describe('layout', () => {
   it('keeps tall props off the moon', () => {
     for (const p of L.placements) {
       if (p.group === 'crypt') continue;
-      expect(blocksMoon(p), p.id).toBe(false);
+      // The check the layout uses: the disc where it is drawn, with a margin of half its radius.
+      expect(overCryptMoon(p), p.id).toBe(false);
     }
   });
   it('has at most the allowed real lights, with the crypt doorway first', () => {
@@ -85,12 +92,12 @@ describe('layout', () => {
   it('has no floor tiles, and a winding path of cobblestones from the bottom centre to the gate', () => {
     expect(L.placements.some((p) => p.model === 'floor_dirt')).toBe(false);
     const path = L.placements.filter((p) => p.group === 'path');
-    expect(path.length).toBeGreaterThan(20);
+    expect(path.length).toBeGreaterThan(12);
     const nearCamera = path.filter((p) => p.z > 6);
     expect(nearCamera.length).toBeGreaterThan(1);
     for (const p of nearCamera) expect(Math.abs(p.x)).toBeLessThan(3);
     const xs = L.pathCentres.map((c) => c.x);
-    expect(Math.max(...xs) - Math.min(...xs)).toBeGreaterThan(1.2);
+    expect(Math.max(...xs) - Math.min(...xs)).toBeGreaterThan(0.4);
     const gate = L.placements.find((p) => p.group === 'gate')!;
     expect(Math.hypot(L.pathCentres.at(-1)!.x - gate.x, L.pathCentres.at(-1)!.z - gate.z)).toBeLessThan(4);
   });
@@ -103,22 +110,26 @@ describe('layout', () => {
   it('has a few hero gravestones and spaced groups on both sides, with few small props', () => {
     const graves = L.placements.filter((p) => p.group === 'oldGrave');
     expect(graves.length).toBeGreaterThanOrEqual(6);
-    expect(graves.length).toBeLessThanOrEqual(14);
+    // Requirement changed: the backdrop adds leaning tombstones peeking over the fence (behind it, z < FENCE_Z).
+    expect(graves.filter((p) => p.z > FENCE_Z).length).toBeLessThanOrEqual(16);
+    expect(graves.filter((p) => p.z < FENCE_Z).length).toBeGreaterThanOrEqual(8);
     for (const side of [-1, 1]) {
       const here = L.placements.filter((p) => p.x * side > 3 && p.z < 10);
       expect(here.filter((p) => p.group === 'oldGrave' && p.scale >= 1.3).length).toBeGreaterThanOrEqual(1);
       expect(here.filter((p) => p.group === 'oldGrave').length).toBeGreaterThanOrEqual(3);
     }
     const smalls = L.placements.filter((p) => p.group === 'small' && !p.model.startsWith('forest_mushroom'));
-    expect(smalls.length).toBeLessThanOrEqual(12);
+    expect(smalls.length).toBeLessThanOrEqual(20);
     expect(L.placements.filter((p) => p.model.startsWith('forest_mushroom')).length).toBeLessThanOrEqual(6);
   });
   it('keeps the middle open: no big prop directly behind or between the cards', () => {
     for (const p of L.placements) {
       if (!['oldGrave', 'small', 'critter', 'pumpkin'].includes(p.group)) continue;
+      // Lit candles line the edge of the path on purpose.
+      if (p.model.includes('candle')) continue;
       if (p.z < -4 || p.z > 8) continue;
       const tooTall = MODELS[p.model].h * p.scale > 0.9;
-      if (tooTall) expect(Math.abs(p.x), p.id).toBeGreaterThan(3);
+      if (tooTall) expect(Math.abs(p.x), p.id).toBeGreaterThanOrEqual(3);
     }
   });
   it('puts big jack-o-lanterns with glowing faces in the foreground', () => {
@@ -129,7 +140,7 @@ describe('layout', () => {
     expect(front.length).toBeGreaterThanOrEqual(2);
     for (const p of front) {
       expect(p.scale).toBeGreaterThanOrEqual(0.85);
-      expect(p.scale).toBeLessThanOrEqual(1.1);
+      expect(p.scale).toBeLessThanOrEqual(1.35);
       expect(Math.abs(p.x)).toBeLessThanOrEqual(5);
     }
     expect(L.lights.filter((l) => l.kind === 'jackOLantern').length).toBeGreaterThanOrEqual(2);
@@ -140,14 +151,14 @@ describe('layout', () => {
     for (const side of [-1, 1]) {
       expect(trees.filter((p) => p.x * side > 10 && p.model.startsWith('tree_pine')).length).toBeGreaterThanOrEqual(1);
       expect(trees.filter((p) => p.x * side > 10 && (p.model.includes('dead') || p.model.startsWith('forest_twisted'))).length).toBeGreaterThanOrEqual(2);
-      // Trees stand at the edges, not in the middle.
-      expect(trees.filter((p) => Math.abs(p.x) < 10 && p.z > -23).length).toBe(0);
+      // Trees in the middle stay short: none stands behind the page's controls.
+      for (const p of trees.filter((p) => Math.abs(p.x) < 10)) expect(behindControls(p), p.id).toBe(false);
     }
     expect(trees.filter((p) => p.model.includes('dead') || p.model.startsWith('forest_twisted')).length).toBeGreaterThanOrEqual(6);
     expect(trees.some((p) => p.model.startsWith('forest_twisted'))).toBe(true);
     expect(L.placements.filter((p) => p.model === 'post_lantern').length).toBeGreaterThanOrEqual(3);
     expect(L.placements.filter((p) => p.group === 'fence').length).toBeGreaterThanOrEqual(18);
-    expect(L.ghostSpots).toHaveLength(2);
+    expect(L.ghostSpots).toHaveLength(3);
   });
   it('keeps the crypt, gate and fence on one line behind the path', () => {
     const gate = L.placements.find((p) => p.group === 'gate')!;

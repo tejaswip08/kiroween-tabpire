@@ -2,6 +2,8 @@
 // Coordinates are world coordinates (x right, y up, z toward the camera).
 import { MOON_KEEP_OUT_DEG } from './sky';
 import { clamp } from './rng';
+import { CLOUD_CALLS, cloudTriangles } from './horizonClouds';
+import { FOG_BANDS, FOG_BAND_TRIS } from './depthFog';
 
 /** [dx, dy, dz, width, height] of a lit window, in the building's own units (before its scale). */
 export type FarWindow = readonly [number, number, number, number, number];
@@ -68,16 +70,22 @@ export function farGroundY(x: number, z: number): number {
 }
 
 /** The village on hill A (left of the moon), the fortress beyond it and ruins on hill B. */
+// The village stands at the two sides of the view, where the sky is free (left under the title, right under the moon), so the middle,
+// behind the search box and the chips, shows only the low hill line.
 const FAR_ITEMS_RAW: readonly FarItem[] = [
-  { id: 'church', kind: 'church', x: -30, y: 8.4, z: -90, rotY: 0.12, scale: 1, windows: [[0, 4.8, 1.05, 0.5, 0.95]] },
-  { id: 'barn', kind: 'barn', x: -12, y: 8.3, z: -93, rotY: -0.15, scale: 0.6, windows: [[-1.6, 3.4, 4.15, 0.8, 1.0], [1.6, 3.4, 4.15, 0.8, 1.0]] },
-  { id: 'windmill', kind: 'windmill', x: -2, y: 7.9, z: -96, rotY: 0.1, scale: 4, windows: [[0, 0.62, 0.31, 0.12, 0.18]] },
-  { id: 'house-1', kind: 'house', x: -41, y: 7.4, z: -88, rotY: 0.3, scale: 1, windows: [[0, 1.05, 1.22, 0.5, 0.6]] },
-  { id: 'house-2', kind: 'house', x: -20, y: 9.1, z: -87, rotY: -0.2, scale: 1.1, windows: [[0, 1.05, 1.22, 0.5, 0.6]] },
-  { id: 'house-3', kind: 'house', x: 6, y: 7.2, z: -90, rotY: 0.25, scale: 0.9, windows: [[0, 1.05, 1.22, 0.5, 0.6]] },
-  { id: 'fortress', kind: 'fortress', x: -54, y: 5.6, z: -104, rotY: 0.05, scale: 7.5, windows: [[-0.42, 0.55, 0.94, 0.08, 0.13], [0.42, 0.55, 0.94, 0.08, 0.13], [0, 0.95, 0.9, 0.08, 0.13]] },
-  { id: 'ruins', kind: 'ruins', x: 26, y: 4.6, z: -98, rotY: 0, scale: 0.55, windows: [] },
+  { id: 'church', kind: 'church', x: -44, y: 8.4, z: -90, rotY: 0.12, scale: 1, windows: [[0, 4.8, 1.05, 0.5, 0.95]] },
+  { id: 'house-1', kind: 'house', x: -37, y: 7.4, z: -88, rotY: 0.3, scale: 1, windows: [[0, 1.05, 1.22, 0.5, 0.6]] },
+  { id: 'house-2', kind: 'house', x: -51, y: 9.1, z: -87, rotY: -0.2, scale: 1.1, windows: [[0, 1.05, 1.22, 0.5, 0.6]] },
+  { id: 'fortress', kind: 'fortress', x: -62, y: 5.6, z: -104, rotY: 0.05, scale: 7.5, windows: [[-0.42, 0.55, 0.94, 0.08, 0.13], [0.42, 0.55, 0.94, 0.08, 0.13], [0, 0.95, 0.9, 0.08, 0.13]] },
+  { id: 'barn', kind: 'barn', x: 39, y: 8.3, z: -93, rotY: -0.15, scale: 0.6, windows: [[-1.6, 3.4, 4.15, 0.8, 1.0], [1.6, 3.4, 4.15, 0.8, 1.0]] },
+  { id: 'house-3', kind: 'house', x: 45, y: 7.2, z: -90, rotY: 0.25, scale: 0.9, windows: [[0, 1.05, 1.22, 0.5, 0.6]] },
+  { id: 'windmill', kind: 'windmill', x: 50, y: 7.9, z: -96, rotY: 0.1, scale: 4, windows: [[0, 0.62, 0.31, 0.12, 0.18]] },
+  { id: 'house-4', kind: 'house', x: 56, y: 7.2, z: -89, rotY: -0.35, scale: 0.85, windows: [[0, 1.05, 1.22, 0.5, 0.6]] },
+  { id: 'ruins', kind: 'ruins', x: 64, y: 4.6, z: -98, rotY: 0, scale: 0.55, windows: [] },
 ];
+/** The village is drawn this far lower than its hills' data, so the hills' feet hide behind the yard's far edge and only their tops
+ * and the buildings show over the fence. */
+export const FAR_SINK = 7;
 
 /** Every building's y is the hill surface under it. The builder then sinks each model so its lowest point is just inside the hill. */
 export const FAR_ITEMS: readonly FarItem[] = FAR_ITEMS_RAW.map((i) => ({ ...i, y: farGroundY(i.x, i.z) }));
@@ -116,8 +124,11 @@ export function farTriangles(): number {
 
 /** Everything that is drawn by the scene's own code, with an upper bound for its triangles and draw calls. */
 export const EXTRAS = {
+  // The far haunted village on the hills behind the fence (houses with lit windows, a church steeple, a fortress on a hill). The old
+  // low clouds are no longer drawn (their code stays); the Crypt's six round clouds are.
   farVillage: { calls: 3, tris: farTriangles() + 600 },
-  lowClouds: { calls: 1, tris: 2 * 4 * 3 * 8 },
+  depthFog: { calls: FOG_BANDS.length, tris: FOG_BAND_TRIS },
+  horizonClouds: { calls: CLOUD_CALLS, tris: cloudTriangles() },
   cat: { calls: 2, tris: 420 },
   crows: { calls: 2, tris: 6 * 160 },
   owl: { calls: 2, tris: 420 },

@@ -3,9 +3,11 @@ import { MeshBasicMaterial, MeshStandardMaterial } from 'three';
 import { buildBackdrop } from '../../../../../lib/scene/uniqueScenes/frostPlan';
 import { buildFarPine, buildSmoothMound } from './frostShapes';
 import { disposeMesh, makeInstanced, placeAt } from './frostParts';
+import { addWind } from './frostWind';
 /**
  * The background layer: a chain of low, soft snowy hills across the whole width, with a dark line of pine silhouettes along their crests.
- * It sits far back and low, so it breaks the horizon without ever rising behind the chips or the search box. Two instanced meshes.
+ * It sits far back and low, so it breaks the horizon without ever rising behind the chips or the search box, and none stands under the
+ * moon. The pines sway a little in the wind. Two instanced meshes.
  */
 export function FrostBackdrop({ seed }: { seed: number }) {
   const meshes = useMemo(() => {
@@ -19,7 +21,7 @@ export function FrostBackdrop({ seed }: { seed: number }) {
       ),
       makeInstanced(
         buildFarPine(),
-        new MeshBasicMaterial({ vertexColors: true }),
+        addWind(new MeshBasicMaterial({ vertexColors: true }), 1.9, 0.025),
         pines.map((p) => placeAt(p.x, p.y, p.z, 0, [(p.scale / 1.9) * 0.85, p.scale / 1.9, (p.scale / 1.9) * 0.85])),
         'frost-far-pines',
       ),

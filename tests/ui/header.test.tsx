@@ -117,3 +117,11 @@ describe('header buttons', () => {
     expect(onDawn).not.toHaveBeenCalled();
   });
 });
+describe('header brand', () => {
+  it('has no corner cobweb behind the title in The Crypt, and keeps the bat logo and the title', () => {
+    setup({ themeId: 'crypt' });
+    expect(document.querySelector('.brand-cobweb')).toBeNull();
+    expect(document.querySelector('.brand-mark')).not.toBeNull();
+    expect(screen.getByRole('heading', { name: 'Tabpire' })).toBeTruthy();
+  });
+});

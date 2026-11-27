@@ -267,7 +267,8 @@ describe('Pumpkin Patch (the template)', () => {
     expect(spec.models).toEqual(expect.arrayContaining(['farm_barn', 'farm_silo', 'farm_windmill', 'farm_corn', 'farm_hay', 'farm_fence', 'farm_pumpkin', 'pumpkin_orange_jackolantern']));
   });
   it('has a harvest moon in the clear sky on the right, a dirt track, grass ground and falling leaves', () => {
-    expect(PUMPKIN_MOON.scale).toBeGreaterThanOrEqual(1.1);
+    // 1.0 (was at least 1.1): the moon was made smaller so it floats higher, with clear sky under it.
+    expect(PUMPKIN_MOON.scale).toBeGreaterThanOrEqual(1);
     for (const aspect of VIEW_ASPECTS) {
       const t = spec.moon.target(aspect);
       expect(t.y).toBeGreaterThanOrEqual(0.24);

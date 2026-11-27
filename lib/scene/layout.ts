@@ -4,7 +4,7 @@ import { assetUrl } from '../assetUrl';
 import { BUDGET, CAPS } from './config';
 import { cameraAt, project, projectDirection } from './camera';
 import { clamp, mulberry32 } from './rng';
-import { layoutMoonDirection, moonScreenRadius } from './sky';
+import { layoutMoonDirection, moonScreenRadius, moonTarget } from './sky';
 
 export const LAYOUT_SEED = 1031;
 
@@ -90,6 +90,10 @@ export const MODELS = {
   forest_mushroom_king: { ...q(1.6, 1.0, 3.44, 4561), parts: ['MushroomKing_1', 'MushroomKing_3'] },
   forest_cauldron: { ...q(0.18, 0.15, 0.25, 988, true), parts: ['Cauldron_1', 'Cauldron_2'] },
   post_skull: m(0.41, 1.35, 3.3, 776, false),
+  // The Crypt's own pieces: an empty stone arch, the KayKit hanging lantern (hung from a branch; `recentre` puts its foot at y = 0,
+  // so a placement's y is the bottom of the lantern) and the wooden grave markers.
+  arch: m(2.11, 0.38, 4.41, 436, false),
+  lantern_hanging: { ...m(0.32, 0.32, 1.41, 472, false), recentre: true },
   // Quaternius props for the themes other than the Crypt. Sizes are read from the files (tests/modelSizes.test.ts checks them).
   // `h` is the highest point above y = 0, or the full height for `recentre` models.
   farm_barn: q(3.86, 4.11, 7.88, 3770),
@@ -125,6 +129,25 @@ export const MODELS = {
   // Things drawn by the scene's own code. They are in the catalogue so nothing is placed on top of them.
   dirt_mound: p_(0.85, 0.85, 0.4, 96),
   open_coffin_spot: p_(0.8, 1.2, 1.0, 256),
+  // Small things the theme fill (`uniqueScenes/fill.ts`) draws itself with `layers/scene/fillShapes.ts`: dead grass, ferns, crosses, toadstools,
+  // a wheelbarrow, logs, roots, snowdrifts, footprints, ground fog, vines, a crow on a post, frozen bushes, snowy tombstones, a frozen lantern and a small scarecrow.
+  // `tris` is an upper bound (tests/fill.test.ts checks it against the real geometry).
+  fill_tuft: p_(0.3, 0.3, 0.45, 100),
+  fill_fern: p_(0.55, 0.55, 0.6, 100),
+  fill_cross: p_(0.3, 0.1, 1.0, 48),
+  fill_toadstool: p_(0.22, 0.22, 0.34, 200),
+  fill_wheelbarrow: p_(0.5, 0.85, 0.7, 200),
+  fill_log: p_(0.35, 1.2, 0.5, 160),
+  fill_root: p_(0.5, 0.8, 0.5, 120),
+  fill_drift: p_(1.0, 0.7, 0.45, 160),
+  fill_print: p_(0.22, 0.4, 0.04, 48),
+  fill_fog: p_(2.2, 1.6, 0.1, 2),
+  fill_vine: p_(1.1, 0.5, 0.3, 300),
+  fill_postcrow: p_(0.2, 0.2, 1.75, 300),
+  fill_bush: p_(0.6, 0.6, 0.7, 400),
+  fill_tomb: p_(0.42, 0.18, 1.1, 160),
+  fill_lamp: p_(0.3, 0.3, 1.9, 260),
+  fill_scarecrow: p_(0.9, 0.9, 3.3, 400),
 } as const;
 
 /** The catalogue entry of a model, with the same type for every model. */
@@ -189,8 +212,8 @@ export interface Layout {
   scenery: Scenery;
   /** Where the floating ghosts hover. */
   ghostSpots: { x: number; y: number; z: number }[];
-  /** World position of the crypt doorway. */
-  cryptDoor: { x: number; y: number; z: number; rotY: number };
+  /** World position of the crypt doorway, and the crypt's scale (missing is 1). */
+  cryptDoor: { x: number; y: number; z: number; rotY: number; scale?: number };
 }
 
 // ---------- footprints ----------
@@ -253,16 +276,25 @@ export const PATH_TILE_SCALE = 0.9;
 export const PATH_TILE_OFFSET = 0.7;
 export const PATH_HALF_WIDTH = 1.6;
 export const PATH_CLEARANCE = 0.6;
+/** The gap small props (candles, skulls, bones, small pumpkins) keep from the path: they line its edge. */
+export const EDGE_CLEARANCE = 0.05;
 
-/** The crypt's doorway in the model's own space (the door faces +z). A guess: check it in Chrome. */
+/** The crypt's doorway in the model's own space (the door faces +z), before the placement's scale. */
 export const CRYPT_DOOR_LOCAL = { x: 0, y: 1.3, z: 4.05 } as const;
 
-/** The winding cobblestone path: from the bottom centre of the screen, into the scene, to the gate. */
-const PATH_POINTS: [number, number][] = [[0.3, 8.6], [-0.9, 5], [0.7, -1.5], [-0.5, -8], [0.6, -14], [0.5, -17.6]];
-/** The crypt: smaller and further back, right of centre, turned to face the camera. */
-const CRYPT = { x: 8, z: -27, rotY: Math.atan2(0.5 - 8, 16 + 27) };
-/** The fence and the gate share one line across the yard. */
-const FENCE_Z = -20.4;
+/** The cobblestone path: from the bottom centre of the screen, nearly straight, to the gate. */
+const PATH_POINTS: [number, number][] = [[0.3, 9.4], [-0.25, 5.5], [0.45, 1.5], [0.4, -3.1]];
+/** The fence and the gate share one line across the yard, close behind the graves. */
+export const FENCE_Z = -3.6;
+const GATE_X = 0.4;
+const GATE_SCALE = 0.82;
+/**
+ * The mausoleum: behind the fence, right of the gate, turned a little toward the path, as big on screen as in the first prototype
+ * (its roof reaches just under the search box, at about 0.34 of the window height). It is the one prop that may stand behind the
+ * chips row: the chips are small pills, and the crypt is the landmark of the scene.
+ */
+const CRYPT_SCALE = 0.56;
+const CRYPT = { x: 6.35, z: -8, rotY: -0.45 };
 
 // ---------- moon clear zone ----------
 const MOON_ASPECTS = [16 / 10, 16 / 9, 21 / 9];
@@ -308,6 +340,82 @@ export function cutByScreenEdge(p: Placement): boolean {
   }
   return false;
 }
+/**
+ * True when a tall prop would stand over the Crypt's moon where it is drawn now (`moonTarget`): the disc and a margin of half
+ * its radius, as the other themes check theirs.
+ */
+export function overCryptMoon(p: Placement): boolean {
+  if (MODELS[p.model].h * p.scale < 1.5) return false;
+  for (const aspect of MOON_ASPECTS) {
+    const b = screenBox(p, aspect);
+    if (!b) continue;
+    const t = moonTarget(aspect);
+    const r = moonScreenRadius(aspect).disc * 1.5;
+    // Distance from the disc centre to the prop's screen box, in window-height units.
+    const dx = Math.max(b.x0 - t.x, 0, t.x - b.x1) * aspect;
+    const dy = Math.max(b.y0 - t.y, 0, t.y - b.y1);
+    if (Math.hypot(dx, dy) < r) return true;
+  }
+  return false;
+}
+
+// ---------- the page's controls ----------
+export interface ScreenBox { x0: number; x1: number; y0: number; y1: number }
+/**
+ * The boxes of the page's controls (brand, stats panel, header buttons, search box, pinned pages, chips) as fractions of the
+ * window, measured on the demo page at 1440x900 and 1920x1080 (tests/fixtures/page-layout.json). The pinned row is taken as wide
+ * as the search box. No Crypt prop may stand behind them; `tests/cryptScene.test.ts` checks the same against the fixture.
+ */
+export const CONTROL_BOXES: readonly { aspect: number; boxes: readonly ScreenBox[] }[] = [
+  {
+    aspect: 1440 / 900,
+    boxes: [
+      { x0: 0.0167, x1: 0.2121, y0: 0.0934, y1: 0.1603 },
+      { x0: 0.3004, x1: 0.6996, y0: 0.068, y1: 0.1857 },
+      { x0: 0.8114, x1: 0.9833, y0: 0.1046, y1: 0.1491 },
+      { x0: 0.2778, x1: 0.7222, y0: 0.2057, y1: 0.3302 },
+      { x0: 0.259, x1: 0.741, y0: 0.3502, y1: 0.3806 },
+    ],
+  },
+  {
+    aspect: 1920 / 1080,
+    boxes: [
+      { x0: 0.1354, x1: 0.282, y0: 0.0779, y1: 0.1336 },
+      { x0: 0.3503, x1: 0.6497, y0: 0.0567, y1: 0.1548 },
+      { x0: 0.7313, x1: 0.8646, y0: 0.064, y1: 0.1474 },
+      { x0: 0.3333, x1: 0.6667, y0: 0.1715, y1: 0.2752 },
+      { x0: 0.3192, x1: 0.6807, y0: 0.2918, y1: 0.3172 },
+    ],
+  },
+];
+/** Where a placement appears on screen at the rest camera: the box around its footprint from its foot to its top. */
+export function screenBox(p: Placement, aspect: number): ScreenBox | null {
+  const cam = cameraAt(0, aspect, true);
+  const h = MODELS[p.model].h * p.scale;
+  let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+  for (const [x, z] of corners(footprintOf(p))) {
+    for (const y of [p.y, p.y + h]) {
+      const q = project([x, y, z], cam);
+      if (!q) return null;
+      x0 = Math.min(x0, q.x); x1 = Math.max(x1, q.x); y0 = Math.min(y0, q.y); y1 = Math.max(y1, q.y);
+    }
+  }
+  return { x0, x1, y0, y1 };
+}
+const MARGIN = 0.004;
+const touches = (a: ScreenBox, b: ScreenBox) => a.x0 < b.x1 + MARGIN && a.x1 > b.x0 - MARGIN && a.y0 < b.y1 + MARGIN && a.y1 > b.y0 - MARGIN;
+/** The index of the chips row in each entry of `CONTROL_BOXES`. */
+const CHIPS_ROW = 4;
+/** Every control but the chips row (the crypt may stand behind the chips). */
+const CHIPS_FREE = (i: number) => i !== CHIPS_ROW;
+/** True when a placement would show behind one of the page's controls (only the ones `which` keeps, when given). */
+export function behindControls(p: Placement, which: (index: number) => boolean = () => true): boolean {
+  return CONTROL_BOXES.some(({ aspect, boxes }) => {
+    const s = screenBox(p, aspect);
+    return !s || boxes.some((b, i) => which(i) && touches(s, b));
+  });
+}
+
 // ---------- building the layout ----------
 const slug = (s: string) => s.replace(/[^a-z0-9]+/gi, '-');
 
@@ -361,7 +469,7 @@ export function buildLayout(seed: number = LAYOUT_SEED): Layout {
   };
   const pathCentres: { x: number; z: number }[] = [];
   const pathModels: ModelId[] = ['path_A', 'path_B', 'path_C'];
-  for (let s = 0; s <= total; s += 1.75) {
+  for (let s = 0; s <= total; s += 1.6) {
     const c = atArc(s);
     pathCentres.push({ x: c.x, z: c.z });
     for (const side of [-1, 1]) {
@@ -370,19 +478,21 @@ export function buildLayout(seed: number = LAYOUT_SEED): Layout {
       placements.push(make(model, 'path', c.x - c.dz * side * PATH_TILE_OFFSET, c.z + c.dx * side * PATH_TILE_OFFSET, turn, PATH_TILE_SCALE, 0.02));
     }
   }
-  const nearPath = (x: number, z: number, extra: number) =>
-    pathCentres.some((c) => Math.hypot(c.x - x, c.z - z) < PATH_HALF_WIDTH + PATH_CLEARANCE + extra);
+  const nearPath = (x: number, z: number, extra: number, clearance = PATH_CLEARANCE) =>
+    pathCentres.some((c) => Math.hypot(c.x - x, c.z - z) < PATH_HALF_WIDTH + clearance + extra);
+  /** Candles, skulls, bones and small pumpkins may stand right at the edge of the cobblestones. */
+  const clearanceOf = (g: Group) => (g === 'small' || g === 'candle' ? EDGE_CLEARANCE : PATH_CLEARANCE);
 
   // The ground itself is one plane drawn by the scene (no tiles), so nothing is placed for it here.
-  const doorX = CRYPT.x + Math.sin(CRYPT.rotY) * CRYPT_DOOR_LOCAL.z;
-  const doorZ = CRYPT.z + Math.cos(CRYPT.rotY) * CRYPT_DOOR_LOCAL.z;
-  const cryptDoor = { x: doorX, y: CRYPT_DOOR_LOCAL.y, z: doorZ, rotY: CRYPT.rotY };
+  const doorX = CRYPT.x + Math.sin(CRYPT.rotY) * CRYPT_DOOR_LOCAL.z * CRYPT_SCALE;
+  const doorZ = CRYPT.z + Math.cos(CRYPT.rotY) * CRYPT_DOOR_LOCAL.z * CRYPT_SCALE;
+  const cryptDoor = { x: doorX, y: CRYPT_DOOR_LOCAL.y * CRYPT_SCALE, z: doorZ, rotY: CRYPT.rotY, scale: CRYPT_SCALE };
 
   const fits = (p: Placement, margin = 0.15): boolean => {
     const f = footprintOf(p);
     if (!insideGround(f)) return false;
-    if (!PATH_EXEMPT.includes(p.group) && nearPath(p.x, p.z, Math.max(f.hx, f.hz))) return false;
-    if (blocksMoon(p)) return false;
+    if (!PATH_EXEMPT.includes(p.group) && nearPath(p.x, p.z, Math.max(f.hx, f.hz), clearanceOf(p.group))) return false;
+    if (overCryptMoon(p) || behindControls(p)) return false;
     return solid.every((q) => !footprintsOverlap(f, footprintOf(q), margin));
   };
   const add = (p: Placement): Placement => {
@@ -391,10 +501,13 @@ export function buildLayout(seed: number = LAYOUT_SEED): Layout {
     return p;
   };
   /** Fixed items: they must fit, so a bad number fails the tests at once. */
-  const fixed = (p: Placement, margin = 0): Placement => {
+  const fixed = (p: Placement, margin = 0, mayCoverChips = false): Placement => {
     const f = footprintOf(p);
     if (!insideGround(f) || solid.some((q) => footprintsOverlap(f, footprintOf(q), margin))) {
       throw new Error(`Fixed prop ${p.model} at ${p.x},${p.z} does not fit`);
+    }
+    if (overCryptMoon(p) || (mayCoverChips ? behindControls(p, CHIPS_FREE) : behindControls(p))) {
+      throw new Error(`Fixed prop ${p.model} at ${p.x},${p.z} stands over the moon or behind the page's controls`);
     }
     return add(p);
   };
@@ -414,17 +527,17 @@ export function buildLayout(seed: number = LAYOUT_SEED): Layout {
       for (const [dx, dz] of [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, -1], [1, -1], [-1, 1]] as const) {
         const p = make(model, group, x + dx * r * 0.35 * reach, z + dz * r * 0.35 * reach, rotY, scale, 0, slot);
         const f = footprintOf(p);
-        if (insideGround(f) && !nearPath(p.x, p.z, Math.max(f.hx, f.hz)) && solid.every((q) => !footprintsOverlap(f, footprintOf(q), 0.1))) return add(p);
+        if (insideGround(f) && !nearPath(p.x, p.z, Math.max(f.hx, f.hz), clearanceOf(group)) && !behindControls(p) && solid.every((q) => !footprintsOverlap(f, footprintOf(q), 0.1))) return add(p);
         counter--;
       }
     }
     throw new Error(`No room for ${model} slot ${slot}`);
   };
 
-  // ----- the fence line across the yard, with the arched gate in the middle -----
-  const gateX = 0.5;
-  fixed(make('arch_gate', 'gate', gateX, FENCE_Z, 0));
-  const GATE_EDGE = MODELS.arch_gate.hx + 0.34;
+  // ----- the fence line across the yard, with the arched gate at the end of the path -----
+  const gateX = GATE_X;
+  fixed(make('arch_gate', 'gate', gateX, FENCE_Z, 0, GATE_SCALE));
+  const GATE_EDGE = MODELS.arch_gate.hx * GATE_SCALE + 0.3;
   const step = 4.6;
   const fenceRun = (sign: 1 | -1) => {
     for (let k = 0; k < 5; k++) {
@@ -435,32 +548,56 @@ export function buildLayout(seed: number = LAYOUT_SEED): Layout {
   };
   fenceRun(1);
   fenceRun(-1);
-  // (The fence ends well past the edge of the view, so no side runs are needed.)
 
-  // ----- the crypt, smaller and further back, right of centre -----
-  fixed(make('crypt', 'crypt', CRYPT.x, CRYPT.z, CRYPT.rotY));
-  lights.push({ kind: 'cryptDoor', x: doorX, y: cryptDoor.y + 0.3, z: doorZ });
+  // ----- the mausoleum behind the fence, right of the gate, and an empty stone arch further right -----
+  fixed(make('crypt', 'crypt', CRYPT.x, CRYPT.z, CRYPT.rotY, CRYPT_SCALE), 0, true);
+  lights.push({ kind: 'cryptDoor', x: doorX, y: cryptDoor.y + 0.3 * CRYPT_SCALE, z: doorZ });
   glows.push({ kind: 'cryptDoor', x: doorX, y: cryptDoor.y, z: doorZ });
+  fixed(make('arch', 'fence', 11.4, -7.4, -0.3, 0.72));
 
-  // ----- big jack-o'-lanterns with glowing faces, and lanterns -----
+  // ----- trees: autumn pines and bare dead trees on both sides, short ones behind the gate -----
+  // In the middle of the screen they stay short, so their tops end under the chips row (`behindControls`).
+  fixed(make('tree_pine_orange_large', 'tree', -10.2, -7.6, 0.4, 0.95));
+  fixed(make('tree_pine_orange_medium', 'tree', -3.6, -8.8, 1.1, 0.6));
+  fixed(make('tree_pine_yellow_medium', 'tree', 2.6, -11.4, 2.0, 0.52));
+  // Two bare trees in front of the fence carry old lanterns on their branches. The KayKit models have one long branch each:
+  // its tip (in the model's own space) is where the lantern hangs.
+  const hangFrom = (tree: Placement, tip: readonly [number, number, number], lanternScale: number, real: boolean) => {
+    const c = Math.cos(tree.rotY);
+    const s = Math.sin(tree.rotY);
+    const x = tree.x + (tip[0] * c + tip[2] * s) * tree.scale;
+    const z = tree.z + (-tip[0] * s + tip[2] * c) * tree.scale;
+    const hook = tip[1] * tree.scale;
+    // Hung from the branch: not part of the ground, so it is not in `solid`.
+    placements.push(make('lantern_hanging', 'lantern', x, z, 0, lanternScale, hook - MODELS.lantern_hanging.h * lanternScale));
+    const src = { kind: 'lantern' as const, x, y: hook - 0.78 * lanternScale, z };
+    glows.push(src);
+    if (real) lights.push(src);
+  };
+  const leftLanternTree = fixed(make('tree_dead_large', 'tree', -7.6, -1.2, Math.PI - 0.5, 1.1));
+  hangFrom(leftLanternTree, [-1.32, 3.86, -0.73], 0.75, true);
+  const rightLanternTree = fixed(make('tree_dead_medium', 'tree', 8.2, -0.4, Math.PI + 0.25, 0.9));
+  hangFrom(rightLanternTree, [1.32, 2.86, 0], 0.72, false);
+  // ----- big jack-o'-lanterns with glowing faces along the path -----
   const jack = (model: ModelId, x: number, z: number, rot: number, scale: number, real: boolean) => {
     const j = fixed(make(model, 'pumpkin', x, z, rot, scale));
     const src = { kind: 'jackOLantern' as const, x: j.x, y: 0.65 * scale, z: j.z };
     glows.push(src);
     if (real) lights.push(src);
   };
-  jack('pumpkin_orange_jackolantern', -4.9, 6.2, 0.35, 1.0, true);
-  jack('pumpkin_yellow_jackolantern', 4.9, 5.6, -0.4, 0.95, true);
-  jack('pumpkin_orange_jackolantern', -10.2, 0.2, 0.5, 0.87, true);
-  jack('pumpkin_yellow_jackolantern', 10.4, -1.2, -0.5, 0.84, false);
+  jack('pumpkin_orange_jackolantern', -3.4, 6.6, 0.45, 1.3, true);
+  jack('pumpkin_orange_jackolantern', -3.3, 4.0, 0.3, 1.1, true);
+  jack('pumpkin_yellow_jackolantern', 3.0, 3.9, -0.35, 1.0, false);
+  jack('pumpkin_orange_jackolantern', 3.3, 6.3, -0.35, 1.25, true);
+  jack('pumpkin_yellow_jackolantern', 6.9, 3.6, -0.6, 1.05, true);
+  jack('pumpkin_orange_jackolantern', -10.6, 2.4, 0.6, 0.9, false);
+  // Two small lanterns either side of the gate (glow only).
   for (const side of [-1, 1]) {
-    const l = fixed(make('lantern_standing', 'lantern', gateX + side * 2.5, FENCE_Z + 1.7, 0, 1.5));
-    glows.push({ kind: 'lantern', x: l.x, y: 0.5 * 1.5, z: l.z });
-    // Only the two gate lanterns are real lights: the crypt, three jack-o'-lanterns and these make six.
-    lights.push({ kind: 'lantern', x: l.x, y: 0.5 * 1.5, z: l.z });
+    const l = fixed(make('lantern_standing', 'lantern', gateX + side * (GATE_EDGE + 0.45), FENCE_Z + 1.3, 0, 1.2));
+    glows.push({ kind: 'lantern', x: l.x, y: 0.5 * 1.2, z: l.z });
   }
-  // Hanging lanterns on posts at the edges, their arms reaching over the grass (glow only, not real lights).
-  for (const [x, z, rot] of [[-14.5, -5, Math.PI / 2], [14.5, -2, -Math.PI / 2], [-11, -17, Math.PI / 2], [-19.5, -14, Math.PI / 2]] as const) {
+  // Lanterns on posts at the edges, their arms reaching over the grass (glow only).
+  for (const [x, z, rot] of [[-11.2, -2.2, Math.PI / 2], [12.6, -1.6, -Math.PI / 2]] as const) {
     const post = fixed(make('post_lantern', 'lantern', x, z, rot));
     glows.push({ kind: 'postLantern', x: post.x + Math.sin(rot), y: 2.4, z: post.z + Math.cos(rot) });
   }
@@ -468,8 +605,8 @@ export function buildLayout(seed: number = LAYOUT_SEED): Layout {
   // ----- data-driven things: new graves (24), coffins (8) and candles (12) -----
   const graveModels: ModelId[] = ['gravestone', 'grave_B'];
   let slot = 0;
-  // Eight groups of three, spaced apart, four on each side.
-  const dataGroups: [number, number][] = [[-9, -8], [-18, -7], [-9.5, -14.5], [-21.5, -11], [9, -8], [18, -7], [9.5, -14.5], [21.5, -11]];
+  // Eight rows of three behind the fence, four on each side of the gate, as the graveyard goes on into the fog.
+  const dataGroups: [number, number][] = [[-4.6, -6.6], [-10, -6.8], [-15.6, -6.4], [-8.2, -11.6], [9.2, -12.6], [15.4, -6.6], [16.4, -11.6], [1.6, -14.4]];
   for (const [gx, gz] of dataGroups) {
     for (let i = 0; i < 3; i++) {
       fixedNear(graveModels[slot % 2]!, 'newGrave', gx + (i - 1) * 2.4, gz + (i === 1 ? -0.5 : 0), between(-0.06, 0.06), slot);
@@ -477,116 +614,132 @@ export function buildLayout(seed: number = LAYOUT_SEED): Layout {
     }
   }
   slot = 0;
-  // Coffins stand behind the fence, along the back left of the yard.
-  for (const [x, z] of [[-23, -26], [-19.5, -26], [-16, -26.5], [-12.5, -27], [-9, -28.5], [-5, -29], [-1.5, -30], [2, -31.5]] as const) {
+  // Coffins stand behind the fence, at the back left of the yard.
+  for (const [x, z] of [[-3.6, -17], [-6.8, -17.6], [-10, -17], [-13.2, -16.4], [-16.4, -16], [-19.6, -15.4], [-12.4, -20.6], [-6.2, -21.2]] as const) {
     fixedNear('coffin_open', 'coffin', x, z, between(-0.1, 0.1), slot++, 2.2);
   }
+  // Candles line both sides of the path, from the front to the gate.
   const candleModels: ModelId[] = ['candle_triple', 'candle_thin', 'candle_melted'];
   slot = 0;
-  for (const z of [3.5, -1.5, -6.5, -11, -14.5, -17]) {
+  for (const z of [7.6, 5.4, 3.0, 1.0, -0.8, -2.4]) {
     for (const side of [-1, 1]) {
       const model = candleModels[slot % 3]!;
-      const c = fixedNear(model, 'candle', pathXAt(z) + side * 3.1, z, between(0, Math.PI * 2), slot);
+      const c = fixedNear(model, 'candle', pathXAt(z) + side * 2.05, z, between(0, Math.PI * 2), slot);
       glows.push({ kind: 'candle', x: c.x, y: MODELS[model].h, z: c.z, slot });
       slot++;
     }
   }
 
-  // ----- trees on the edges: autumn pines and bare dead trees -----
+  // ----- more trees toward the edges, placed at random where they fit -----
   const edge = (xLo: number, xHi: number, zLo: number, zHi: number, sLo = 1, sHi = 1.25) => () => ({ x: between(xLo, xHi), z: between(zLo, zHi), scale: between(sLo, sHi) });
-  const L = (zLo: number, zHi: number, s?: [number, number]) => edge(-24.2, -20.5, zLo, zHi, s?.[0], s?.[1]);
-  const R = (zLo: number, zHi: number, s?: [number, number]) => edge(20.5, 24.2, zLo, zHi, s?.[0], s?.[1]);
   const treeJobs: [ModelId, () => { x: number; z: number; scale: number }][] = [
-    ['tree_pine_orange_large', L(-17, -8)], ['tree_pine_orange_large', R(-17, -8)],
-    ['tree_pine_orange_medium', L(-6, 4)], ['tree_pine_orange_medium', R(-6, 4)],
-    ['tree_dead_large', L(-4, 4, [1, 1.2])], ['tree_dead_large_decorated', R(-4, 4, [1, 1.15])],
-    ['tree_dead_medium', edge(-24, -14, -24, -21)], ['tree_dead_medium', edge(14, 24, -24, -21)],
-    ['forest_twisted_a', edge(-24.2, -20.5, -12, 2, 0.28, 0.32)], ['forest_twisted_b', edge(20.5, 24.2, -12, 2, 0.28, 0.32)],
-    ['tree_pine_orange_large', edge(-24, -16, -31, -23)], ['tree_pine_orange_large', edge(16, 24, -31, -23)],
-    ['tree_dead_medium', L(0, 8)], ['tree_dead_medium', R(0, 8)],
+    ['tree_pine_orange_medium', edge(9.4, 10.6, -10.6, -9.4, 0.8, 0.9)],
+    ['tree_pine_orange_medium', edge(-15, -12.5, -10, -7, 0.9, 1.05)],
+    ['tree_dead_large', edge(-20, -17, -9, -5, 1.1, 1.25)],
+    ['tree_pine_orange_large', edge(-17, -13, -16, -12, 1, 1.15)],
+    ['tree_pine_yellow_medium', edge(-24, -20, -14, -8, 0.9, 1.1)],
+    ['tree_dead_medium', edge(13, 16, -6, -3, 0.9, 1.05)],
+    ['tree_pine_orange_medium', edge(17, 22, -14, -8, 0.8, 1)],
+    ['tree_dead_large', edge(18, 24, -6, 2, 0.9, 1.1)],
+    ['forest_twisted_a', edge(-24, -20, -4, 2, 0.24, 0.28)],
+    ['forest_twisted_b', edge(19, 24, -18, -12, 0.24, 0.28)],
+    ['tree_pine_orange_large', edge(-26, -21, -26, -18)],
+    ['tree_pine_orange_large', edge(18, 26, -28, -20)],
   ];
   treeJobs.forEach(([model, region]) => tryAdd(model, 'tree', region, 160));
 
-  // ----- hero gravestones in the foreground corners, then spaced groups in the midground -----
-  // Big gravestones frame the view at both sides. The middle stays open behind and between the cards.
+  // ----- tombstones of mixed shapes in the middle ground, a few tilted -----
   const heroIds: string[] = [];
   const hero = (model: ModelId, x: number, z: number, rot: number, scale: number) => {
-    const g = fixed(make(model, 'oldGrave', x, z, rot, scale), 0.3);
+    const g = fixed(make(model, 'oldGrave', x, z, rot, scale), 0.2);
     heroIds.push(g.id);
     return g;
   };
-  const tidy = (cx: number, cz: number, models: ModelId[]) => {
-    // A small tidy cluster of two or three small props, set in front of a hero grave.
-    models.forEach((model, i) => {
-      const off: [number, number][] = [[-0.9, 0], [0.1, 0.55], [1.0, 0.1]];
-      const c = tryAdd(model, 'small', () => ({ x: cx + off[i]![0], z: cz + off[i]![1], scale: 1.3, rotY: i * 1.7 }), 3);
-      if (c && model.startsWith('candle')) glows.push({ kind: 'candle', x: c.x, y: MODELS[model].h * 1.3, z: c.z });
-    });
-  };
-  hero('grave_A', -7.4, 3.0, 0.15, 1.4);
-  hero('grave_B', 6.4, 2.6, -0.15, 1.4);
-  tidy(-5.0, 1.6, ['candle_triple', 'skull', 'candle_thin']);
-  tidy(4.1, 0.2, ['candle_thin', 'candle_melted', 'skull']);
-  // Old graves in neat groups of three with open ground between the groups.
-  const group = (cx: number, cz: number, models: ModelId[]): string[] =>
+  hero('grave_A', -4.6, 2.0, 0.22, 1.2);
+  hero('grave_B', -7.7, 1.5, 0.12, 1.15);
+  hero('gravestone', -5.6, 5.2, 0.3, 1.3);
+  hero('grave_B', 4.9, 1.0, -0.18, 1.15);
+  hero('grave_A_destroyed', 7.6, 1.8, -0.32, 1.0);
+  hero('gravestone', 6.0, 6.4, -0.38, 1.35);
+  // Rows of smaller graves behind the big ones, on both sides of the path.
+  const row = (cx: number, cz: number, models: ModelId[]): string[] =>
     models.map((model, i) => {
-      const g = tryAdd(model, 'oldGrave', () => ({ x: cx + (i - 1) * 2.5, z: cz + (i === 1 ? -0.5 : 0), rotY: (i - 1) * 0.08, scale: 1.05 }), 3);
+      const g = tryAdd(model, 'oldGrave', () => ({ x: cx + (i - 1) * 2.2 + between(-0.3, 0.3), z: cz + between(-0.4, 0.4), rotY: between(-0.25, 0.25), scale: between(0.85, 1.0) }), 12);
       return g ? g.id : '';
     });
-  const leftGroup = group(-12.5, -3.8, ['gravestone', 'grave_B', 'grave_A']).filter(Boolean);
-  const rightGroup = group(12.8, -4.6, ['grave_A', 'gravestone', 'grave_B']).filter(Boolean);
-  const webPair = leftGroup.length >= 2 ? leftGroup : rightGroup;
-  // A third hero stone on the right edge.
-  hero('gravestone', 8.0, 0.8, -0.2, 1.2);
-  // Pumpkins: three, away from the path.
-  [['pumpkin_orange', -8.6, 5.6], ['pumpkin_yellow_small', 8.6, 5.4], ['pumpkin_orange', 14.6, -1.2]].forEach(([model, x, z]) => {
-    tryAdd(model as ModelId, 'pumpkin', () => ({ x: x as number, z: z as number, scale: 0.9 }), 3);
-  });
+  const leftRow = row(-5.8, -1.8, ['gravestone', 'grave_A', 'grave_B']).filter(Boolean);
+  const rightRow = row(5.8, -1.6, ['grave_A', 'gravestone', 'grave_B']).filter(Boolean);
+  row(-12.4, 0.8, ['grave_B', 'gravestone', 'grave_A']);
+  row(12.4, 1.4, ['gravestone', 'grave_A_destroyed']);
+  const webPair = leftRow.length >= 2 ? leftRow : rightRow;
+  // Small wooden grave crosses.
+  for (const [x, z, rot] of [[3.0, -1.6, -0.2], [-3.2, -2.2, 0.25], [-8.4, 3.6, 0.4], [8.8, 3.4, -0.3]] as const) {
+    tryAdd(next() < 0.5 ? 'gravemarker_A' : 'gravemarker_B', 'small', () => ({ x: x + between(-0.4, 0.4), z: z + between(-0.4, 0.4), rotY: rot, scale: between(1.1, 1.3) }), 12);
+  }
 
-  // ===== A richer yard: more trees and graves, mushrooms, and spots for the animated critters =====
-  // Everything below uses its own random numbers, so the layout built above stays where it was.
+  // ----- the foreground along the path: small pumpkins, melted candles, skull candles, bones and skulls -----
+  const litSmall = (model: ModelId, x: number, z: number, scale: number, flame: number) => {
+    const c = tryAdd(model, 'small', () => ({ x: x + between(-0.35, 0.35), z: z + between(-0.35, 0.35), scale }), 16);
+    if (c) glows.push({ kind: 'candle', x: c.x, y: flame * scale, z: c.z });
+  };
+  litSmall('skull_candle', -2.35, 2.2, 1.0, MODELS.skull_candle.h);
+  litSmall('skull_candle', 2.5, 7.0, 0.95, MODELS.skull_candle.h);
+  litSmall('candle_triple', 2.5, 2.0, 1.3, MODELS.candle_triple.h);
+  litSmall('candle_melted', 5.0, 4.6, 1.4, MODELS.candle_melted.h);
+  litSmall('candle_thin', -4.7, 4.1, 1.3, MODELS.candle_thin.h);
+  litSmall('candle_melted', -2.1, -1.6, 1.2, MODELS.candle_melted.h);
+  litSmall('skull_candle', 2.45, -1.0, 0.85, MODELS.skull_candle.h);
+  const smallJobs: [ModelId, number, number, number][] = [
+    ['pumpkin_orange', -2.3, 0.2, 0.8], ['pumpkin_yellow_small', 2.4, 3.6, 1.1], ['pumpkin_orange', 5.4, 2.8, 0.7],
+    ['pumpkin_yellow_small', -6.6, 3.4, 1.2], ['pumpkin_orange', -2.3, 4.8, 0.75], ['pumpkin_yellow_small', -1.9, -2.6, 0.9],
+    ['skull', -2.1, 5.9, 0.45], ['skull', 4.8, 3.2, 0.4], ['skull', 2.0, 7.1, 0.42], ['skull', -1.9, 3.4, 0.4],
+    ['bone_A', 2.1, 5.3, 1], ['bone_B', -1.95, 6.1, 1], ['bone_C', 4.4, 5.0, 1], ['bone_A', -6.0, 2.8, 1], ['ribcage', 6.6, 4.9, 0.7],
+    ['bone_C', 2.3, -2.2, 1], ['bone_B', -2.2, 1.2, 1],
+  ];
+  for (const [model, x, z, scale] of smallJobs) tryAdd(model, 'small', () => ({ x: x + between(-0.3, 0.3), z: z + between(-0.3, 0.3), scale }), 16);
+
+  // ===== spots for the animated critters and details =====
+  // Everything below uses its own random numbers, so the layout built above stays where it was when these change.
   next = mulberry32(seed + 7);
   const lean = <T extends Placement | null>(p: T, amount = 0.07): T => {
     if (p) p.tilt = [between(-amount, amount), between(-amount, amount)];
     return p;
   };
-  // A slight lean for the trees and graves already placed.
+  // A slight lean for the trees and graves already placed (not the trees that carry a lantern: it hangs from the branch tip).
   for (const p of placements) {
-    if (p.group === 'tree') lean(p, 0.07);
-    else if (p.group === 'oldGrave' || p.group === 'small') lean(p, 0.05);
+    if (p.group === 'tree' && p !== leftLanternTree && p !== rightLanternTree) lean(p, 0.07);
+    else if (p.group === 'oldGrave' || p.group === 'small') lean(p, 0.06);
   }
-  // Spots for the cat, mounds, cauldron and open coffin are reserved first, before the yard fills up.
-  // The black cat sits on a big gravestone beside the path.
-  const perch = fixedNear('gravestone', 'critter', -7.8, -0.6, 0.15, undefined, 1.35, 2);
-  const cat = { x: perch.x, y: MODELS.gravestone.h * perch.scale * 0.96, z: perch.z, rotY: 0.1 };
+  // The black cat sits on a gravestone at the left.
+  const perch = fixedNear('gravestone', 'critter', -4.2, -2.5, 0.2, undefined, 1.3, 1);
+  const cat = { x: perch.x, y: MODELS.gravestone.h * perch.scale * 0.96, z: perch.z, rotY: 0.2 };
   // Dirt mounds where skeletons push up out of the soil.
-  const moundSpots: [number, number][] = [[-5.0, -5.8], [7.0, -5.4], [-12.5, -9.6]];
+  const moundSpots: [number, number][] = [[-4.7, -0.2], [10, -2], [-7, -9.8]];
   const mounds = moundSpots.map(([x, z], i) => {
     const m = fixedNear('dirt_mound', 'critter', x!, z!, between(0, 6.28), undefined, 1, 2);
     return { x: m.x, z: m.z, rotY: m.rotY, scale: 1, seed: i };
   });
-  // The bubbling cauldron, and a half-open coffin.
+  // The bubbling cauldron behind the fence at the left (its green glow shows between the bars), and a half-open coffin at the right.
   const cauldronSc = 4.2;
-  const caul = fixedNear('forest_cauldron', 'critter', 7.6, -2.4, 0.3, undefined, cauldronSc, 2);
+  const caul = fixedNear('forest_cauldron', 'critter', -7.4, -5.6, 0.3, undefined, cauldronSc, 2);
   const cauldron = { x: caul.x, y: MODELS.forest_cauldron.h * cauldronSc, z: caul.z };
   glows.push({ kind: 'cauldron', x: cauldron.x, y: cauldron.y, z: cauldron.z });
-  const spot = fixedNear('open_coffin_spot', 'critter', -8.8, -3.4, 0.5, undefined, 1, 3);
+  const spot = fixedNear('open_coffin_spot', 'critter', 8.6, -2.6, -0.5, undefined, 1, 3);
   const openCoffin = { x: spot.x, z: spot.z, rotY: spot.rotY };
-  // Three bare trees that carry the owl and spiders and the crows. They stand in plain view, so each one takes
-  // the place of any random gravestones, bones or trees that are in the way. Fixed things (lanterns, jack-o'-lanterns,
-  // the gate, the data slots) are never moved.
+  // Three bare trees that carry the owl, the spiders and the crows, at the left behind the fence. Each takes the place of any
+  // random gravestones, bones or trees in the way; fixed things (lanterns, jack-o'-lanterns, the gate, the data slots) never move.
   const EVICTABLE: Group[] = ['oldGrave', 'small', 'tree'];
   const perchTree = (model: ModelId, x: number, z: number, scale: number): Placement => {
     for (let r = 0; r < 14; r++) {
       for (const [dx, dz] of [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, -1], [1, -1], [-1, 1]] as const) {
         const p = make(model, 'tree', x + dx * r * 0.5, z + dz * r * 0.5, between(0, 6.28), scale, 0);
         const f = footprintOf(p);
-        if (!insideGround(f) || nearPath(p.x, p.z, Math.max(f.hx, f.hz)) || blocksMoon(p)) {
+        if (!insideGround(f) || nearPath(p.x, p.z, Math.max(f.hx, f.hz)) || overCryptMoon(p) || behindControls(p)) {
           counter--;
           continue;
         }
         const blockers = solid.filter((q) => footprintsOverlap(f, footprintOf(q), 0.1));
-        if (blockers.some((q) => !EVICTABLE.includes(q.group))) {
+        if (blockers.some((q) => !EVICTABLE.includes(q.group) || q === leftLanternTree || q === rightLanternTree || heroIds.includes(q.id))) {
           counter--;
           continue;
         }
@@ -605,56 +758,38 @@ export function buildLayout(seed: number = LAYOUT_SEED): Layout {
     }
     throw new Error(`No room for the ${model} tree near ${x},${z}`);
   };
-  const owlTree = perchTree('tree_dead_large', -13.5, -12, 1.1);
-  const crowTreeA = perchTree('tree_dead_medium', -15.5, -18.2, 1.2);
-  const crowTreeB = perchTree('tree_dead_large', -17.2, -14.8, 1.1);
-  // At most two small mushroom clusters, each beside a hero grave.
-  const mushroomClusters: [number, number][] = [[-6.8, -2.2], [10.6, -2.8]];
+  const owlTree = perchTree('tree_dead_large', -11.6, -5.4, 1.05);
+  const crowTreeA = perchTree('tree_dead_medium', -13.6, -12.4, 1.2);
+  const crowTreeB = perchTree('tree_dead_large', -6.4, -13.6, 1.0);
+  // Two small clusters of glowing mushrooms behind the fence, where the yard has room (they glow between the bars).
+  const mushroomClusters: [number, number][] = [[-5.4, -14.4], [-3.2, -11.8]];
   mushroomClusters.forEach(([cx, cz]) => {
     [[-0.5, 0.1, 2.1], [0.45, 0.5, 1.7], [0.05, -0.55, 1.9]].forEach(([dx, dz, sc]) => {
       const mush = lean(tryAdd('forest_mushroom', 'small', () => ({ x: cx! + dx! + between(-0.5, 0.5), z: cz! + dz! + between(-0.5, 0.5), scale: sc! }), 40), 0.1);
       if (mush) glows.push({ kind: 'mushroom', x: mush.x, y: MODELS.forest_mushroom.h * sc! * 0.85, z: mush.z });
     });
   });
-  // A back row of trees in the fog behind the fence, only toward the two edges so the gate and crypt stay clear.
-  const backRow: [ModelId, number, number][] = [
-    ['tree_pine_orange_large', -24, 1], ['forest_twisted_c', -19, 0.3], ['tree_dead_large', -15, 1.2], ['tree_pine_yellow_medium', -21, 1.1],
-    ['tree_pine_orange_large', 24, 1], ['forest_twisted_b', 20, 0.28], ['tree_dead_large', 16, 1.2], ['tree_pine_orange_medium', 22, 1.1],
-  ];
-  backRow.forEach(([model, x, scale]) => {
-    lean(tryAdd(model, 'tree', () => ({ x: x + between(-1, 1), z: between(-38.8, -32.4), scale, rotY: between(0, 6.28) }), 120), 0.1);
-  });
-  // A few more trees at the far left and right edges.
-  const sideTrees: ModelId[] = ['tree_pine_orange_medium', 'tree_dead_medium', 'tree_dead_large'];
-  sideTrees.forEach((model) => {
-    for (const side of [-1, 1]) {
-      lean(tryAdd(model, 'tree', () => ({ x: side * between(21, 26), z: between(-26, 9), scale: between(0.85, 1.3), rotY: between(0, 6.28) }), 120), 0.1);
-    }
-  });
-  // ----- spots for the animated critters and details -----
   const top = (p: Placement, k: number) => MODELS[p.model].h * p.scale * k;
-
-  // Crows on the fence posts and the dead trees.
+  // Crows on the fence pillars near the gate and on the dead trees.
   const pillars = placements
     .filter((p) => p.model === 'fence_pillar' && Math.abs(p.z - FENCE_Z) < 0.1 && Math.abs(p.x - gateX) < 14)
     .sort((a, b) => Math.abs(a.x - gateX) - Math.abs(b.x - gateX));
   const crows: Scenery['crows'] = [];
-  [0, 1, 3, 4].forEach((k, i) => {
+  [0, 1, 2, 3].forEach((k, i) => {
     const pil = pillars[k];
     if (pil) crows.push({ x: pil.x, y: MODELS.fence_pillar.h + 0.05, z: pil.z, rotY: between(-0.9, 0.9), seed: i + 1 });
   });
   for (const [tree, k] of [[crowTreeA, 0.8], [crowTreeB, 0.7]] as const) {
-    if (tree) crows.push({ x: tree.x + 0.3, y: top(tree, k), z: tree.z + 0.4, rotY: between(-0.9, 0.9), seed: crows.length + 1 });
+    crows.push({ x: tree.x + 0.3, y: top(tree, k), z: tree.z + 0.4, rotY: between(-0.9, 0.9), seed: crows.length + 1 });
   }
   // The owl sits on a bare branch that reaches toward the camera.
   const ot = owlTree;
   const by = MODELS[ot.model].h * ot.scale * 0.5;
   const owl = { x: ot.x + 1.5, y: by + 0.45, z: ot.z + 2.2, rotY: 0.2, branch: [ot.x, by, ot.z, ot.x + 1.6, by + 0.3, ot.z + 2.4] as [number, number, number, number, number, number] };
-  // Spiders drop on threads from the branches of the owl's tree, on the other side of the trunk from the owl.
-  const st = owlTree;
-  const sTop = MODELS[st.model].h * st.scale * 0.72;
-  const spiders = [0, 1, 2].map((i) => ({ x: st.x - 1.3 + i * 0.85, topY: sTop - i * 0.1, z: st.z + 1.7 + i * 0.3, drop: [1.5, 2.1, 1.1][i]!, seed: i + 1 }));
-  // One cobweb hangs between two neighbouring gravestones of the left midground group.
+  // Spiders drop on threads from the branches of the owl's tree.
+  const sTop = MODELS[ot.model].h * ot.scale * 0.72;
+  const spiders = [0, 1, 2].map((i) => ({ x: ot.x - 0.4 + i * 0.85, topY: sTop - i * 0.1, z: ot.z + 1.7 + i * 0.3, drop: [1.5, 2.1, 1.1][i]!, seed: i + 1 }));
+  // One cobweb hangs between two neighbouring gravestones of a row.
   const webA = placements.find((q) => q.id === webPair[0]);
   const webB = placements.find((q) => q.id === webPair[1]);
   const cobwebs: Scenery['cobwebs'] = [];
@@ -663,18 +798,57 @@ export function buildLayout(seed: number = LAYOUT_SEED): Layout {
     cobwebs.push({ x: (webA.x + webB.x) / 2, y: 0.95, z: (webA.z + webB.z) / 2 + 0.1, w: dx * 0.95, h: 1.5, rotY: 0 });
   }
   // Will-o'-the-wisps drift between the graves.
-  const wisps = Array.from({ length: 6 }, (_, i) => ({ x: (i % 2 ? 1 : -1) * between(7, 18), y: between(0.7, 2.4), z: between(-16, 2), seed: i + 1 }));
+  const wisps = Array.from({ length: 6 }, (_, i) => ({ x: (i % 2 ? 1 : -1) * between(6, 13), y: between(0.7, 2.2), z: between(-9, 1), seed: i + 1 }));
   const scenery: Scenery = { cat, crows, owl, spiders, mounds, cauldron, openCoffin, wisps, cobwebs };
 
-  // ----- where the floating ghosts hover -----
+  // ===== the backdrop behind the fence, in layers, so the band from the horizon to the tombstones is not empty =====
+  // Its own random numbers again, so nothing above moves. Every piece passes `fits` (inside the ground, off the path, no overlap,
+  // not over the moon, never behind the page's controls), so the tall ones end up at the sides and the middle stays low.
+  next = mulberry32(seed + 13);
+  const backdrop = (model: ModelId, group: Group, x: readonly [number, number], z: readonly [number, number], s: readonly [number, number], tilt: number, rot: readonly [number, number] = [0, Math.PI * 2]) =>
+    lean(tryAdd(model, group, () => ({ x: between(x[0], x[1]), z: between(z[0], z[1]), rotY: between(rot[0], rot[1]), scale: between(s[0], s[1]) }), 60), tilt);
+  // Middle back: bare twisted dead trees of different heights, two carrying a lantern, and a few more rust pines.
+  const backTrees: [ModelId, [number, number], [number, number], [number, number]][] = [
+    ['tree_dead_large', [-24, -15], [-30, -19], [1.1, 1.45]],
+    ['tree_dead_medium', [-13, -6], [-27, -18], [0.8, 1.1]],
+    ['tree_dead_large', [6, 13], [-30, -19], [0.95, 1.25]],
+    ['tree_dead_medium', [14, 24], [-27, -17], [1.0, 1.3]],
+    ['tree_dead_medium', [-4, 5], [-32, -22], [0.6, 0.85]],
+    ['forest_twisted_c', [-27, -18], [-37, -28], [0.22, 0.28]],
+    ['forest_twisted_c', [17, 27], [-37, -28], [0.2, 0.26]],
+    ['tree_pine_orange_medium', [-22, -12], [-32, -21], [0.8, 1.0]],
+    ['tree_pine_orange_medium', [12, 22], [-32, -21], [0.8, 1.0]],
+    ['tree_pine_orange_large', [-28, -20], [-38, -29], [0.9, 1.1]],
+    ['tree_pine_yellow_medium', [19, 28], [-38, -29], [0.85, 1.05]],
+  ];
+  const backDead = backTrees.map(([model, x, z, s]) => backdrop(model, 'tree', x, z, s, 0.05)).filter((p): p is Placement => !!p && p.model.startsWith('tree_dead'));
+  // A lantern hangs from the branch tip of the first two bare trees (glow only: the point lights are all used).
+  const TIP: Partial<Record<ModelId, readonly [number, number, number]>> = { tree_dead_large: [-1.32, 3.86, -0.73], tree_dead_medium: [1.32, 2.86, 0] };
+  for (const tree of backDead.slice(0, 2)) {
+    tree.tilt = undefined;
+    hangFrom(tree, TIP[tree.model]!, 0.7, false);
+  }
+  // Near the fence: two small mausoleums, broken fence sections, a lone lamp post and leaning tombstones peeking over the fence.
+  backdrop('crypt', 'fence', [-21, -14], [-15, -9.5], [0.34, 0.42], 0, [0.25, 0.6]);
+  backdrop('crypt', 'fence', [15, 22], [-17, -12], [0.3, 0.38], 0, [-0.6, -0.25]);
+  for (const side of [-1, 1]) {
+    for (let i = 0; i < 2; i++) backdrop('fence_broken', 'fence', side < 0 ? [-24, -9] : [9, 24], [-13, -8], [0.8, 1], 0.12, [-0.35, 0.35]);
+  }
+  const lamp = backdrop('post_lantern', 'lantern', [-17, -12], [-21, -16], [0.9, 1], 0.03, [Math.PI / 2 - 0.2, Math.PI / 2 + 0.2]);
+  if (lamp) glows.push({ kind: 'postLantern', x: lamp.x + Math.sin(lamp.rotY) * lamp.scale, y: 2.4 * lamp.scale, z: lamp.z + Math.cos(lamp.rotY) * lamp.scale });
+  const peekers: ModelId[] = ['grave_A', 'grave_B', 'gravestone', 'grave_A_destroyed'];
+  for (let i = 0; i < 16; i++) backdrop(peekers[i % peekers.length]!, 'oldGrave', i % 2 ? [3, 22] : [-22, -3], [-11, -5], [0.85, 1.1], 0.16, [-0.35, 0.35]);
+
+  // ----- where the floating ghosts hover: one at the left, one by the mausoleum, one peeking in at the right edge -----
   const ghostSpots = [
-    { x: -9.5, y: 1.7, z: -9.5 },
-    { x: 10.5, y: 1.9, z: -10.5 },
+    { x: -5.6, y: 1.0, z: -2.2 },
+    { x: 4.4, y: 0.9, z: -2.6 },
+    { x: 11.2, y: 1.1, z: -1.4 },
   ];
 
-  // Nothing in the near foreground is cut off by the screen edge: scattered props that would be are dropped (the
-  // trees that carry the owl and the crows stay). Lit candles and mushroom glows that stood beside them go too.
-  const keep = new Set<string>([owlTree.id, crowTreeA.id, crowTreeB.id, ...heroIds, ...leftGroup, ...rightGroup]);
+  // Nothing in the near foreground is cut off by the screen edge: scattered props that would be are dropped (the hero
+  // gravestones, the rows and the critter trees stay). Lit candles and mushroom glows that stood beside them go too.
+  const keep = new Set<string>([owlTree.id, crowTreeA.id, crowTreeB.id, ...heroIds, ...leftRow, ...rightRow]);
   const dropped = placements.filter((p) => (p.group === 'small' || p.group === 'oldGrave' || p.group === 'tree') && !keep.has(p.id) && cutByScreenEdge(p));
   if (dropped.length) {
     const gone = new Set(dropped.map((p) => p.id));

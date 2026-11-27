@@ -5,7 +5,9 @@ import { MODELS, type Footprint, type ModelId, type Placement, type WarmSource }
 import { WINDMILL_FOOT } from '../windmill';
 import { WEATHER } from '../weather';
 import { LANE, LANE_Z, MOON_SCALE, TREE_FOOTPRINT, bankHeight, buildAutumnPlan, buildTreeVariant, moonSpot, sideOf, smoothPolyline, type TreeSpot } from './autumn';
+import { buildFill } from './fill';
 import { HILL, HOUSE } from './house';
+import { FAR_PARTS, buildPumpkinFar, farFootprints } from './pumpkinFar';
 import { skeletonFootprints } from './skeletons';
 import { Placer, modelsOf, sampleLine, type UniqueMoon, type UniqueSceneSpec } from './types';
 
@@ -24,6 +26,8 @@ const TRACK: [number, number][] = [[2.0, 14], [0.3, 9], [1.0, 3.5], [-0.9, -1.5]
 const TRACK_HALF_WIDTH = 1.3;
 /** Props keep this far from the trail's centre line: the lane (jack-o'-lanterns, fence and dry corn) is theirs. */
 const LANE_KEEP = 4.6;
+/** The fill is low (pumpkins, vines, tufts, hay): it may stand among the dry corn at the edge of the lane, but not on the fence or the lanterns. */
+const FILL_LANE_KEEP = 3.6;
 
 /** The barn faces the camera; the silo stands behind it on the left, and the windmill on the right, turned toward the camera. */
 export const BARN = { x: -3.8, z: -23, rotY: 0.1, scale: 1.25 };
@@ -150,6 +154,8 @@ export function buildPumpkinPatch(seed: number): UniqueSceneSpec {
     ...placer.reserved,
     { x: HOUSE.x, z: HOUSE.z, hx: HILL.rx * HOUSE.scale, hz: HILL.rz * HOUSE.scale, rotY: HOUSE.rotY },
     ...EXTRA_TREE_SPOTS.map((t) => ({ x: t.x, z: t.z, hx: 1.6 * t.scale, hz: 1.6 * t.scale, rotY: 0 })),
+    // The far scenery (drawn by `PumpkinFar`): the fill keeps off its trees, scarecrows and field-edge props.
+    ...farFootprints(buildPumpkinFar(seed)),
   ];
   const placements: Placement[] = placer.placements;
   return {
@@ -169,12 +175,14 @@ export function buildPumpkinPatch(seed: number): UniqueSceneSpec {
     // No floating ghosts in the Pumpkin Patch: the little witch walking the lane is its only figure.
     ghostSpots: [],
     weather: WEATHER.leaves,
-    layers: { clouds: true, witch: true, bats: 1.6, ghosts: false, mist: true, embers: true },
+    // The dark shared clouds are off: the Pumpkin Patch has its own amber dusk clouds (`DuskClouds`).
+    layers: { clouds: false, witch: true, bats: 1.6, ghosts: false, mist: true, embers: true },
     // The scarecrow, the ground plane, the track and the windmill's sails (a second draw for the same model).
     extras: {
-      tris: PUMPKIN_PARTS.scarecrowTris + PUMPKIN_PARTS.groundTris + 2 * centre.length + PUMPKIN_PARTS.autumnTris + PUMPKIN_PARTS.skeletonTris + PUMPKIN_PARTS.houseTris + PUMPKIN_PARTS.extraTreeTris,
-      calls: PUMPKIN_PARTS.calls + PUMPKIN_PARTS.houseCalls,
+      tris: PUMPKIN_PARTS.scarecrowTris + PUMPKIN_PARTS.groundTris + 2 * centre.length + PUMPKIN_PARTS.autumnTris + PUMPKIN_PARTS.skeletonTris + PUMPKIN_PARTS.houseTris + PUMPKIN_PARTS.extraTreeTris + FAR_PARTS.tris + FAR_PARTS.cloudTris,
+      calls: PUMPKIN_PARTS.calls + PUMPKIN_PARTS.houseCalls + FAR_PARTS.calls + FAR_PARTS.cloudCalls,
     },
+    fill: buildFill({ theme: 'pumpkin', seed, placements, keepOut: cornClear, path: { centre, halfWidth: FILL_LANE_KEEP }, moon: PUMPKIN_MOON }),
     autumn: { ...buildAutumnPlan(PUMPKIN_SEED + seed, line, placements, cornClear), extraTrees: EXTRA_TREE_SPOTS.map(buildTreeVariant) },
   };
 }

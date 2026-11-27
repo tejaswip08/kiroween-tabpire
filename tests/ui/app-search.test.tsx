@@ -40,6 +40,13 @@ describe('search box in the page', () => {
     expect(fake.searches).toEqual([{ text: 'cute bats', disposition: 'CURRENT_TAB' }]);
   });
 
+  it('Enter on a typed address opens it in this tab instead of searching', async () => {
+    render(<App />);
+    expect(screen.getByRole('combobox').getAttribute('placeholder')).toBe('Search the web or type a URL');
+    await userEvent.type(screen.getByRole('combobox'), 'example.com/docs{Enter}');
+    await waitFor(() => expect(fake.tabs.get(me)?.url).toBe('https://example.com/docs'));
+    expect(fake.searches).toEqual([]);
+  });
   it('an open tab suggestion switches to that tab and its window', async () => {
     const other = fake.addTab({ title: 'Weather today', url: 'https://weather.example/', windowId: 9 });
     render(<App />);

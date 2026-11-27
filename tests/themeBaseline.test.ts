@@ -1,5 +1,6 @@
-// Feature: themes. The Crypt must stay exactly as it was before the themes work.
-// Compares today's code with tests/fixtures/crypt-baseline.json, recorded before any change.
+// Feature: themes. The Crypt must stay exactly as recorded in tests/fixtures/crypt-baseline.json: first before the themes
+// work, then re-recorded for the redesign after the prototype (new layout, red moon, pink horizon clouds, purple doorway,
+// red rim light). Any other change to the Crypt must fail here.
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -70,6 +71,8 @@ describe('Crypt baseline', () => {
       farSilhouette: b.components.farSilhouette,
       groundBase: b.components.groundBase,
       groundTint: b.components.groundTint,
+      door: b.components.door,
+      rim: b.components.rim,
     });
     expect(JSON.parse(JSON.stringify(CRYPT_SHADER))).toEqual(b.shader);
   });
@@ -96,7 +99,7 @@ describe('Crypt baseline', () => {
       groundTint: b.components.groundTint,
       hemiSky: b.COLD.hemisphereSky,
       hemiGround: b.COLD.hemisphereGround,
-      rim: b.COLD.rim,
+      rim: b.components.rim,
       moonlight: b.ACCENT.moonlight,
       moon: b.ACCENT.moon,
       ...b.shader,
@@ -106,7 +109,7 @@ describe('Crypt baseline', () => {
       candle: b.WARM.candle,
       lantern: b.WARM.lantern,
       jack: b.WARM.jackOLantern,
-      door: b.WARM.cryptDoor,
+      door: b.components.door,
       mushroom: b.C.mushroom,
       cauldron: b.C.cauldron,
       wisp: b.C.wisp,

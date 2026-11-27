@@ -5,7 +5,7 @@ import { SearchIcon } from './icons';
 
 /**
  * Search box with suggestions (ARIA combobox).
- * Enter with no highlighted suggestion searches the typed text.
+ * Enter with no highlighted suggestion searches the typed text (the page opens it instead when it is an address).
  */
 export function SearchBox({
   sources,
@@ -74,7 +74,7 @@ export function SearchBox({
   return (
     <div className="search" role="search">
       <label className="sr-only" htmlFor={`${id}-input`}>
-        Search the web or your tabs
+        Search the web or type a URL
       </label>
       <div className="search-field">
         <SearchIcon size={22} className="search-icon" />
@@ -89,7 +89,7 @@ export function SearchBox({
           aria-activedescendant={showList && active >= 0 ? `${id}-opt-${active}` : undefined}
           autoComplete="off"
           spellCheck={false}
-          placeholder="Search the web or your tabs"
+          placeholder="Search the web or type a URL"
           value={query}
           onChange={(e) => {
             setQuery(e.target.value);
@@ -103,6 +103,9 @@ export function SearchBox({
           }}
           onKeyDown={onKeyDown}
         />
+        <kbd className="search-hint" aria-hidden="true">
+          Enter
+        </kbd>
       </div>
 
       <ul

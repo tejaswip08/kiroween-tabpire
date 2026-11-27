@@ -18,9 +18,21 @@ void main() {
   float size = 0.6 + aSeed.w * 0.8;
   vec3 p; float alpha = 1.0; float base = 1.0; float angle = 0.0;
   #if defined(KIND_SNOW)
-    float t = fract(ph + uTime * (0.025 + aSeed.w * 0.02));
-    p = vec3(x + sin(uTime * 0.5 + ph * 40.0) * 0.8, 18.0 * (1.0 - t), z + cos(uTime * 0.4 + ph * 30.0) * 0.6);
-    base = 9.0; alpha = 0.9;
+    // The Frozen Cemetery's wind (the same as gustAt and windTravel in frostPlan.ts): fine snow drifts sideways, faster in a gust.
+    float gust = 0.35 + 0.35 * (0.5 + 0.5 * sin(uTime * 0.21)) + 0.3 * (0.5 + 0.5 * sin(uTime * 0.7 + 1.3));
+    float travel = 0.675 * uTime - 0.8333 * (cos(uTime * 0.21) - 1.0) - 0.2143 * (cos(uTime * 0.7 + 1.3) - 0.2675);
+    if (aSeed.w < 0.2) {
+      // Spindrift: a fifth of the flakes sweep low and fast across the snow, lifting a little in the gusts.
+      float sx = mod(x + 28.0 + travel * (3.2 + 2.4 * aSeed.z), 56.0) - 28.0;
+      float hop = fract(ph * 7.31 + uTime * 0.05);
+      p = vec3(sx, 0.05 + 0.5 * hop * hop * gust + 0.08 * sin(uTime * 2.0 + ph * 50.0), z * 0.7 - 2.0);
+      base = 6.5; alpha = 0.55 * (1.0 - smoothstep(24.0, 28.0, abs(sx)));
+    } else {
+      float t = fract(ph + uTime * (0.025 + aSeed.w * 0.02));
+      float fx = mod(x + 28.0 + travel * (0.9 + 0.6 * aSeed.w) + sin(uTime * 0.5 + ph * 40.0) * 0.8, 56.0) - 28.0;
+      p = vec3(fx, 18.0 * (1.0 - t), z + cos(uTime * 0.4 + ph * 30.0) * 0.6);
+      base = 9.0; alpha = 0.9 * (1.0 - smoothstep(25.0, 28.0, abs(fx)));
+    }
   #elif defined(KIND_ASH)
     float t = fract(ph + uTime * (0.012 + aSeed.w * 0.01));
     p = vec3(x + uTime * 0.25 * (aSeed.w - 0.3) + sin(uTime * 0.3 + ph * 50.0) * 1.4, 16.0 * (1.0 - t), z + cos(uTime * 0.25 + ph * 20.0) * 1.2);

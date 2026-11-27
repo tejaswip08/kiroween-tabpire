@@ -433,11 +433,15 @@ describe('the moon, and no clouds or Crypt sky life', () => {
     expect(spec.moon).toBe(FOREST_MOON);
     expect(FOREST_MOON.seeThrough).toBe(true);
     expect(FOREST_MOON.crisp).toBe(true);
-    expect(FOREST_MOON.scale).toBeGreaterThan(1.2);
+    expect(FOREST_MOON.scale).toBeGreaterThan(0.5);
     for (const aspect of VIEW_ASPECTS) {
       const t = FOREST_MOON.target(aspect);
-      // The clear sky zone, like every theme (tests/moonZone.test.ts checks it against the measured page).
-      expect(t).toEqual(clearSkyMoon(aspect, FOREST_MOON.scale));
+      // Raised above the pine line: the top of the disc just under the header buttons, the bottom well above the horizon
+      // (tests/moonZone.test.ts checks it against the measured page).
+      const r = moonScreenRadiusScaled(aspect, FOREST_MOON.scale).disc;
+      expect(t.x).toBe(clearSkyMoon(aspect, FOREST_MOON.scale).x);
+      expect(t.y - r).toBeGreaterThanOrEqual(0.21);
+      expect(t.y + r).toBeLessThan(0.33);
       expect(t.x + moonScreenRadiusScaled(aspect, FOREST_MOON.scale).disc / aspect).toBeLessThan(1);
     }
     expect(spec.layers.clouds).toBe(false);

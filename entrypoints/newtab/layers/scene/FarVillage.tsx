@@ -2,7 +2,7 @@ import { useGLTF } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import { useMemo, useRef } from 'react';
 import { Color, DoubleSide, InstancedMesh, type Mesh, MeshBasicMaterial, PlaneGeometry } from 'three';
-import { FAR_ITEMS } from '../../../../lib/scene/depth';
+import { FAR_ITEMS, FAR_SINK } from '../../../../lib/scene/depth';
 import { sceneColorsFor } from './colors';
 import { useDisplay } from './display';
 import { useColorSync } from './themeColors';
@@ -58,7 +58,7 @@ export function FarVillage() {
   });
 
   return (
-    <>
+    <group position={[0, -FAR_SINK, 0]}>
       <mesh geometry={built.village} material={silhouette} frustumCulled={false} renderOrder={-60} />
       <primitive object={windowMesh} />
       {built.bladeGeo && (
@@ -66,6 +66,6 @@ export function FarVillage() {
           <mesh ref={sails} geometry={built.bladeGeo} material={silhouette} frustumCulled={false} renderOrder={-60} />
         </group>
       )}
-    </>
+    </group>
   );
 }

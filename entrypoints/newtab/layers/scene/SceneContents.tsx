@@ -2,8 +2,9 @@ import { Fog } from './Fog';
 import { Cat } from './Cat';
 import { CauldronFx } from './CauldronFx';
 import { Crows } from './Crows';
+import { DepthFog } from './DepthFog';
 import { FarVillage } from './FarVillage';
-import { LowClouds } from './LowClouds';
+import { HorizonClouds } from './HorizonClouds';
 import { OpenCoffin } from './OpenCoffin';
 import { Owl } from './Owl';
 import { Skeletons } from './Skeletons';
@@ -12,6 +13,7 @@ import { Wisps } from './Wisps';
 import { Bats } from './Bats';
 import { Clouds } from './Clouds';
 import { Effects } from './Effects';
+import { FillProps } from './Fill';
 import { Props } from './Props';
 import { Embers } from './Embers';
 import { SceneWeather } from './Weather';
@@ -40,8 +42,9 @@ export function SceneContents() {
       <Lights />
       <Ground />
       <FarVillage />
-      <LowClouds />
+      <HorizonClouds />
       <Props />
+      <FillProps />
       <Cat />
       <Crows />
       <Owl />
@@ -53,6 +56,7 @@ export function SceneContents() {
       <OpenCoffin />
       <Glows />
       <Mist />
+      <DepthFog />
       <Embers />
       <SceneWeather />
       <Effects />

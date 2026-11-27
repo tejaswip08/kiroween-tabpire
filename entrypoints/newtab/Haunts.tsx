@@ -134,7 +134,8 @@ export function Haunts({ pages, tabIcons = {} }: { pages: readonly Haunt[]; tabI
               <button
                 ref={addButton}
                 type="button"
-                className="add-page-btn"
+                // With no pinned pages it is a round + button with its name under it, centred under the search box.
+                className={pages.length === 0 ? 'add-page-btn add-page-round' : 'add-page-btn'}
                 aria-disabled={full || undefined}
                 aria-expanded={adding}
                 aria-haspopup="dialog"
@@ -143,8 +144,10 @@ export function Haunts({ pages, tabIcons = {} }: { pages: readonly Haunt[]; tabI
                 }}
                 {...describedBy}
               >
-                <PlusIcon size={16} />
-                Add page
+                <span className="add-page-plus">
+                  <PlusIcon size={pages.length === 0 ? 18 : 16} />
+                </span>
+                <span className="add-page-label">Add page</span>
               </button>
             )}
           </Tooltip>

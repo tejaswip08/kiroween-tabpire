@@ -87,7 +87,9 @@ describe('themes', () => {
     fc.assert(
       fc.property(fc.constantFrom(...THEME_IDS), fc.constantFrom(...THEME_IDS), (a, b) => {
         const s = themeById(a).scene;
+        // The Crypt's mausoleum doorway glows purple (the redesign after the prototype); every other warm light stays warm.
         for (const key of ['candle', 'lantern', 'jack', 'door', 'ember'] as const) {
+          if (a === 'crypt' && key === 'door') continue;
           const h = hueOf(s[key]);
           expect(h, `${a}.${key}`).toBeGreaterThanOrEqual(WARM_HUE_RANGE[0]);
           expect(h, `${a}.${key}`).toBeLessThanOrEqual(WARM_HUE_RANGE[1]);

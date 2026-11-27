@@ -217,7 +217,7 @@ describe('accessibility', () => {
   it('follows the combobox pattern', async () => {
     const { input } = setup();
     const search = screen.getByRole('search');
-    expect(within(search).getByLabelText('Search the web or your tabs')).toBe(input);
+    expect(within(search).getByLabelText('Search the web or type a URL')).toBe(input);
     expect(input.getAttribute('aria-autocomplete')).toBe('list');
     expect(input.getAttribute('aria-expanded')).toBe('false');
     const listbox = screen.getByRole('listbox', { hidden: true });

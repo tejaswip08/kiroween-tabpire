@@ -70,7 +70,8 @@ import { BASE_SKULLS } from '../../lib/scene/uniqueScenes/skeletons';
 import { FOREST_MOON, cauldronFxAt } from '../../lib/scene/uniqueScenes/forest';
 import { FOREST_PARTS, SWAY_AMPLITUDE, bob, scarecrowSway } from '../../lib/scene/uniqueScenes/forestParts';
 import { buildWitchScarecrow } from '../../entrypoints/newtab/layers/scene/themes/forestShapes';
-import { FROST_GHOST_TINT, FROST_MOON, FROST_PARTS } from '../../lib/scene/uniqueScenes/frost';
+import { FROST_GHOST_TINT, FROST_MOON, FROST_PARTS, SNOW_PINE_TRIS } from '../../lib/scene/uniqueScenes/frost';
+import { frostWind } from '../../entrypoints/newtab/layers/scene/themes/frostWind';
 import { ICICLE_TRIS, LAKE_SEGMENTS, MOUND_TRIS } from '../../lib/scene/uniqueScenes/frostIce';
 import { AURORA_TRIS } from '../../lib/scene/aurora';
 import { BLOOD_MOON, BLOOD_PARTS } from '../../lib/scene/uniqueScenes/bloodmoon';
@@ -150,7 +151,8 @@ describe('ThemeSceneRoot for the Pumpkin Patch', () => {
     });
     for (const m of spec.models.filter((id) => id !== 'farm_windmill')) expect(instanced.has(m), m).toBe(true);
     for (const n of ['windmill', 'windmill-body', 'windmill-sails', 'scarecrow', 'theme-ground', 'theme-path']) expect(named(scene, n), n).toBeDefined();
-    // Shared layers: the sky shader, the moon disc, the clouds, two point-sprite layers (embers, leaves).
+    // Shared layers: the sky shader, the moon disc, two point-sprite layers (embers, leaves); the Pumpkin Patch's own dusk
+    // clouds (uPeach, uPlum) replace the dark shared clouds (uTint).
     const uniforms: string[] = [];
     let points = 0;
     scene.traverse((o) => {
@@ -158,7 +160,9 @@ describe('ThemeSceneRoot for the Pumpkin Patch', () => {
       if (mat?.isShaderMaterial) uniforms.push(...Object.keys(mat.uniforms));
       if ((o as THREE.Points).isPoints) points++;
     });
-    for (const u of ['uTop', 'uLight', 'uTint', 'uCold']) expect(uniforms, u).toContain(u);
+    for (const u of ['uTop', 'uLight', 'uPlum', 'uCold']) expect(uniforms, u).toContain(u);
+    expect(uniforms).not.toContain('uTint');
+    for (const n of ['pumpkin-dusk-clouds', 'pumpkin-far', 'pumpkin-far-buildings', 'pumpkin-far-dead-trees', 'pumpkin-far-crows', 'pumpkin-far-mist']) expect(named(scene, n), n).toBeDefined();
     expect(points).toBe(2);
     expect(scene.fog).not.toBeNull();
     // Real point lights: the jack-o'-lanterns and the barn, never more than the budget.
@@ -343,7 +347,8 @@ describe('ThemeSceneRoot for the Witch\'s Forest', () => {
     expect(moon!.depthTest).toBe(true);
     expect(moon!.depthWrite).toBe(true);
     // The cauldron liquid is drawn at the small pot of the forest, not at the Crypt's.
-    expect(crypt.fx).toEqual([cauldronFxAt(spec.placements.find((p) => p.model === 'forest_cauldron')!)]);
+    // (and at the fill's own small pot).
+    expect(crypt.fx).toEqual([cauldronFxAt(spec.placements.find((p) => p.model === 'forest_cauldron')!), ...spec.fill!.placements.filter((p) => p.model === 'forest_cauldron').map(cauldronFxAt)]);
     expect(crypt.rendered).toEqual([]);
     for (const n of ['crypt', 'arch_gate', 'gravestone', 'fence', 'fence_pillar', 'coffin_open', 'path_A']) expect(named(scene, n), n).toBeUndefined();
   });
@@ -409,7 +414,7 @@ const frostRoot = () => (
   </SceneThemeContext>
 );
 describe('ThemeSceneRoot for the Frozen Cemetery', () => {
-  it('mounts the shared layers, the pond, the path, the chapel, the graveyard and the aurora, and none of the Crypt-only parts', async () => {
+  it('mounts the shared layers, the pond, the path, the house, the graveyard and the aurora, and none of the Crypt-only parts', async () => {
     const { scene } = await mount(frostRoot);
     expect(named(scene, 'fallback')).toBeUndefined();
     const spec = sceneThemeFor('frost').scene.unique!;
@@ -418,7 +423,7 @@ describe('ThemeSceneRoot for the Frozen Cemetery', () => {
       if ((o as THREE.InstancedMesh).isInstancedMesh && spec.models.includes(o.name as never)) instanced.add(o.name);
     });
     for (const m of spec.models) expect(instanced.has(m), m).toBe(true);
-    for (const n of ['theme-ground', 'theme-path', 'frozen-lake', 'chapel-icicles', 'tombstone-icicles', 'snow-mounds', 'aurora', 'frost-far-hills', 'frost-far-pines']) {
+    for (const n of ['theme-ground', 'theme-path', 'frozen-lake', 'house-icicles', 'tombstone-icicles', 'frost-mist-0', 'frost-mist-1', 'snow-mounds', 'aurora', 'frost-far-hills', 'frost-far-pines']) {
       expect(named(scene, n), n).toBeDefined();
     }
     // The mounds, the drifts of the plan and the wolves' ridge share one instanced mesh.
@@ -442,17 +447,20 @@ describe('ThemeSceneRoot for the Frozen Cemetery', () => {
     expect(points).toBe(1);
     expect(scene.fog).not.toBeNull();
     expect(crypt.rendered).toEqual([]);
-    for (const n of ['crypt', 'arch_gate', 'fence', 'fence_pillar', 'coffin_open', 'path_A', 'frost_rock']) expect(named(scene, n), n).toBeUndefined();
+    for (const n of ['crypt', 'arch_gate', 'fence', 'fence_pillar', 'coffin_open', 'path_A']) expect(named(scene, n), n).toBeUndefined();
+    // (`frost_rock` is back as the ice rocks of the fill.)
     // The things that made white streaks and blobs are gone.
     for (const n of ['frost-wind-snow', 'frost-lake-breath', 'frost-ghost-trail', 'frost-rock-caps', 'frost-open-graves', 'frost-candles']) expect(named(scene, n), n).toBeUndefined();
+    // The see-through chapel, the ice block with its skeleton and the owl were removed (they read as broken or unrelated).
+    for (const n of ['frost-chapel', 'frost-chapel-door', 'frost-ice-pillars', 'frost-pillar-skeletons', 'frost-pillar-caps', 'frost-owl', 'chapel-icicles']) expect(named(scene, n), n).toBeUndefined();
   });
   it('draws every part it builds itself as instanced meshes or merged shapes, within the draw calls and triangles it declared', async () => {
     const { scene } = await mount(frostRoot);
     const spec = sceneThemeFor('frost').scene.unique!;
     const own = (o: THREE.Object3D) =>
-      /^(frost-|theme-|chapel-icicles|tree-icicles|tombstone-icicles|frozen-lake|snow-mounds|aurora)/.test(o.name) && !(spec.models as string[]).includes(o.name);
+      /^(frost-|theme-|house-icicles|tree-icicles|tombstone-icicles|frozen-lake|snow-mounds|aurora)/.test(o.name) && !(spec.models as string[]).includes(o.name);
     // These are counted by their own formulas in `spec.extras.tris`; the rest is `FROST_PARTS.partsTris`.
-    const counted = /^(theme-ground|frozen-lake$|chapel-icicles|tree-icicles|tombstone-icicles|snow-mounds|aurora)/;
+    const counted = /^(theme-ground|frozen-lake$|frost-snow-pines|house-icicles|tree-icicles|tombstone-icicles|snow-mounds|aurora)/;
     let calls = 0;
     let tris = 0;
     const kinds = new Set<string>();
@@ -470,16 +478,22 @@ describe('ThemeSceneRoot for the Frozen Cemetery', () => {
     expect(tris).toBeLessThanOrEqual(FROST_PARTS.partsTris);
     expect(spec.extras.calls).toBe(FROST_PARTS.calls);
     for (const n of [
-      'frost-chapel', 'frost-chapel-door', 'frost-stones-slab', 'frost-stones-cross', 'frost-lanterns', 'frost-lantern-flames', 'frost-lantern-halos', 'frost-ice-pillars',
-      'frost-pillar-skeletons', 'frost-fence-bars', 'frost-broken-hand', 'frost-wolves', 'frost-wolf-howl-head', 'frost-owl', 'frost-crows', 'frost-footprints',
+      'frost-house', 'frost-house-windows', 'frost-chimney-smoke', 'frost-gate', 'frost-flag', 'frost-flag-pole', 'frost-far-cottages', 'frost-stones-slab',
+      'frost-stones-cross', 'frost-lanterns', 'frost-hanging-lanterns', 'frost-lantern-flames', 'frost-lantern-halos', 'frost-fence-bars', 'frost-broken-hand',
+      'frost-wolves', 'frost-wolf-howl-head', 'frost-crows', 'frost-footprints', 'frost-mist-0', 'frost-mist-1',
+      'frost-mist-2', 'frost-snow-pines', 'frost-props-angel', 'frost-props-grave', 'frost-props-well', 'frost-props-cart', 'frost-props-bones', 'frost-far-steeple', 'frost-far-windows',
     ]) {
       expect(kinds.has(n), n).toBe(true);
     }
-    for (const n of ['frost-stones-slab', 'frost-stones-cross', 'frost-lanterns', 'frost-fence-bars', 'frost-ice-pillars', 'frost-footprints', 'frost-far-pines']) {
+    for (const n of ['frost-stones-slab', 'frost-stones-cross', 'frost-lanterns', 'frost-hanging-lanterns', 'frost-gate', 'frost-chimney-smoke', 'frost-fence-bars', 'frost-footprints', 'frost-far-pines', 'frost-far-cottages']) {
       expect((named(scene, n) as THREE.InstancedMesh).isInstancedMesh, n).toBe(true);
     }
     expect((named(scene, 'frost-stones-slab') as THREE.InstancedMesh).count + (named(scene, 'frost-stones-cross') as THREE.InstancedMesh).count).toBe(spec.frost!.plan.stones.length);
     expect((named(scene, 'frost-lanterns') as THREE.InstancedMesh).count).toBe(spec.frost!.plan.lanterns.length);
+    // The light cluster pines: no more triangles each than the spec counts for them (shadow pass included).
+    const pines = named(scene, 'frost-snow-pines') as THREE.InstancedMesh;
+    expect(pines.count).toBe(spec.frost!.pines.length);
+    expect(trianglesOf(pines.geometry) * 2).toBeLessThanOrEqual(SNOW_PINE_TRIS);
   });
   it('keeps every lantern flame small, warm and under the Bloom threshold, with a halo no bigger than the lantern', async () => {
     const { scene } = await mount(frostRoot);
@@ -537,11 +551,23 @@ describe('ThemeSceneRoot for the Frozen Cemetery', () => {
     expect(plainBody.g).toBeCloseTo(pal.g, 5);
     expect(plainBody.b).toBeCloseTo(pal.b, 5);
   });
-  it('waves, pulses and howls with time, and holds all of it still under reduced motion', async () => {
+  it('waves, pulses, howls, blows and flickers with time, and holds all of it still under reduced motion', async () => {
     const live = await mount(frostRoot);
     const lake = (named(live.scene, 'frozen-lake') as THREE.Mesh).material as THREE.ShaderMaterial;
     const aurora = (named(live.scene, 'aurora') as THREE.Mesh).material as THREE.ShaderMaterial;
-    const door = (named(live.scene, 'frost-chapel-door') as THREE.Mesh).material as THREE.ShaderMaterial;
+    const windows = (named(live.scene, 'frost-house-windows') as THREE.Mesh).material as THREE.MeshBasicMaterial;
+    const lanterns = named(live.scene, 'frost-hanging-lanterns') as THREE.InstancedMesh;
+    const ghost = () => {
+      let g: THREE.ShaderMaterial | undefined;
+      live.scene.traverse((o) => {
+        const m = (o as THREE.Mesh).material as THREE.ShaderMaterial | undefined;
+        if (m?.isShaderMaterial && 'uWind' in m.uniforms) g = m;
+      });
+      return g!;
+    };
+    const hung = new THREE.Matrix4();
+    lanterns.getMatrixAt(0, hung);
+    const rest = hung.clone();
     const neck = () => named(live.scene, 'frost-wolf-howl-head')!.parent!;
     live.display.time = 5;
     await act(async () => advance(5000, true, live.store.getState()));
@@ -550,7 +576,12 @@ describe('ThemeSceneRoot for the Frozen Cemetery', () => {
     expect(aurora.uniforms.uMoonScale!.value).toBe(live.display.moonScale);
     expect(neck().rotation.z).toBeGreaterThan(0.3);
     expect(lake.uniforms.uPulse!.value).not.toBe(0.6);
-    expect(door.uniforms.uPulse!.value).not.toBe(0.7);
+    expect(windows.color.r).toBeLessThan(1.2);
+    expect(frostWind.amp.value).toBe(1);
+    expect(frostWind.time.value).toBe(5);
+    expect(ghost().uniforms.uWind!.value).toBe(1);
+    lanterns.getMatrixAt(0, hung);
+    expect(hung.equals(rest)).toBe(false);
     live.display.time = 14;
     await act(async () => advance(14000, true, live.store.getState()));
     expect(neck().rotation.z).toBeCloseTo(-0.2, 9);
@@ -563,8 +594,15 @@ describe('ThemeSceneRoot for the Frozen Cemetery', () => {
     expect(((named(still.scene, 'aurora') as THREE.Mesh).material as THREE.ShaderMaterial).uniforms.uTime!.value).toBe(0);
     expect(named(still.scene, 'frost-wolf-howl-head')!.parent!.rotation.z).toBeCloseTo(-0.2, 9);
     expect(((named(still.scene, 'frozen-lake') as THREE.Mesh).material as THREE.ShaderMaterial).uniforms.uPulse!.value).toBe(0.6);
-    expect(((named(still.scene, 'frost-chapel-door') as THREE.Mesh).material as THREE.ShaderMaterial).uniforms.uPulse!.value).toBe(0.7);
-    expect(named(still.scene, 'frost-owl-head')!.parent!.rotation.y).toBe(0);
+    expect(frostWind.amp.value).toBe(0);
+    expect(((named(still.scene, 'frost-house-windows') as THREE.Mesh).material as THREE.MeshBasicMaterial).color.r).toBeCloseTo(1.05, 9);
+    // The lanterns hang straight down from their hooks (no swing).
+    const plan = sceneThemeFor('frost').scene.unique!.frost!.plan;
+    const still0 = new THREE.Matrix4();
+    (named(still.scene, 'frost-hanging-lanterns') as THREE.InstancedMesh).getMatrixAt(0, still0);
+    const up = new THREE.Vector3(0, 1, 0).transformDirection(still0);
+    expect(up.y).toBeCloseTo(1, 6);
+    expect(plan.lanterns.length).toBeGreaterThan(0);
   });
   it('hangs each icicle tip down from its point', () => {
     const m = icicleMatrix({ x: 2, y: 5, z: -3, length: 1, radius: 0.1 });
@@ -822,8 +860,8 @@ describe('ThemedScene points the moon of the shown theme', () => {
     const m = await mount(() => view('pumpkin'));
     expect(m.display.moonScale).toBe(PUMPKIN_MOON.scale);
     expect(m.display.moonTarget).toBe(PUMPKIN_MOON.target);
-    // 160 x 90 is 16:9. The pumpkin moon is low (screen y about 0.34), the Crypt moon higher (about 0.25).
-    const low = m.display.moon.y;
+    // 160 x 90 is 16:9. The pumpkin moon now has the Crypt's size, so it sits at the same clear-sky spot (it was lower and bigger).
+    const pumpkinMoon = [m.display.moon.x, m.display.moon.y, m.display.moon.z];
     await m.rerender(view('crypt'));
     await act(async () => {
       await new Promise((r) => setTimeout(r, 5));
@@ -831,7 +869,7 @@ describe('ThemedScene points the moon of the shown theme', () => {
     expect(m.display.moonScale).toBe(1);
     expect(m.display.moonTarget).toBeNull();
     expect([m.display.moon.x, m.display.moon.y, m.display.moon.z]).toEqual([...moonDirection(16 / 9)]);
-    expect(m.display.moon.y).toBeGreaterThan(low);
+    for (let i = 0; i < 3; i++) expect(pumpkinMoon[i]).toBeCloseTo([...moonDirection(16 / 9)][i]!, 6);
   });
   it('uses the cold silver moon for the Frozen Cemetery', async () => {
     const m = await mount(() => view('frost'));

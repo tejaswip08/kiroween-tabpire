@@ -163,8 +163,9 @@ export function uiRects(w: number, h: number): ScreenRect[] {
 /**
  * The harvest moon: in the clear sky on the right, right of the windmill and under the header buttons, its whole disc
  * above the horizon. Its screen x depends on the window shape, because a wider window brings the windmill toward the centre.
+ * Scale 1.0 (was 1.2): the smaller disc floats higher under the header buttons, with clear sky between it and the horizon.
  */
-export const MOON_SCALE = 1.2;
+export const MOON_SCALE = 1.0;
 export function moonSpot(aspect: number): { x: number; y: number } {
   return clearSkyMoon(aspect, MOON_SCALE);
 }

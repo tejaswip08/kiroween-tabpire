@@ -9,6 +9,7 @@ import {
 } from './layout';
 import { mulberry32 } from './rng';
 import { UNIQUE_SCENES } from './uniqueScenes';
+import type { FillPlan } from './uniqueScenes/fill';
 import { layoutOf, type UniqueSceneSpec } from './uniqueScenes/types';
 
 export interface ThemeScene {
@@ -21,6 +22,8 @@ export interface ThemeScene {
   readonly weather: WeatherSpec | null;
   /** The spec of a unique theme scene (its ground, path, moon, layers and extras). Missing for the Crypt and for themes not moved yet. */
   readonly unique?: UniqueSceneSpec;
+  /** The small props that fill the empty ground, drawn by `FillProps` next to the layout's own props. */
+  readonly fill?: FillPlan;
 }
 
 /** One seed per theme. The base stream (`LAYOUT_SEED`) is never used here. */
@@ -94,10 +97,12 @@ function build(id: ThemeId, seed: number): ThemeScene {
   const unique = id === 'crypt' ? undefined : UNIQUE_SCENES[id];
   if (unique) {
     const spec = unique(seed);
-    return { layout: layoutOf(spec), models: spec.models, anchors: spec.anchors, weather: spec.weather, unique: spec };
+    return { layout: layoutOf(spec), models: spec.models, anchors: spec.anchors, weather: spec.weather, unique: spec, fill: spec.fill };
   }
   const base = seed === LAYOUT_SEED ? layout() : buildLayout(seed);
   const weather = theme.weather ? WEATHER[theme.weather] : null;
+  // The Crypt's layout (lib/scene/layout.ts) is complete in itself: its tombstones, crosses, candles and bones are its own
+  // placements, so it has no separate fill.
   if (id === 'crypt') return { layout: base, models: modelsOf(base.placements), anchors: [], weather };
 
   const rng = mulberry32(THEME_SEED[id] + seed);

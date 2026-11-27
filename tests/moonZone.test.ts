@@ -8,6 +8,7 @@ import { MODELS, layout } from '../lib/scene/layout';
 import { moonScreenRadiusScaled, moonTarget } from '../lib/scene/sky';
 import { themeScene } from '../lib/scene/themeLayout';
 import { ENABLED_THEME_IDS } from '../lib/themes';
+import { TREE_LINE_Z } from '../lib/scene/uniqueScenes/forestHouse';
 
 interface Box { x0: number; x1: number; y0: number; y1: number }
 interface Ui { width: number; height: number; [k: string]: number | Box | null }
@@ -106,5 +107,30 @@ describe.each(ENABLED_THEME_IDS)('the creatures of %s', (id) => {
         }
       }
     }
+  });
+});
+// The whole disc floats above the tree line with open sky under it: for the Witch's Forest the tops of the pine cones of its
+// tree-line under the disc, for every other theme the far horizon. The real drawn disc matches this planned one (checked
+// in the demo by `npm run console:check`, which reads the box Moon.tsx measures from the real camera).
+describe.each(ENABLED_THEME_IDS)('the moon of %s above the tree line', (id) => {
+  const moon = moonOf(id);
+  it.each(['1280x600', '1366x768', '1440x900', '1920x1080', '2000x1032'])('has sky under the whole disc at %s', (size) => {
+    const [w, h] = size.split('x').map(Number) as [number, number];
+    const a = w / h;
+    const cam = cameraAt(0, a, true);
+    const t = moon.target(a);
+    const r = moonScreenRadiusScaled(a, moon.scale).disc;
+    let skyline = project([0, 0, -400], cam)!.y;
+    const forest = themeScene(id).unique?.forest;
+    if (forest) {
+      for (const l of forest.mid.lineTrees) {
+        const q = project([l.x, l.height, TREE_LINE_Z], cam);
+        if (q && q.x > t.x - r / a && q.x < t.x + r / a) skyline = Math.min(skyline, q.y);
+      }
+    }
+    expect(t.y + r, `bottom of the disc vs the tree line (${skyline.toFixed(3)})`).toBeLessThan(skyline - (forest ? 0.01 : 0.005));
+    // Whole in the window, with a margin from the right edge.
+    expect(t.x + r / a).toBeLessThan(0.99);
+    expect(t.y - r).toBeGreaterThan(0);
   });
 });

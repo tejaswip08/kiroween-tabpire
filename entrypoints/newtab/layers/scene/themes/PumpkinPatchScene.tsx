@@ -3,7 +3,9 @@ import { SCARECROW } from '../../../../../lib/scene/uniqueScenes/pumpkin';
 import type { UniqueSceneSpec } from '../../../../../lib/scene/uniqueScenes/types';
 import { ModelBoundary, SafeModelBatch } from '../ModelBatch';
 import { AutumnLane } from './AutumnLane';
+import { DuskClouds } from './DuskClouds';
 import { HauntedHouse } from './HauntedHouse';
+import { PumpkinFar } from './PumpkinFar';
 import { PumpkinSkeletons } from './PumpkinSkeletons';
 import { Scarecrow } from './Scarecrow';
 import { ThemeGround } from './ThemeGround';
@@ -14,6 +16,7 @@ import { Windmill } from './Windmill';
  * The Pumpkin Patch: a farm at dusk. Earth ground and a dirt track, the barn with its silo and windmill, corn, hay, fence,
  * pumpkins and jack-o'-lanterns (every model instanced, one batch per model), and the scarecrow. The windmill's sails turn.
  * The autumn lane (`AutumnLane`) adds the big old tree, the trick-or-treaters, dry corn, a crooked fence, grass banks and leaves.
+ * `PumpkinFar` fills the far field and the horizon in layers, and `DuskClouds` adds amber clouds high in the sky.
  */
 export function PumpkinPatchScene({ spec }: { spec: UniqueSceneSpec }) {
   const groups = useMemo(
@@ -25,6 +28,8 @@ export function PumpkinPatchScene({ spec }: { spec: UniqueSceneSpec }) {
     <>
       <ThemeGround kind={spec.ground.kind} />
       <ThemePath path={spec.path} />
+      <DuskClouds />
+      <PumpkinFar seed={spec.seed} />
       {groups.map((g) => (
         <SafeModelBatch key={g.id} id={g.id} placements={g.placements} />
       ))}

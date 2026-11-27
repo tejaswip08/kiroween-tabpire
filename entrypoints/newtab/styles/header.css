@@ -21,6 +21,14 @@
   min-width: 0;
 }
 
+.brand {
+  position: relative;
+  isolation: isolate;
+}
+/* No cobweb behind the title in the Witch's Forest. */
+[data-theme='forest'] .brand-cobweb {
+  display: none;
+}
 .brand-mark {
   flex: none;
   filter: none;
@@ -186,6 +194,24 @@
   place-items: center;
 }
 
+/* Blood Bank: a red pill with the blood orb. */
+.header-btn-bank {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--blood-bottom) 70%, var(--button-top)), color-mix(in srgb, var(--blood-bottom) 45%, var(--button-bottom)));
+  box-shadow: var(--shadow-button), 0 0 0 1px color-mix(in srgb, var(--blood-top) 55%, transparent) inset;
+}
+@media (max-width: 1100px) {
+  .header-btn-bank {
+    padding: 7px;
+  }
+  .header-btn-bank .header-btn-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}
 .header-btn-dawn {
   background: linear-gradient(180deg, var(--dawn-top), var(--dawn-bottom));
   overflow: hidden;
@@ -218,13 +244,12 @@
   background: var(--dawn-glow);
 }
 
-/* Themes and Blood Bank show only their icon when space is short. Their names stay for screen readers. */
+/* Themes shows only its icon when space is short (Blood Bank too, on narrow screens). Their names stay for screen readers. */
 @media (max-width: 1499px) {
-  .header-btn:not(.header-btn-dawn) {
+  .header-btn:not(.header-btn-dawn):not(.header-btn-bank) {
     padding: 7px;
   }
-
-  .header-btn:not(.header-btn-dawn) .header-btn-label {
+  .header-btn:not(.header-btn-dawn):not(.header-btn-bank) .header-btn-label {
     position: absolute;
     width: 1px;
     height: 1px;

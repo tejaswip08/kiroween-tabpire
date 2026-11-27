@@ -1,7 +1,7 @@
 {
   "COLD": {
-    "skyTop": "#140632",
-    "fog": "#3b2270",
+    "skyTop": "#170838",
+    "fog": "#592176",
     "hemisphereSky": "#9a78ff",
     "hemisphereGround": "#4a2a78",
     "rim": "#9a86ff"
@@ -18,21 +18,21 @@
     "moonlight": "#e2809c"
   },
   "C": {
-    "skyTop": "#140632",
-    "fog": "#3b2270",
+    "skyTop": "#170838",
+    "fog": "#592176",
     "hemiSky": "#9a78ff",
     "hemiGround": "#4a2a78",
-    "rim": "#9a86ff",
+    "rim": "#b0588c",
     "candle": "#ffb347",
     "lantern": "#ff9a3d",
     "jack": "#ff8a1c",
     "ember": "#ff6a1f",
-    "door": "#ffb066",
+    "door": "#b57cff",
     "moon": "#ff2d45",
     "moonlight": "#e2809c",
-    "horizon": "#5c1a5c",
-    "mid": "#2a0e58",
-    "haze": "#74205c",
+    "horizon": "#a4377f",
+    "mid": "#3a1468",
+    "haze": "#c45a9e",
     "mushroom": "#35e8d0",
     "cauldron": "#5cff58",
     "wisp": "#58f0c8",
@@ -40,14 +40,14 @@
   },
   "shader": {
     "moonLight": [
-      0.462,
-      0.058,
-      0.023
+      0.82,
+      0.03,
+      0.035
     ],
     "moonDark": [
-      0.195,
-      0.018,
-      0.009
+      0.42,
+      0.012,
+      0.016
     ],
     "cloudBody": [
       0.045,
@@ -61,10 +61,12 @@
     ]
   },
   "components": {
-    "lowCloud": "#2a1648",
+    "lowCloud": "#e07cb0",
     "farSilhouette": "#190c36",
     "groundBase": "#2d2832",
-    "groundTint": "#b4aab4"
+    "groundTint": "#b4aab4",
+    "door": "#b57cff",
+    "rim": "#b0588c"
   },
   "halo": {
     "starving": [
@@ -138,9 +140,9 @@
         "id": "path-0",
         "model": "path_C",
         "group": "path",
-        "x": -0.36407830863535956,
+        "x": -0.393141257305151,
         "y": 0.02,
-        "z": 8.821359436211786,
+        "z": 9.497750690132778,
         "rotY": 4.71238898038469,
         "scale": 0.9
       },
@@ -148,9 +150,9 @@
         "id": "path-1",
         "model": "path_B",
         "group": "path",
-        "x": 0.9640783086353595,
+        "x": 0.993141257305151,
         "y": 0.02,
-        "z": 8.378640563788213,
+        "z": 9.302249309867223,
         "rotY": 4.71238898038469,
         "scale": 0.9
       },
@@ -158,9 +160,9 @@
         "id": "path-2",
         "model": "path_A",
         "group": "path",
-        "x": -0.9174768991648259,
+        "x": -0.6165714061800714,
         "y": 0.02,
-        "z": 7.161163664623387,
+        "z": 7.913427816292433,
         "rotY": 3.141592653589793,
         "scale": 0.9
       },
@@ -168,9 +170,9 @@
         "id": "path-3",
         "model": "path_C",
         "group": "path",
-        "x": 0.41067971810589315,
+        "x": 0.7697111084302305,
         "y": 0.02,
-        "z": 6.718444792199814,
+        "z": 7.717926436026877,
         "rotY": 3.141592653589793,
         "scale": 0.9
       },
@@ -178,9 +180,9 @@
         "id": "path-4",
         "model": "path_A",
         "group": "path",
-        "x": -1.4708754896942922,
+        "x": -0.840001555054992,
         "y": 0.02,
-        "z": 5.5009678930349875,
+        "z": 6.329104942452088,
         "rotY": 3.141592653589793,
         "scale": 0.9
       },
@@ -188,9 +190,9 @@
         "id": "path-5",
         "model": "path_A",
         "group": "path",
-        "x": -0.14271887242357317,
+        "x": 0.54628095955531,
         "y": 0.02,
-        "z": 5.058249020611415,
+        "z": 6.133603562186532,
         "rotY": 3.141592653589793,
         "scale": 0.9
       },
@@ -198,9 +200,9 @@
         "id": "path-6",
         "model": "path_A",
         "group": "path",
-        "x": -1.2318739295456087,
+        "x": -0.7910313782695457,
         "y": 0.02,
-        "z": 3.419600943822613,
+        "z": 4.530819774976585,
         "rotY": 1.5707963267948966,
         "scale": 0.9
       },
@@ -208,9 +210,9 @@
         "id": "path-7",
         "model": "path_C",
         "group": "path",
-        "x": 0.12754690096306343,
+        "x": 0.5880112757484401,
         "y": 0.02,
-        "z": 3.754227609793978,
+        "z": 4.772152239429733,
         "rotY": 0,
         "scale": 0.9
       },
@@ -218,9 +220,9 @@
         "id": "path-8",
         "model": "path_A",
         "group": "path",
-        "x": -0.8135905970814018,
+        "x": -0.5152228474659486,
         "y": 0.02,
-        "z": 1.720324905686772,
+        "z": 2.9547710275274586,
         "rotY": 0,
         "scale": 0.9
       },
@@ -228,9 +230,9 @@
         "id": "path-9",
         "model": "path_B",
         "group": "path",
-        "x": 0.5458302334272703,
+        "x": 0.8638198065520373,
         "y": 0.02,
-        "z": 2.0549515716581372,
+        "z": 3.1961034919806064,
         "rotY": 3.141592653589793,
         "scale": 0.9
       },
@@ -238,9 +240,9 @@
         "id": "path-10",
         "model": "path_B",
         "group": "path",
-        "x": -0.3953072646171948,
+        "x": -0.24996539927246375,
         "y": 0.02,
-        "z": 0.02104886755093094,
+        "z": 1.5069875023975647,
         "rotY": 1.5707963267948966,
         "scale": 0.9
       },
@@ -248,9 +250,9 @@
         "id": "path-11",
         "model": "path_A",
         "group": "path",
-        "x": 0.9641135658914773,
+        "x": 1.1499519048415845,
         "y": 0.02,
-        "z": 0.3556755335222964,
+        "z": 1.4917710099615424,
         "rotY": 4.71238898038469,
         "scale": 0.9
       },
@@ -258,9 +260,9 @@
         "id": "path-12",
         "model": "path_B",
         "group": "path",
-        "x": 0.009591949170238201,
+        "x": -0.2673556763422035,
         "y": 0.02,
-        "z": -1.3839696057403708,
+        "z": -0.09291798801849006,
         "rotY": 3.141592653589793,
         "scale": 0.9
       },
@@ -268,9 +270,9 @@
         "id": "path-13",
         "model": "path_B",
         "group": "path",
-        "x": 1.3863270017123552,
+        "x": 1.1325616277718447,
         "y": 0.02,
-        "z": -1.6381360769789155,
+        "z": -0.10813448045451234,
         "rotY": 4.71238898038469,
         "scale": 0.9
       },
@@ -278,9 +280,9 @@
         "id": "path-14",
         "model": "path_A",
         "group": "path",
-        "x": -0.30811613987794256,
+        "x": -0.2847459534119432,
         "y": 0.02,
-        "z": -3.104888421418016,
+        "z": -1.692823478434545,
         "rotY": 4.71238898038469,
         "scale": 0.9
       },
@@ -288,189 +290,189 @@
         "id": "path-15",
         "model": "path_A",
         "group": "path",
-        "x": 1.0686189126641743,
+        "x": 1.115171350702105,
         "y": 0.02,
-        "z": -3.3590548926565607,
+        "z": -1.7080399708705674,
         "rotY": 4.71238898038469,
         "scale": 0.9
       },
       {
-        "id": "path-16",
-        "model": "path_C",
-        "group": "path",
-        "x": -0.6258242289261234,
-        "y": 0.02,
-        "z": -4.825807237095662,
-        "rotY": 0,
-        "scale": 0.9
-      },
-      {
-        "id": "path-17",
-        "model": "path_A",
-        "group": "path",
-        "x": 0.7509108236159935,
-        "y": 0.02,
-        "z": -5.079973708334207,
-        "rotY": 4.71238898038469,
-        "scale": 0.9
-      },
-      {
-        "id": "path-18",
-        "model": "path_C",
-        "group": "path",
-        "x": -0.9435323179743041,
-        "y": 0.02,
-        "z": -6.546726052773309,
-        "rotY": 0,
-        "scale": 0.9
-      },
-      {
-        "id": "path-19",
-        "model": "path_B",
-        "group": "path",
-        "x": 0.4332027345678128,
-        "y": 0.02,
-        "z": -6.800892524011854,
-        "rotY": 4.71238898038469,
-        "scale": 0.9
-      },
-      {
-        "id": "path-20",
-        "model": "path_C",
-        "group": "path",
-        "x": -1.1161412592445892,
-        "y": 0.02,
-        "z": -8.521047676847694,
-        "rotY": 3.141592653589793,
-        "scale": 0.9
-      },
-      {
-        "id": "path-21",
-        "model": "path_B",
-        "group": "path",
-        "x": 0.26090792108327954,
-        "y": 0.02,
-        "z": -8.268588660454252,
-        "rotY": 1.5707963267948966,
-        "scale": 0.9
-      },
-      {
-        "id": "path-22",
-        "model": "path_C",
-        "group": "path",
-        "x": -0.8005674887527862,
-        "y": 0.02,
-        "z": -10.24235915225753,
-        "rotY": 1.5707963267948966,
-        "scale": 0.9
-      },
-      {
-        "id": "path-23",
-        "model": "path_B",
-        "group": "path",
-        "x": 0.5764816915750827,
-        "y": 0.02,
-        "z": -9.989900135864088,
-        "rotY": 1.5707963267948966,
-        "scale": 0.9
-      },
-      {
-        "id": "path-24",
-        "model": "path_B",
-        "group": "path",
-        "x": -0.4849937182609828,
-        "y": 0.02,
-        "z": -11.963670627667366,
-        "rotY": 3.141592653589793,
-        "scale": 0.9
-      },
-      {
-        "id": "path-25",
-        "model": "path_B",
-        "group": "path",
-        "x": 0.892055462066886,
-        "y": 0.02,
-        "z": -11.711211611273924,
-        "rotY": 0,
-        "scale": 0.9
-      },
-      {
-        "id": "path-26",
-        "model": "path_C",
-        "group": "path",
-        "x": -0.16941994776917946,
-        "y": 0.02,
-        "z": -13.684982103077202,
-        "rotY": 0,
-        "scale": 0.9
-      },
-      {
-        "id": "path-27",
-        "model": "path_A",
-        "group": "path",
-        "x": 1.2076292325586895,
-        "y": 0.02,
-        "z": -13.43252308668376,
-        "rotY": 4.71238898038469,
-        "scale": 0.9
-      },
-      {
-        "id": "path-28",
-        "model": "path_C",
-        "group": "path",
-        "x": -0.13586611332047616,
-        "y": 0.02,
-        "z": -15.281459732020396,
-        "rotY": 0,
-        "scale": 0.9
-      },
-      {
-        "id": "path-29",
-        "model": "path_A",
-        "group": "path",
-        "x": 1.2635940755933293,
-        "y": 0.02,
-        "z": -15.32033362615689,
-        "rotY": 4.71238898038469,
-        "scale": 0.9
-      },
-      {
-        "id": "path-30",
-        "model": "path_A",
-        "group": "path",
-        "x": -0.1844584809910943,
-        "y": 0.02,
-        "z": -17.030784968162653,
-        "rotY": 0,
-        "scale": 0.9
-      },
-      {
-        "id": "path-31",
-        "model": "path_C",
-        "group": "path",
-        "x": 1.2150017079227111,
-        "y": 0.02,
-        "z": -17.069658862299146,
-        "rotY": 3.141592653589793,
-        "scale": 0.9
-      },
-      {
-        "id": "gate-32",
+        "id": "gate-16",
         "model": "arch_gate",
         "group": "gate",
-        "x": 0.5,
+        "x": 0.4,
         "y": 0,
-        "z": -20.4,
+        "z": -3.6,
+        "rotY": 0,
+        "scale": 0.82
+      },
+      {
+        "id": "fence-17",
+        "model": "fence",
+        "group": "fence",
+        "x": 4.4302,
+        "y": 0,
+        "z": -3.6,
+        "rotY": 0,
+        "scale": 1
+      },
+      {
+        "id": "fence-18",
+        "model": "fence_pillar",
+        "group": "fence",
+        "x": 6.7302,
+        "y": 0,
+        "z": -3.6,
+        "rotY": 0,
+        "scale": 1
+      },
+      {
+        "id": "fence-19",
+        "model": "fence_broken",
+        "group": "fence",
+        "x": 9.030199999999999,
+        "y": 0,
+        "z": -3.6,
+        "rotY": 0,
+        "scale": 1
+      },
+      {
+        "id": "fence-20",
+        "model": "fence_pillar",
+        "group": "fence",
+        "x": 11.330199999999998,
+        "y": 0,
+        "z": -3.6,
+        "rotY": 0,
+        "scale": 1
+      },
+      {
+        "id": "fence-21",
+        "model": "fence_broken",
+        "group": "fence",
+        "x": 13.6302,
+        "y": 0,
+        "z": -3.6,
+        "rotY": 0,
+        "scale": 1
+      },
+      {
+        "id": "fence-22",
+        "model": "fence_pillar",
+        "group": "fence",
+        "x": 15.9302,
+        "y": 0,
+        "z": -3.6,
+        "rotY": 0,
+        "scale": 1
+      },
+      {
+        "id": "fence-23",
+        "model": "fence",
+        "group": "fence",
+        "x": 18.230199999999996,
+        "y": 0,
+        "z": -3.6,
+        "rotY": 0,
+        "scale": 1
+      },
+      {
+        "id": "fence-24",
+        "model": "fence_pillar",
+        "group": "fence",
+        "x": 20.530199999999997,
+        "y": 0,
+        "z": -3.6,
+        "rotY": 0,
+        "scale": 1
+      },
+      {
+        "id": "fence-25",
+        "model": "fence",
+        "group": "fence",
+        "x": 22.830199999999998,
+        "y": 0,
+        "z": -3.6,
+        "rotY": 0,
+        "scale": 1
+      },
+      {
+        "id": "fence-26",
+        "model": "fence_pillar",
+        "group": "fence",
+        "x": 25.1302,
+        "y": 0,
+        "z": -3.6,
+        "rotY": 0,
+        "scale": 1
+      },
+      {
+        "id": "fence-27",
+        "model": "fence_broken",
+        "group": "fence",
+        "x": -3.6302,
+        "y": 0,
+        "z": -3.6,
+        "rotY": 0,
+        "scale": 1
+      },
+      {
+        "id": "fence-28",
+        "model": "fence_pillar",
+        "group": "fence",
+        "x": -5.930199999999999,
+        "y": 0,
+        "z": -3.6,
+        "rotY": 0,
+        "scale": 1
+      },
+      {
+        "id": "fence-29",
+        "model": "fence",
+        "group": "fence",
+        "x": -8.230199999999998,
+        "y": 0,
+        "z": -3.6,
+        "rotY": 0,
+        "scale": 1
+      },
+      {
+        "id": "fence-30",
+        "model": "fence_pillar",
+        "group": "fence",
+        "x": -10.530199999999997,
+        "y": 0,
+        "z": -3.6,
+        "rotY": 0,
+        "scale": 1
+      },
+      {
+        "id": "fence-31",
+        "model": "fence",
+        "group": "fence",
+        "x": -12.8302,
+        "y": 0,
+        "z": -3.6,
+        "rotY": 0,
+        "scale": 1
+      },
+      {
+        "id": "fence-32",
+        "model": "fence_pillar",
+        "group": "fence",
+        "x": -15.130199999999999,
+        "y": 0,
+        "z": -3.6,
         "rotY": 0,
         "scale": 1
       },
       {
         "id": "fence-33",
-        "model": "fence_broken",
+        "model": "fence",
         "group": "fence",
-        "x": 4.949999999999999,
+        "x": -17.4302,
         "y": 0,
-        "z": -20.4,
+        "z": -3.6,
         "rotY": 0,
         "scale": 1
       },
@@ -478,9 +480,9 @@
         "id": "fence-34",
         "model": "fence_pillar",
         "group": "fence",
-        "x": 7.249999999999999,
+        "x": -19.7302,
         "y": 0,
-        "z": -20.4,
+        "z": -3.6,
         "rotY": 0,
         "scale": 1
       },
@@ -488,9 +490,9 @@
         "id": "fence-35",
         "model": "fence",
         "group": "fence",
-        "x": 9.549999999999999,
+        "x": -22.0302,
         "y": 0,
-        "z": -20.4,
+        "z": -3.6,
         "rotY": 0,
         "scale": 1
       },
@@ -498,1841 +500,2288 @@
         "id": "fence-36",
         "model": "fence_pillar",
         "group": "fence",
-        "x": 11.849999999999998,
+        "x": -24.3302,
         "y": 0,
-        "z": -20.4,
+        "z": -3.6,
         "rotY": 0,
         "scale": 1
       },
       {
-        "id": "fence-37",
-        "model": "fence",
-        "group": "fence",
-        "x": 14.149999999999999,
+        "id": "crypt-37",
+        "model": "crypt",
+        "group": "crypt",
+        "x": 6.35,
         "y": 0,
-        "z": -20.4,
-        "rotY": 0,
-        "scale": 1
+        "z": -8,
+        "rotY": -0.45,
+        "scale": 0.56
       },
       {
         "id": "fence-38",
-        "model": "fence_pillar",
+        "model": "arch",
         "group": "fence",
-        "x": 16.45,
-        "y": 0,
-        "z": -20.4,
-        "rotY": 0,
-        "scale": 1
-      },
-      {
-        "id": "fence-39",
-        "model": "fence_broken",
-        "group": "fence",
-        "x": 18.75,
-        "y": 0,
-        "z": -20.4,
-        "rotY": 0,
-        "scale": 1
-      },
-      {
-        "id": "fence-40",
-        "model": "fence_pillar",
-        "group": "fence",
-        "x": 21.05,
-        "y": 0,
-        "z": -20.4,
-        "rotY": 0,
-        "scale": 1
-      },
-      {
-        "id": "fence-41",
-        "model": "fence",
-        "group": "fence",
-        "x": 23.349999999999998,
-        "y": 0,
-        "z": -20.4,
-        "rotY": 0,
-        "scale": 1
-      },
-      {
-        "id": "fence-42",
-        "model": "fence_pillar",
-        "group": "fence",
-        "x": 25.65,
-        "y": 0,
-        "z": -20.4,
-        "rotY": 0,
-        "scale": 1
-      },
-      {
-        "id": "fence-43",
-        "model": "fence",
-        "group": "fence",
-        "x": -3.9499999999999993,
-        "y": 0,
-        "z": -20.4,
-        "rotY": 0,
-        "scale": 1
-      },
-      {
-        "id": "fence-44",
-        "model": "fence_pillar",
-        "group": "fence",
-        "x": -6.249999999999999,
-        "y": 0,
-        "z": -20.4,
-        "rotY": 0,
-        "scale": 1
-      },
-      {
-        "id": "fence-45",
-        "model": "fence",
-        "group": "fence",
-        "x": -8.549999999999999,
-        "y": 0,
-        "z": -20.4,
-        "rotY": 0,
-        "scale": 1
-      },
-      {
-        "id": "fence-46",
-        "model": "fence_pillar",
-        "group": "fence",
-        "x": -10.849999999999998,
-        "y": 0,
-        "z": -20.4,
-        "rotY": 0,
-        "scale": 1
-      },
-      {
-        "id": "fence-47",
-        "model": "fence",
-        "group": "fence",
-        "x": -13.149999999999999,
-        "y": 0,
-        "z": -20.4,
-        "rotY": 0,
-        "scale": 1
-      },
-      {
-        "id": "fence-48",
-        "model": "fence_pillar",
-        "group": "fence",
-        "x": -15.45,
-        "y": 0,
-        "z": -20.4,
-        "rotY": 0,
-        "scale": 1
-      },
-      {
-        "id": "fence-49",
-        "model": "fence",
-        "group": "fence",
-        "x": -17.75,
-        "y": 0,
-        "z": -20.4,
-        "rotY": 0,
-        "scale": 1
-      },
-      {
-        "id": "fence-50",
-        "model": "fence_pillar",
-        "group": "fence",
-        "x": -20.05,
-        "y": 0,
-        "z": -20.4,
-        "rotY": 0,
-        "scale": 1
-      },
-      {
-        "id": "fence-51",
-        "model": "fence",
-        "group": "fence",
-        "x": -22.349999999999998,
-        "y": 0,
-        "z": -20.4,
-        "rotY": 0,
-        "scale": 1
-      },
-      {
-        "id": "fence-52",
-        "model": "fence_pillar",
-        "group": "fence",
-        "x": -24.65,
-        "y": 0,
-        "z": -20.4,
-        "rotY": 0,
-        "scale": 1
-      },
-      {
-        "id": "crypt-53",
-        "model": "crypt",
-        "group": "crypt",
-        "x": 8,
-        "y": 0,
-        "z": -27,
-        "rotY": -0.17268149161800544,
-        "scale": 1
-      },
-      {
-        "id": "pumpkin-54",
-        "model": "pumpkin_orange_jackolantern",
-        "group": "pumpkin",
-        "x": -4.9,
-        "y": 0,
-        "z": 6.2,
-        "rotY": 0.35,
-        "scale": 1
-      },
-      {
-        "id": "pumpkin-55",
-        "model": "pumpkin_yellow_jackolantern",
-        "group": "pumpkin",
-        "x": 4.9,
-        "y": 0,
-        "z": 5.6,
-        "rotY": -0.4,
-        "scale": 0.95
-      },
-      {
-        "id": "pumpkin-56",
-        "model": "pumpkin_orange_jackolantern",
-        "group": "pumpkin",
-        "x": -10.2,
-        "y": 0,
-        "z": 0.2,
-        "rotY": 0.5,
-        "scale": 0.87
-      },
-      {
-        "id": "pumpkin-57",
-        "model": "pumpkin_yellow_jackolantern",
-        "group": "pumpkin",
-        "x": 10.4,
-        "y": 0,
-        "z": -1.2,
-        "rotY": -0.5,
-        "scale": 0.84
-      },
-      {
-        "id": "lantern-58",
-        "model": "lantern_standing",
-        "group": "lantern",
-        "x": -2,
-        "y": 0,
-        "z": -18.7,
-        "rotY": 0,
-        "scale": 1.5
-      },
-      {
-        "id": "lantern-59",
-        "model": "lantern_standing",
-        "group": "lantern",
-        "x": 3,
-        "y": 0,
-        "z": -18.7,
-        "rotY": 0,
-        "scale": 1.5
-      },
-      {
-        "id": "lantern-60",
-        "model": "post_lantern",
-        "group": "lantern",
-        "x": -14.5,
-        "y": 0,
-        "z": -5,
-        "rotY": 1.5707963267948966,
-        "scale": 1
-      },
-      {
-        "id": "lantern-61",
-        "model": "post_lantern",
-        "group": "lantern",
-        "x": 14.5,
-        "y": 0,
-        "z": -2,
-        "rotY": -1.5707963267948966,
-        "scale": 1
-      },
-      {
-        "id": "lantern-62",
-        "model": "post_lantern",
-        "group": "lantern",
-        "x": -11,
-        "y": 0,
-        "z": -17,
-        "rotY": 1.5707963267948966,
-        "scale": 1
-      },
-      {
-        "id": "lantern-63",
-        "model": "post_lantern",
-        "group": "lantern",
-        "x": -19.5,
-        "y": 0,
-        "z": -14,
-        "rotY": 1.5707963267948966,
-        "scale": 1
-      },
-      {
-        "id": "newGrave-64",
-        "model": "gravestone",
-        "group": "newGrave",
-        "x": -11.4,
-        "y": 0,
-        "z": -8,
-        "rotY": 0.04934796418994665,
-        "scale": 1,
-        "slot": 0
-      },
-      {
-        "id": "newGrave-65",
-        "model": "grave_B",
-        "group": "newGrave",
-        "x": -9,
-        "y": 0,
-        "z": -8.5,
-        "rotY": 0.0066893276944756525,
-        "scale": 1,
-        "slot": 1
-      },
-      {
-        "id": "newGrave-66",
-        "model": "gravestone",
-        "group": "newGrave",
-        "x": -6.6,
-        "y": 0,
-        "z": -8,
-        "rotY": -0.010038016280159351,
-        "scale": 1,
-        "slot": 2
-      },
-      {
-        "id": "newGrave-67",
-        "model": "grave_B",
-        "group": "newGrave",
-        "x": -20.4,
-        "y": 0,
-        "z": -7,
-        "rotY": -0.012333546057343485,
-        "scale": 1,
-        "slot": 3
-      },
-      {
-        "id": "newGrave-68",
-        "model": "gravestone",
-        "group": "newGrave",
-        "x": -18,
-        "y": 0,
-        "z": -7.5,
-        "rotY": 0.025419675791636107,
-        "scale": 1,
-        "slot": 4
-      },
-      {
-        "id": "newGrave-69",
-        "model": "grave_B",
-        "group": "newGrave",
-        "x": -15.6,
-        "y": 0,
-        "z": -7,
-        "rotY": 0.029899932118132716,
-        "scale": 1,
-        "slot": 5
-      },
-      {
-        "id": "newGrave-70",
-        "model": "gravestone",
-        "group": "newGrave",
-        "x": -11.9,
-        "y": 0,
-        "z": -14.5,
-        "rotY": -0.004229941936209798,
-        "scale": 1,
-        "slot": 6
-      },
-      {
-        "id": "newGrave-71",
-        "model": "grave_B",
-        "group": "newGrave",
-        "x": -9.5,
-        "y": 0,
-        "z": -15,
-        "rotY": -0.03538954264484346,
-        "scale": 1,
-        "slot": 7
-      },
-      {
-        "id": "newGrave-72",
-        "model": "gravestone",
-        "group": "newGrave",
-        "x": -7.1,
-        "y": 0,
-        "z": -14.5,
-        "rotY": 0.028074621828272944,
-        "scale": 1,
-        "slot": 8
-      },
-      {
-        "id": "newGrave-73",
-        "model": "grave_B",
-        "group": "newGrave",
-        "x": -23.9,
-        "y": 0,
-        "z": -11,
-        "rotY": -0.03367583052255213,
-        "scale": 1,
-        "slot": 9
-      },
-      {
-        "id": "newGrave-74",
-        "model": "gravestone",
-        "group": "newGrave",
-        "x": -21.5,
-        "y": 0,
-        "z": -11.5,
-        "rotY": 0.010495904143899684,
-        "scale": 1,
-        "slot": 10
-      },
-      {
-        "id": "newGrave-75",
-        "model": "grave_B",
-        "group": "newGrave",
-        "x": -19.1,
-        "y": 0,
-        "z": -11,
-        "rotY": -0.025749278627336024,
-        "scale": 1,
-        "slot": 11
-      },
-      {
-        "id": "newGrave-76",
-        "model": "gravestone",
-        "group": "newGrave",
-        "x": 6.6,
-        "y": 0,
-        "z": -8,
-        "rotY": -0.054199441177770494,
-        "scale": 1,
-        "slot": 12
-      },
-      {
-        "id": "newGrave-77",
-        "model": "grave_B",
-        "group": "newGrave",
-        "x": 9,
-        "y": 0,
-        "z": -8.5,
-        "rotY": -0.014625537190586325,
-        "scale": 1,
-        "slot": 13
-      },
-      {
-        "id": "newGrave-78",
-        "model": "gravestone",
-        "group": "newGrave",
         "x": 11.4,
         "y": 0,
-        "z": -8,
-        "rotY": 0.0030439234524965303,
-        "scale": 1,
-        "slot": 14
+        "z": -7.4,
+        "rotY": -0.3,
+        "scale": 0.72
       },
       {
-        "id": "newGrave-79",
-        "model": "grave_B",
-        "group": "newGrave",
-        "x": 15.6,
-        "y": 0,
-        "z": -7,
-        "rotY": -0.04969228634610772,
-        "scale": 1,
-        "slot": 15
-      },
-      {
-        "id": "newGrave-80",
-        "model": "gravestone",
-        "group": "newGrave",
-        "x": 18,
-        "y": 0,
-        "z": -7.5,
-        "rotY": -0.0278838983271271,
-        "scale": 1,
-        "slot": 16
-      },
-      {
-        "id": "newGrave-81",
-        "model": "grave_B",
-        "group": "newGrave",
-        "x": 20.4,
-        "y": 0,
-        "z": -7,
-        "rotY": 0.043261308744549754,
-        "scale": 1,
-        "slot": 17
-      },
-      {
-        "id": "newGrave-82",
-        "model": "gravestone",
-        "group": "newGrave",
-        "x": 7.1,
-        "y": 0,
-        "z": -14.5,
-        "rotY": 0.05594892181456089,
-        "scale": 1,
-        "slot": 18
-      },
-      {
-        "id": "newGrave-83",
-        "model": "grave_B",
-        "group": "newGrave",
-        "x": 9.5,
-        "y": 0,
-        "z": -15,
-        "rotY": 0.015408873371779916,
-        "scale": 1,
-        "slot": 19
-      },
-      {
-        "id": "newGrave-84",
-        "model": "gravestone",
-        "group": "newGrave",
-        "x": 11.9,
-        "y": 0,
-        "z": -14.5,
-        "rotY": 0.04647583748213947,
-        "scale": 1,
-        "slot": 20
-      },
-      {
-        "id": "newGrave-85",
-        "model": "grave_B",
-        "group": "newGrave",
-        "x": 19.1,
-        "y": 0,
-        "z": -11,
-        "rotY": -0.0024943186808377496,
-        "scale": 1,
-        "slot": 21
-      },
-      {
-        "id": "newGrave-86",
-        "model": "gravestone",
-        "group": "newGrave",
-        "x": 21.5,
-        "y": 0,
-        "z": -11.5,
-        "rotY": 0.053434001673012974,
-        "scale": 1,
-        "slot": 22
-      },
-      {
-        "id": "newGrave-87",
-        "model": "grave_B",
-        "group": "newGrave",
-        "x": 23.9,
-        "y": 0,
-        "z": -11,
-        "rotY": -0.03346062119118869,
-        "scale": 1,
-        "slot": 23
-      },
-      {
-        "id": "coffin-88",
-        "model": "coffin_open",
-        "group": "coffin",
-        "x": -23,
-        "y": 0,
-        "z": -26,
-        "rotY": -0.013585164258256552,
-        "scale": 2.2,
-        "slot": 0
-      },
-      {
-        "id": "coffin-89",
-        "model": "coffin_open",
-        "group": "coffin",
-        "x": -19.5,
-        "y": 0,
-        "z": -26,
-        "rotY": 0.06447196928784252,
-        "scale": 2.2,
-        "slot": 1
-      },
-      {
-        "id": "coffin-90",
-        "model": "coffin_open",
-        "group": "coffin",
-        "x": -16,
-        "y": 0,
-        "z": -26.5,
-        "rotY": -0.01150643769651652,
-        "scale": 2.2,
-        "slot": 2
-      },
-      {
-        "id": "coffin-91",
-        "model": "coffin_open",
-        "group": "coffin",
-        "x": -12.5,
-        "y": 0,
-        "z": -27,
-        "rotY": 0.07449964988045396,
-        "scale": 2.2,
-        "slot": 3
-      },
-      {
-        "id": "coffin-92",
-        "model": "coffin_open",
-        "group": "coffin",
-        "x": -9,
-        "y": 0,
-        "z": -28.5,
-        "rotY": -0.013525389926508063,
-        "scale": 2.2,
-        "slot": 4
-      },
-      {
-        "id": "coffin-93",
-        "model": "coffin_open",
-        "group": "coffin",
-        "x": -5,
-        "y": 0,
-        "z": -29,
-        "rotY": -0.08013169928453863,
-        "scale": 2.2,
-        "slot": 5
-      },
-      {
-        "id": "coffin-94",
-        "model": "coffin_open",
-        "group": "coffin",
-        "x": -1.5,
-        "y": 0,
-        "z": -30,
-        "rotY": -0.038561141397804026,
-        "scale": 2.2,
-        "slot": 6
-      },
-      {
-        "id": "coffin-95",
-        "model": "coffin_open",
-        "group": "coffin",
-        "x": 2,
-        "y": 0,
-        "z": -31.5,
-        "rotY": -0.009733762731775647,
-        "scale": 2.2,
-        "slot": 7
-      },
-      {
-        "id": "candle-96",
-        "model": "candle_triple",
-        "group": "candle",
-        "x": -3.6307692307692307,
-        "y": 0,
-        "z": 3.5,
-        "rotY": 0.7214481975903976,
-        "scale": 1,
-        "slot": 0
-      },
-      {
-        "id": "candle-97",
-        "model": "candle_thin",
-        "group": "candle",
-        "x": 2.5692307692307694,
-        "y": 0,
-        "z": 3.5,
-        "rotY": 5.536179775675075,
-        "scale": 1,
-        "slot": 1
-      },
-      {
-        "id": "candle-98",
-        "model": "candle_melted",
-        "group": "candle",
-        "x": -2.4,
-        "y": 0,
-        "z": -1.5,
-        "rotY": 2.6105287611270316,
-        "scale": 1,
-        "slot": 2
-      },
-      {
-        "id": "candle-99",
-        "model": "candle_triple",
-        "group": "candle",
-        "x": 3.8000000000000003,
-        "y": 0,
-        "z": -1.5,
-        "rotY": 0.6320729920572006,
-        "scale": 1,
-        "slot": 3
-      },
-      {
-        "id": "candle-100",
-        "model": "candle_thin",
-        "group": "candle",
-        "x": -3.3230769230769233,
-        "y": 0,
-        "z": -6.5,
-        "rotY": 3.036500619856187,
-        "scale": 1,
-        "slot": 4
-      },
-      {
-        "id": "candle-101",
-        "model": "candle_melted",
-        "group": "candle",
-        "x": 2.876923076923077,
-        "y": 0,
-        "z": -6.5,
-        "rotY": 0.8010676340137952,
-        "scale": 1,
-        "slot": 5
-      },
-      {
-        "id": "candle-102",
-        "model": "candle_triple",
-        "group": "candle",
-        "x": -3.05,
-        "y": 0,
-        "z": -11,
-        "rotY": 3.0053297035424054,
-        "scale": 1,
-        "slot": 6
-      },
-      {
-        "id": "candle-103",
-        "model": "candle_thin",
-        "group": "candle",
-        "x": 3.1500000000000004,
-        "y": 0,
-        "z": -11,
-        "rotY": 5.377384402536109,
-        "scale": 1,
-        "slot": 7
-      },
-      {
-        "id": "candle-104",
-        "model": "candle_melted",
-        "group": "candle",
-        "x": -2.513888888888889,
-        "y": 0,
-        "z": -14.5,
-        "rotY": 5.181969549305951,
-        "scale": 1,
-        "slot": 8
-      },
-      {
-        "id": "candle-105",
-        "model": "candle_triple",
-        "group": "candle",
-        "x": 3.6861111111111113,
-        "y": 0,
-        "z": -14.5,
-        "rotY": 1.8413229094157881,
-        "scale": 1,
-        "slot": 9
-      },
-      {
-        "id": "candle-106",
-        "model": "candle_thin",
-        "group": "candle",
-        "x": -2.5833333333333335,
-        "y": 0,
-        "z": -17,
-        "rotY": 4.634918061524244,
-        "scale": 1,
-        "slot": 10
-      },
-      {
-        "id": "candle-107",
-        "model": "candle_melted",
-        "group": "candle",
-        "x": 3.6166666666666667,
-        "y": 0,
-        "z": -17,
-        "rotY": 3.260533831418697,
-        "scale": 1,
-        "slot": 11
-      },
-      {
-        "id": "tree-108",
-        "model": "tree_pine_orange_large",
+        "id": "tree-40",
+        "model": "tree_pine_orange_medium",
         "group": "tree",
-        "x": -23.667279360326937,
+        "x": -3.6,
         "y": 0,
-        "z": -15.849532890599221,
-        "rotY": 2.273117812618119,
-        "scale": 1.1499279703130014,
-        "tilt": [
-          -0.06945557412225754,
-          0.010863945917226378
-        ]
-      },
-      {
-        "id": "tree-109",
-        "model": "tree_pine_orange_large",
-        "group": "tree",
-        "x": 22.091671424359085,
-        "y": 0,
-        "z": -16.30608753510751,
-        "rotY": 3.8653867485762334,
-        "scale": 1.1082253541680984,
+        "z": -8.8,
+        "rotY": 1.1,
+        "scale": 0.6,
         "tilt": [
           0.06991510746069254,
           0.06752478672657164
         ]
       },
       {
-        "id": "tree-110",
-        "model": "tree_pine_orange_medium",
+        "id": "tree-41",
+        "model": "tree_pine_yellow_medium",
         "group": "tree",
-        "x": -22.773520167870448,
+        "x": 2.6,
         "y": 0,
-        "z": -0.12909392267465591,
-        "rotY": 1.8391977195445282,
-        "scale": 1.1226531660067849,
+        "z": -11.4,
+        "rotY": 2,
+        "scale": 0.52,
         "tilt": [
           -0.03711589869577438,
           -0.0272485744394362
         ]
       },
       {
-        "id": "tree-111",
-        "model": "tree_pine_orange_medium",
-        "group": "tree",
-        "x": 22.204291039216333,
-        "y": 0,
-        "z": -1.0564284319989383,
-        "rotY": 3.30564294842877,
-        "scale": 1.087062668579165,
-        "tilt": [
-          -0.06097657022532076,
-          0.017537771472707395
-        ]
-      },
-      {
-        "id": "tree-112",
+        "id": "tree-42",
         "model": "tree_dead_large",
         "group": "tree",
-        "x": -20.948015581117943,
+        "x": -7.6,
         "y": 0,
-        "z": -3.914165211841464,
-        "rotY": 2.6322714483743717,
-        "scale": 1.1180315005127341,
+        "z": -1.2,
+        "rotY": 2.641592653589793,
+        "scale": 1.1
+      },
+      {
+        "id": "lantern-43",
+        "model": "lantern_hanging",
+        "group": "lantern",
+        "x": -6.7107288276343535,
+        "y": 3.1885000000000003,
+        "z": 0.20082467925127245,
+        "rotY": 0,
+        "scale": 0.75
+      },
+      {
+        "id": "tree-44",
+        "model": "tree_dead_medium",
+        "group": "tree",
+        "x": 8.2,
+        "y": 0,
+        "z": -0.4,
+        "rotY": 3.391592653589793,
+        "scale": 0.9
+      },
+      {
+        "id": "lantern-45",
+        "model": "lantern_hanging",
+        "group": "lantern",
+        "x": 7.048932043007753,
+        "y": 1.5588,
+        "z": -0.10608409640562688,
+        "rotY": 0,
+        "scale": 0.72
+      },
+      {
+        "id": "pumpkin-46",
+        "model": "pumpkin_orange_jackolantern",
+        "group": "pumpkin",
+        "x": -3.4,
+        "y": 0,
+        "z": 6.6,
+        "rotY": 0.45,
+        "scale": 1.3
+      },
+      {
+        "id": "pumpkin-47",
+        "model": "pumpkin_orange_jackolantern",
+        "group": "pumpkin",
+        "x": -3.3,
+        "y": 0,
+        "z": 4,
+        "rotY": 0.3,
+        "scale": 1.1
+      },
+      {
+        "id": "pumpkin-48",
+        "model": "pumpkin_yellow_jackolantern",
+        "group": "pumpkin",
+        "x": 3,
+        "y": 0,
+        "z": 3.9,
+        "rotY": -0.35,
+        "scale": 1
+      },
+      {
+        "id": "pumpkin-49",
+        "model": "pumpkin_orange_jackolantern",
+        "group": "pumpkin",
+        "x": 3.3,
+        "y": 0,
+        "z": 6.3,
+        "rotY": -0.35,
+        "scale": 1.25
+      },
+      {
+        "id": "pumpkin-50",
+        "model": "pumpkin_yellow_jackolantern",
+        "group": "pumpkin",
+        "x": 6.9,
+        "y": 0,
+        "z": 3.6,
+        "rotY": -0.6,
+        "scale": 1.05
+      },
+      {
+        "id": "pumpkin-51",
+        "model": "pumpkin_orange_jackolantern",
+        "group": "pumpkin",
+        "x": -10.6,
+        "y": 0,
+        "z": 2.4,
+        "rotY": 0.6,
+        "scale": 0.9
+      },
+      {
+        "id": "lantern-52",
+        "model": "lantern_standing",
+        "group": "lantern",
+        "x": -2.0802,
+        "y": 0,
+        "z": -2.3,
+        "rotY": 0,
+        "scale": 1.2
+      },
+      {
+        "id": "lantern-53",
+        "model": "lantern_standing",
+        "group": "lantern",
+        "x": 2.8802,
+        "y": 0,
+        "z": -2.3,
+        "rotY": 0,
+        "scale": 1.2
+      },
+      {
+        "id": "lantern-54",
+        "model": "post_lantern",
+        "group": "lantern",
+        "x": -11.2,
+        "y": 0,
+        "z": -2.2,
+        "rotY": 1.5707963267948966,
+        "scale": 1
+      },
+      {
+        "id": "lantern-55",
+        "model": "post_lantern",
+        "group": "lantern",
+        "x": 12.6,
+        "y": 0,
+        "z": -1.6,
+        "rotY": -1.5707963267948966,
+        "scale": 1
+      },
+      {
+        "id": "newGrave-56",
+        "model": "gravestone",
+        "group": "newGrave",
+        "x": -6.65,
+        "y": 0,
+        "z": -6.25,
+        "rotY": -0.01986450140364468,
+        "scale": 1,
+        "slot": 0
+      },
+      {
+        "id": "newGrave-57",
+        "model": "grave_B",
+        "group": "newGrave",
+        "x": -4.949999999999999,
+        "y": 0,
+        "z": -7.1,
+        "rotY": -0.015340337567031383,
+        "scale": 1,
+        "slot": 1
+      },
+      {
+        "id": "newGrave-58",
+        "model": "gravestone",
+        "group": "newGrave",
+        "x": -2.1999999999999997,
+        "y": 0,
+        "z": -6.6,
+        "rotY": 0.04757843063212931,
+        "scale": 1,
+        "slot": 2
+      },
+      {
+        "id": "newGrave-59",
+        "model": "grave_B",
+        "group": "newGrave",
+        "x": -13.45,
+        "y": 0,
+        "z": -5.75,
+        "rotY": -0.029598718900233505,
+        "scale": 1,
+        "slot": 3
+      },
+      {
+        "id": "newGrave-60",
+        "model": "gravestone",
+        "group": "newGrave",
+        "x": -8.25,
+        "y": 0,
+        "z": -5.55,
+        "rotY": -0.0065248594991862766,
+        "scale": 1,
+        "slot": 4
+      },
+      {
+        "id": "newGrave-61",
+        "model": "grave_B",
+        "group": "newGrave",
+        "x": -6.199999999999999,
+        "y": 0,
+        "z": -5.4,
+        "rotY": -0.016245623538270595,
+        "scale": 1,
+        "slot": 5
+      },
+      {
+        "id": "newGrave-62",
+        "model": "gravestone",
+        "group": "newGrave",
+        "x": -18,
+        "y": 0,
+        "z": -6.4,
+        "rotY": 0.01873863520100713,
+        "scale": 1,
+        "slot": 6
+      },
+      {
+        "id": "newGrave-63",
+        "model": "grave_B",
+        "group": "newGrave",
+        "x": -15.6,
+        "y": 0,
+        "z": -6.9,
+        "rotY": 0.008085231073200708,
+        "scale": 1,
+        "slot": 7
+      },
+      {
+        "id": "newGrave-64",
+        "model": "gravestone",
+        "group": "newGrave",
+        "x": -13.549999999999999,
+        "y": 0,
+        "z": -6.75,
+        "rotY": -0.018338096877560016,
+        "scale": 1,
+        "slot": 8
+      },
+      {
+        "id": "newGrave-65",
+        "model": "grave_B",
+        "group": "newGrave",
+        "x": -10.6,
+        "y": 0,
+        "z": -11.6,
+        "rotY": -0.034645300693809986,
+        "scale": 1,
+        "slot": 9
+      },
+      {
+        "id": "newGrave-66",
+        "model": "gravestone",
+        "group": "newGrave",
+        "x": -8.2,
+        "y": 0,
+        "z": -12.1,
+        "rotY": 0.05388447258621454,
+        "scale": 1,
+        "slot": 10
+      },
+      {
+        "id": "newGrave-67",
+        "model": "grave_B",
+        "group": "newGrave",
+        "x": -5.799999999999999,
+        "y": 0,
+        "z": -11.6,
+        "rotY": -0.04742021452635527,
+        "scale": 1,
+        "slot": 11
+      },
+      {
+        "id": "newGrave-68",
+        "model": "gravestone",
+        "group": "newGrave",
+        "x": 6.799999999999999,
+        "y": 0,
+        "z": -12.6,
+        "rotY": -0.03634801849722862,
+        "scale": 1,
+        "slot": 12
+      },
+      {
+        "id": "newGrave-69",
+        "model": "grave_B",
+        "group": "newGrave",
+        "x": 9.2,
+        "y": 0,
+        "z": -13.1,
+        "rotY": 0.03589750897139311,
+        "scale": 1,
+        "slot": 13
+      },
+      {
+        "id": "newGrave-70",
+        "model": "gravestone",
+        "group": "newGrave",
+        "x": 11.6,
+        "y": 0,
+        "z": -12.6,
+        "rotY": 0.034906913163140416,
+        "scale": 1,
+        "slot": 14
+      },
+      {
+        "id": "newGrave-71",
+        "model": "grave_B",
+        "group": "newGrave",
+        "x": 13,
+        "y": 0,
+        "z": -5.8999999999999995,
+        "rotY": -0.04417032385244965,
+        "scale": 1,
+        "slot": 15
+      },
+      {
+        "id": "newGrave-72",
+        "model": "gravestone",
+        "group": "newGrave",
+        "x": 15.4,
+        "y": 0,
+        "z": -7.1,
+        "rotY": -0.059425186570733785,
+        "scale": 1,
+        "slot": 16
+      },
+      {
+        "id": "newGrave-73",
+        "model": "grave_B",
+        "group": "newGrave",
+        "x": 17.8,
+        "y": 0,
+        "z": -6.6,
+        "rotY": 0.03251249738037586,
+        "scale": 1,
+        "slot": 17
+      },
+      {
+        "id": "newGrave-74",
+        "model": "gravestone",
+        "group": "newGrave",
+        "x": 13.999999999999998,
+        "y": 0,
+        "z": -11.6,
+        "rotY": -0.04065466532483697,
+        "scale": 1,
+        "slot": 18
+      },
+      {
+        "id": "newGrave-75",
+        "model": "grave_B",
+        "group": "newGrave",
+        "x": 16.4,
+        "y": 0,
+        "z": -12.1,
+        "rotY": -0.03642737335525453,
+        "scale": 1,
+        "slot": 19
+      },
+      {
+        "id": "newGrave-76",
+        "model": "gravestone",
+        "group": "newGrave",
+        "x": 18.799999999999997,
+        "y": 0,
+        "z": -11.6,
+        "rotY": 0.0525478764809668,
+        "scale": 1,
+        "slot": 20
+      },
+      {
+        "id": "newGrave-77",
+        "model": "grave_B",
+        "group": "newGrave",
+        "x": -0.7999999999999998,
+        "y": 0,
+        "z": -14.4,
+        "rotY": 0.019213501755148174,
+        "scale": 1,
+        "slot": 21
+      },
+      {
+        "id": "newGrave-78",
+        "model": "gravestone",
+        "group": "newGrave",
+        "x": 1.6,
+        "y": 0,
+        "z": -14.9,
+        "rotY": -0.05434550763107836,
+        "scale": 1,
+        "slot": 22
+      },
+      {
+        "id": "newGrave-79",
+        "model": "grave_B",
+        "group": "newGrave",
+        "x": 4,
+        "y": 0,
+        "z": -14.4,
+        "rotY": 0.012295771166682248,
+        "scale": 1,
+        "slot": 23
+      },
+      {
+        "id": "coffin-80",
+        "model": "coffin_open",
+        "group": "coffin",
+        "x": -3.6,
+        "y": 0,
+        "z": -17,
+        "rotY": -0.061841651611030106,
+        "scale": 2.2,
+        "slot": 0
+      },
+      {
+        "id": "coffin-81",
+        "model": "coffin_open",
+        "group": "coffin",
+        "x": -6.8,
+        "y": 0,
+        "z": -17.6,
+        "rotY": -0.09636599747464061,
+        "scale": 2.2,
+        "slot": 1
+      },
+      {
+        "id": "coffin-82",
+        "model": "coffin_open",
+        "group": "coffin",
+        "x": -10,
+        "y": 0,
+        "z": -17,
+        "rotY": 0.08082497031427921,
+        "scale": 2.2,
+        "slot": 2
+      },
+      {
+        "id": "coffin-83",
+        "model": "coffin_open",
+        "group": "coffin",
+        "x": -13.2,
+        "y": 0,
+        "z": -16.4,
+        "rotY": -0.030989782605320218,
+        "scale": 2.2,
+        "slot": 3
+      },
+      {
+        "id": "coffin-84",
+        "model": "coffin_open",
+        "group": "coffin",
+        "x": -16.4,
+        "y": 0,
+        "z": -16,
+        "rotY": -0.04065695176832378,
+        "scale": 2.2,
+        "slot": 4
+      },
+      {
+        "id": "coffin-85",
+        "model": "coffin_open",
+        "group": "coffin",
+        "x": -19.6,
+        "y": 0,
+        "z": -15.4,
+        "rotY": 0.09536356558091938,
+        "scale": 2.2,
+        "slot": 5
+      },
+      {
+        "id": "coffin-86",
+        "model": "coffin_open",
+        "group": "coffin",
+        "x": -12.4,
+        "y": 0,
+        "z": -20.6,
+        "rotY": 0.040367679204791784,
+        "scale": 2.2,
+        "slot": 6
+      },
+      {
+        "id": "coffin-87",
+        "model": "coffin_open",
+        "group": "coffin",
+        "x": -6.2,
+        "y": 0,
+        "z": -21.2,
+        "rotY": 0.053417671611532574,
+        "scale": 2.2,
+        "slot": 7
+      },
+      {
+        "id": "candle-88",
+        "model": "candle_triple",
+        "group": "candle",
+        "x": -2.003846153846154,
+        "y": 0,
+        "z": 7.6,
+        "rotY": 5.72544601640227,
+        "scale": 1,
+        "slot": 0
+      },
+      {
+        "id": "candle-89",
+        "model": "candle_thin",
+        "group": "candle",
+        "x": 2.096153846153846,
+        "y": 0,
+        "z": 7.6,
+        "rotY": 3.4918450326301174,
+        "scale": 1,
+        "slot": 1
+      },
+      {
+        "id": "candle-90",
+        "model": "candle_melted",
+        "group": "candle",
+        "x": -2.2824999999999998,
+        "y": 0,
+        "z": 5.4,
+        "rotY": 2.61600335021707,
+        "scale": 1,
+        "slot": 2
+      },
+      {
+        "id": "candle-91",
+        "model": "candle_triple",
+        "group": "candle",
+        "x": 1.8174999999999997,
+        "y": 0,
+        "z": 5.4,
+        "rotY": 2.495809692148766,
+        "scale": 1,
+        "slot": 3
+      },
+      {
+        "id": "candle-92",
+        "model": "candle_thin",
+        "group": "candle",
+        "x": -1.8624999999999998,
+        "y": 0,
+        "z": 3,
+        "rotY": 4.472563765650432,
+        "scale": 1,
+        "slot": 4
+      },
+      {
+        "id": "candle-93",
+        "model": "candle_melted",
+        "group": "candle",
+        "x": 2.2375,
+        "y": 0,
+        "z": 2.65,
+        "rotY": 4.707149438342447,
+        "scale": 1,
+        "slot": 5
+      },
+      {
+        "id": "candle-94",
+        "model": "candle_triple",
+        "group": "candle",
+        "x": -1.6054347826086954,
+        "y": 0,
+        "z": 1,
+        "rotY": 2.9201134117246585,
+        "scale": 1,
+        "slot": 6
+      },
+      {
+        "id": "candle-95",
+        "model": "candle_thin",
+        "group": "candle",
+        "x": 2.494565217391304,
+        "y": 0,
+        "z": 1,
+        "rotY": 1.2886005338074114,
+        "scale": 1,
+        "slot": 7
+      },
+      {
+        "id": "candle-96",
+        "model": "candle_melted",
+        "group": "candle",
+        "x": -1.6249999999999998,
+        "y": 0,
+        "z": -0.8,
+        "rotY": 4.611576415056692,
+        "scale": 1,
+        "slot": 8
+      },
+      {
+        "id": "candle-97",
+        "model": "candle_triple",
+        "group": "candle",
+        "x": 2.4749999999999996,
+        "y": 0,
+        "z": -0.8,
+        "rotY": 1.3783302907033814,
+        "scale": 1,
+        "slot": 9
+      },
+      {
+        "id": "candle-98",
+        "model": "candle_thin",
+        "group": "candle",
+        "x": -1.292391304347826,
+        "y": 0,
+        "z": -2.4,
+        "rotY": 3.6911569094440915,
+        "scale": 1,
+        "slot": 10
+      },
+      {
+        "id": "candle-99",
+        "model": "candle_melted",
+        "group": "candle",
+        "x": 2.1076086956521736,
+        "y": 0,
+        "z": -2.4,
+        "rotY": 1.7933635774085344,
+        "scale": 1,
+        "slot": 11
+      },
+      {
+        "id": "tree-101",
+        "model": "tree_dead_large",
+        "group": "tree",
+        "x": -19.52305637882091,
+        "y": 0,
+        "z": -8.949474642984569,
+        "rotY": 1.09353185965986,
+        "scale": 1.1877949183690362,
         "tilt": [
           0.013297671251930293,
           -0.05341896719299258
         ]
       },
       {
-        "id": "tree-113",
-        "model": "tree_dead_large_decorated",
+        "id": "tree-102",
+        "model": "tree_pine_yellow_medium",
         "group": "tree",
-        "x": 21.518566290917807,
+        "x": -23.742001065053046,
         "y": 0,
-        "z": 3.280148521065712,
-        "rotY": 5.393004350449636,
-        "scale": 1.0953620413900353,
+        "z": -8.34592967806384,
+        "rotY": 5.287003531524336,
+        "scale": 0.9060655553359539,
         "tilt": [
           -0.046126345433294774,
           0.025729830651544036
         ]
       },
       {
-        "id": "tree-114",
-        "model": "tree_dead_medium",
+        "id": "tree-103",
+        "model": "tree_dead_large",
         "group": "tree",
-        "x": -16.735745122190565,
+        "x": 22.192999497056007,
         "y": 0,
-        "z": -23.581834237324074,
-        "rotY": 4.947188887188987,
-        "scale": 1.222296223277226,
+        "z": 0.40039187110960484,
+        "rotY": 5.4005491090619735,
+        "scale": 1.004433922795579,
         "tilt": [
           0.04422692267689854,
           -0.03600877003744245
         ]
       },
       {
-        "id": "tree-115",
-        "model": "tree_dead_medium",
+        "id": "tree-104",
+        "model": "forest_twisted_a",
         "group": "tree",
-        "x": 23.144960220437497,
+        "x": -20.012925809249282,
         "y": 0,
-        "z": -23.045042202807963,
-        "rotY": 2.136968818037434,
-        "scale": 1.1759160190122202,
+        "z": -0.5651417043991387,
+        "rotY": 3.385355909204975,
+        "scale": 0.26754191166721286,
         "tilt": [
           -0.02435206441674382,
           0.017319848062470555
         ]
       },
       {
-        "id": "tree-116",
-        "model": "forest_twisted_a",
+        "id": "tree-105",
+        "model": "tree_pine_orange_large",
         "group": "tree",
-        "x": -23.526620577042923,
+        "x": -21.572690084809437,
         "y": 0,
-        "z": -7.911154466681182,
-        "rotY": 4.959710096656192,
-        "scale": 0.2809003402385861,
+        "z": -21.752555776387453,
+        "rotY": 0.15863146487152938,
+        "scale": 1.2014466534019448,
         "tilt": [
           -0.01139665593858808,
           -0.0008266990259289675
         ]
       },
       {
-        "id": "tree-117",
-        "model": "forest_twisted_b",
-        "group": "tree",
-        "x": 23.20302419187501,
-        "y": 0,
-        "z": -5.835144134704024,
-        "rotY": 1.3457348637615858,
-        "scale": 0.29601637654006485,
-        "tilt": [
-          -0.024948223833926024,
-          0.029682711269706494
-        ]
-      },
-      {
-        "id": "tree-118",
-        "model": "tree_pine_orange_large",
-        "group": "tree",
-        "x": -17.10773147828877,
-        "y": 0,
-        "z": -30.830592650920153,
-        "rotY": 4.8777342166603175,
-        "scale": 1.0101702294196002,
-        "tilt": [
-          -0.012542906957678499,
-          -0.03622671007178724
-        ]
-      },
-      {
-        "id": "tree-120",
-        "model": "tree_dead_medium",
-        "group": "tree",
-        "x": 24.074768854188733,
-        "y": 0,
-        "z": 2.8231482785195112,
-        "rotY": 5.09189140139524,
-        "scale": 1.1213566174847074,
-        "tilt": [
-          -0.017892950722016396,
-          0.036838680091314024
-        ]
-      },
-      {
-        "id": "oldGrave-121",
+        "id": "oldGrave-106",
         "model": "grave_A",
         "group": "oldGrave",
-        "x": -7.4,
+        "x": -4.6,
         "y": 0,
-        "z": 3,
-        "rotY": 0.15,
-        "scale": 1.4,
+        "z": 2,
+        "rotY": 0.22,
+        "scale": 1.2,
         "tilt": [
-          0.025625610235147186,
-          0.0009709617355838432
+          -0.021384191857650878,
+          0.025442323945462697
         ]
       },
       {
-        "id": "oldGrave-122",
+        "id": "oldGrave-107",
         "model": "grave_B",
         "group": "oldGrave",
-        "x": 6.4,
+        "x": -7.7,
         "y": 0,
-        "z": 2.6,
-        "rotY": -0.15,
-        "scale": 1.4,
+        "z": 1.5,
+        "rotY": 0.12,
+        "scale": 1.15,
         "tilt": [
-          0.038850760343484586,
-          -0.030448089679703118
+          -0.010751063106581568,
+          -0.031051465775817633
+        ]
+      },
+      {
+        "id": "oldGrave-108",
+        "model": "gravestone",
+        "group": "oldGrave",
+        "x": -5.6,
+        "y": 0,
+        "z": 5.2,
+        "rotY": 0.3,
+        "scale": 1.3,
+        "tilt": [
+          -0.011063856007531285,
+          -0.05297413065098226
+        ]
+      },
+      {
+        "id": "oldGrave-109",
+        "model": "grave_B",
+        "group": "oldGrave",
+        "x": 4.9,
+        "y": 0,
+        "z": 1,
+        "rotY": -0.18,
+        "scale": 1.15,
+        "tilt": [
+          -0.01533681490458548,
+          0.031576011506840584
+        ]
+      },
+      {
+        "id": "oldGrave-110",
+        "model": "grave_A_destroyed",
+        "group": "oldGrave",
+        "x": 7.6,
+        "y": 0,
+        "z": 1.8,
+        "rotY": -0.32,
+        "scale": 1,
+        "tilt": [
+          0.030750732282176618,
+          0.0011651540827006118
+        ]
+      },
+      {
+        "id": "oldGrave-111",
+        "model": "gravestone",
+        "group": "oldGrave",
+        "x": 6,
+        "y": 0,
+        "z": 6.4,
+        "rotY": -0.38,
+        "scale": 1.35,
+        "tilt": [
+          0.0466209124121815,
+          -0.03653770761564374
+        ]
+      },
+      {
+        "id": "oldGrave-112",
+        "model": "grave_B",
+        "group": "oldGrave",
+        "x": -3.531650200579315,
+        "y": 0,
+        "z": -1.5679503638297319,
+        "rotY": -0.0540447945240885,
+        "scale": 0.8607592222397216,
+        "tilt": [
+          0.029639380965381865,
+          -0.051242409227415915
+        ]
+      },
+      {
+        "id": "oldGrave-113",
+        "model": "grave_A",
+        "group": "oldGrave",
+        "x": 3.880343468673527,
+        "y": 0,
+        "z": -1.281476167961955,
+        "rotY": 0.019125360413454473,
+        "scale": 0.9559988402412273,
+        "tilt": [
+          0.027889446141198274,
+          -0.0378008605632931
+        ]
+      },
+      {
+        "id": "oldGrave-114",
+        "model": "gravestone",
+        "group": "oldGrave",
+        "x": 5.976616817340255,
+        "y": 0,
+        "z": -1.6599625868722798,
+        "rotY": -0.10530978231690824,
+        "scale": 0.9842785915825516,
+        "tilt": [
+          0.021740108672529457,
+          -0.008735603559762238
+        ]
+      },
+      {
+        "id": "oldGrave-115",
+        "model": "grave_B",
+        "group": "oldGrave",
+        "x": 7.891231920570135,
+        "y": 0,
+        "z": -1.904768044129014,
+        "rotY": -0.10830240172799677,
+        "scale": 0.9368961801868864,
+        "tilt": [
+          0.03546044158749283,
+          0.05786611712537705
+        ]
+      },
+      {
+        "id": "oldGrave-116",
+        "model": "grave_B",
+        "group": "oldGrave",
+        "x": -14.595087985973807,
+        "y": 0,
+        "z": 0.9466368583962321,
+        "rotY": -0.029908071737736464,
+        "scale": 0.9541472563170827,
+        "tilt": [
+          -0.04219454552046954,
+          0.043075130414217705
+        ]
+      },
+      {
+        "id": "oldGrave-117",
+        "model": "gravestone",
+        "group": "oldGrave",
+        "x": -12.555482123279944,
+        "y": 0,
+        "z": 0.761375161446631,
+        "rotY": 0.13250415888614953,
+        "scale": 0.9943631122121588,
+        "tilt": [
+          0.05591396785341203,
+          0.01061396925710141
+        ]
+      },
+      {
+        "id": "oldGrave-118",
+        "model": "grave_A",
+        "group": "oldGrave",
+        "x": -10.20762767479755,
+        "y": 0,
+        "z": 0.7663513094186784,
+        "rotY": -0.17593154241330922,
+        "scale": 0.9961617290740833,
+        "tilt": [
+          -0.024597951639443637,
+          -0.03650146851316094
+        ]
+      },
+      {
+        "id": "oldGrave-119",
+        "model": "gravestone",
+        "group": "oldGrave",
+        "x": 10.148292193841188,
+        "y": 0,
+        "z": 1.2775611393153667,
+        "rotY": 0.2496679751202464,
+        "scale": 0.994287365861237,
+        "tilt": [
+          -0.03838860841467977,
+          -0.04656909791752696
+        ]
+      },
+      {
+        "id": "oldGrave-120",
+        "model": "grave_A_destroyed",
+        "group": "oldGrave",
+        "x": 12.28135774540715,
+        "y": 0,
+        "z": 1.1817389775067566,
+        "rotY": 0.21519380481913686,
+        "scale": 0.9323656374355778,
+        "tilt": [
+          0.02506187335588038,
+          -0.024798832247033713
+        ]
+      },
+      {
+        "id": "small-121",
+        "model": "gravemarker_A",
+        "group": "small",
+        "x": -8.051537313312293,
+        "y": 0,
+        "z": 3.3961514523252845,
+        "rotY": 0.4,
+        "scale": 1.171412435686216,
+        "tilt": [
+          -0.037436179742217066,
+          -0.01116524649783969
+        ]
+      },
+      {
+        "id": "small-122",
+        "model": "gravemarker_B",
+        "group": "small",
+        "x": 9.031530983373523,
+        "y": 0,
+        "z": 3.627815959230065,
+        "rotY": -0.3,
+        "scale": 1.1578519683331252,
+        "tilt": [
+          -0.04943611714057624,
+          -0.0405479134619236
         ]
       },
       {
         "id": "small-123",
-        "model": "candle_triple",
+        "model": "skull_candle",
         "group": "small",
-        "x": -5.9,
+        "x": -2.637705589015968,
         "y": 0,
-        "z": 1.6,
-        "rotY": 0,
-        "scale": 1.3,
+        "z": 2.1058467708993707,
+        "rotY": 4.9401975812073164,
+        "scale": 1,
         "tilt": [
-          0.024699484137818223,
-          -0.042702007689513266
+          0.02449044247157872,
+          0.020727156735956667
         ]
       },
       {
         "id": "small-124",
-        "model": "candle_thin",
+        "model": "candle_triple",
         "group": "small",
-        "x": -4,
+        "x": 2.8256082474486903,
         "y": 0,
-        "z": 1.7000000000000002,
-        "rotY": 3.4,
+        "z": 1.7302652636775746,
+        "rotY": 1.0443485918707682,
         "scale": 1.3,
         "tilt": [
-          0.023241205117665226,
-          -0.031500717136077584
+          -0.02446111628785729,
+          0.05640427281148731
         ]
       },
       {
         "id": "small-125",
-        "model": "candle_thin",
+        "model": "candle_melted",
         "group": "small",
-        "x": 3.1999999999999997,
+        "x": 4.954793759598397,
         "y": 0,
-        "z": 0.2,
-        "rotY": 0,
-        "scale": 1.3,
+        "z": 4.407990125054493,
+        "rotY": 1.9185925702473148,
+        "scale": 1.4,
         "tilt": [
-          0.018116757227107885,
-          -0.0072796696331351995
+          -0.019587280880659814,
+          0.01147546243853867
         ]
       },
       {
         "id": "small-126",
-        "model": "candle_melted",
+        "model": "candle_thin",
         "group": "small",
-        "x": 4.199999999999999,
+        "x": -4.958290940639563,
         "y": 0,
-        "z": 0.75,
-        "rotY": 1.7,
+        "z": 3.9377957219257946,
+        "rotY": 3.3233192881021254,
         "scale": 1.3,
         "tilt": [
-          0.02955036798957736,
-          0.04822176427114755
+          -0.009692020174115898,
+          -0.045770020857453346
         ]
       },
       {
         "id": "small-127",
-        "model": "skull",
+        "model": "candle_melted",
         "group": "small",
-        "x": 5.1,
+        "x": -2.1279419928090646,
         "y": 0,
-        "z": 0.30000000000000004,
-        "rotY": 3.4,
-        "scale": 1.3,
-        "tilt": [
-          -0.03516212126705796,
-          0.03589594201184809
-        ]
-      },
-      {
-        "id": "oldGrave-128",
-        "model": "gravestone",
-        "group": "oldGrave",
-        "x": -15,
-        "y": 0,
-        "z": -3.8,
-        "rotY": -0.08,
-        "scale": 1.05,
-        "tilt": [
-          0.0465949732111767,
-          0.008844974380917844
-        ]
-      },
-      {
-        "id": "oldGrave-129",
-        "model": "grave_A",
-        "group": "oldGrave",
-        "x": -10,
-        "y": 0,
-        "z": -3.8,
-        "rotY": 0.08,
-        "scale": 1.05,
-        "tilt": [
-          -0.020498293032869697,
-          -0.030417890427634122
-        ]
-      },
-      {
-        "id": "oldGrave-130",
-        "model": "grave_A",
-        "group": "oldGrave",
-        "x": 10.3,
-        "y": 0,
-        "z": -4.6,
-        "rotY": -0.08,
-        "scale": 1.05,
-        "tilt": [
-          -0.03199050701223314,
-          -0.038807581597939136
-        ]
-      },
-      {
-        "id": "oldGrave-131",
-        "model": "gravestone",
-        "group": "oldGrave",
-        "x": 12.8,
-        "y": 0,
-        "z": -5.1,
-        "rotY": 0,
-        "scale": 1.05,
-        "tilt": [
-          0.020884894463233647,
-          -0.020665693539194764
-        ]
-      },
-      {
-        "id": "oldGrave-132",
-        "model": "grave_B",
-        "group": "oldGrave",
-        "x": 15.3,
-        "y": 0,
-        "z": -4.6,
-        "rotY": 0.08,
-        "scale": 1.05,
-        "tilt": [
-          -0.031196816451847555,
-          -0.009304372081533077
-        ]
-      },
-      {
-        "id": "oldGrave-133",
-        "model": "gravestone",
-        "group": "oldGrave",
-        "x": 8,
-        "y": 0,
-        "z": 0.8,
-        "rotY": -0.2,
+        "z": -1.4267744150711223,
+        "rotY": 2.44235958093709,
         "scale": 1.2,
         "tilt": [
-          -0.04119676428381354,
-          -0.03378992788493633
+          -0.03326538361608982,
+          -0.04651850832626223
         ]
       },
       {
-        "id": "pumpkin-134",
+        "id": "small-128",
         "model": "pumpkin_orange",
-        "group": "pumpkin",
-        "x": -8.6,
+        "group": "small",
+        "x": -2.5158217567950487,
         "y": 0,
-        "z": 5.6,
-        "rotY": 5.098561276479453,
-        "scale": 0.9
+        "z": 0.19928781581111255,
+        "rotY": 4.699713545704815,
+        "scale": 0.8,
+        "tilt": [
+          0.05825742233544588,
+          0.042082354528829455
+        ]
       },
       {
-        "id": "pumpkin-135",
+        "id": "small-129",
+        "model": "pumpkin_orange",
+        "group": "small",
+        "x": 5.226703055296094,
+        "y": 0,
+        "z": 2.62074649464339,
+        "rotY": 4.413884679053799,
+        "scale": 0.7,
+        "tilt": [
+          -0.011930244192481038,
+          0.0070838348753750335
+        ]
+      },
+      {
+        "id": "small-130",
         "model": "pumpkin_yellow_small",
-        "group": "pumpkin",
-        "x": 8.6,
+        "group": "small",
+        "x": -6.696365625970065,
         "y": 0,
-        "z": 5.4,
-        "rotY": 1.747839925005684,
-        "scale": 0.9
+        "z": 3.6321964098140596,
+        "rotY": 3.205277137801327,
+        "scale": 1.2,
+        "tilt": [
+          0.05095785646699369,
+          -0.04325721083208918
+        ]
       },
       {
-        "id": "critter-136",
-        "model": "gravestone",
-        "group": "critter",
-        "x": -7.8,
+        "id": "small-131",
+        "model": "skull",
+        "group": "small",
+        "x": -2.0727676029782742,
         "y": 0,
-        "z": -0.6,
-        "rotY": 0.15,
-        "scale": 1.35
+        "z": 6.192258083214984,
+        "rotY": 0.36331779549593435,
+        "scale": 0.45,
+        "tilt": [
+          0.030799648175016042,
+          0.03976085881702601
+        ]
       },
       {
-        "id": "critter-137",
-        "model": "dirt_mound",
-        "group": "critter",
-        "x": -5,
+        "id": "small-132",
+        "model": "skull",
+        "group": "small",
+        "x": 4.650283649750054,
         "y": 0,
-        "z": -5.8,
-        "rotY": 4.421666489345953,
-        "scale": 1
+        "z": 3.3191119866445664,
+        "rotY": 5.574859413077229,
+        "scale": 0.4,
+        "tilt": [
+          0.047395132407546045,
+          0.05987478568218649
+        ]
+      },
+      {
+        "id": "small-133",
+        "model": "skull",
+        "group": "small",
+        "x": 1.7432634626980872,
+        "y": 0,
+        "z": 6.846826927969232,
+        "rotY": 4.558163344930783,
+        "scale": 0.42,
+        "tilt": [
+          0.006900907410308715,
+          -0.016137005221098663
+        ]
+      },
+      {
+        "id": "small-134",
+        "model": "skull",
+        "group": "small",
+        "x": -1.610878961533308,
+        "y": 0,
+        "z": 3.5382504273671658,
+        "rotY": 1.0193625420957892,
+        "scale": 0.4,
+        "tilt": [
+          0.003383084814995524,
+          -0.051388105060905215
+        ]
+      },
+      {
+        "id": "small-135",
+        "model": "bone_C",
+        "group": "small",
+        "x": 4.462026645615698,
+        "y": 0,
+        "z": 5.2062266724649815,
+        "rotY": 3.017979990660498,
+        "scale": 1,
+        "tilt": [
+          -0.007435319535434248,
+          -0.02165854213759303
+        ]
+      },
+      {
+        "id": "small-136",
+        "model": "bone_A",
+        "group": "small",
+        "x": -5.974563251808286,
+        "y": 0,
+        "z": 2.986785040004179,
+        "rotY": 2.2217000310897035,
+        "scale": 1,
+        "tilt": [
+          -0.031620461046695705,
+          0.03823075069114566
+        ]
+      },
+      {
+        "id": "small-137",
+        "model": "ribcage",
+        "group": "small",
+        "x": 6.31102292058058,
+        "y": 0,
+        "z": 4.976854241965339,
+        "rotY": 0.1870096442394645,
+        "scale": 0.7,
+        "tilt": [
+          0.03331868338398636,
+          0.04611439607106149
+        ]
       },
       {
         "id": "critter-138",
-        "model": "dirt_mound",
+        "model": "gravestone",
         "group": "critter",
-        "x": 7,
+        "x": -4.2,
         "y": 0,
-        "z": -5.4,
-        "rotY": 4.224721202515066,
-        "scale": 1
+        "z": -2.5,
+        "rotY": 0.2,
+        "scale": 1.3
       },
       {
         "id": "critter-139",
         "model": "dirt_mound",
         "group": "critter",
-        "x": -12.5,
+        "x": -4.7,
         "y": 0,
-        "z": -9.6,
-        "rotY": 1.859868247602135,
+        "z": -0.2,
+        "rotY": 2.9466147165559233,
         "scale": 1
       },
       {
         "id": "critter-140",
+        "model": "dirt_mound",
+        "group": "critter",
+        "x": 10,
+        "y": 0,
+        "z": -2,
+        "rotY": 0.05980073256418109,
+        "scale": 1
+      },
+      {
+        "id": "critter-141",
+        "model": "dirt_mound",
+        "group": "critter",
+        "x": -7,
+        "y": 0,
+        "z": -9.8,
+        "rotY": 4.177621930269525,
+        "scale": 1
+      },
+      {
+        "id": "critter-142",
         "model": "forest_cauldron",
         "group": "critter",
-        "x": 7.6,
+        "x": -3.9000000000000004,
         "y": 0,
-        "z": -2.4,
+        "z": -5.6,
         "rotY": 0.3,
         "scale": 4.2
       },
       {
-        "id": "critter-141",
+        "id": "critter-143",
         "model": "open_coffin_spot",
         "group": "critter",
-        "x": -7.750000000000001,
+        "x": 8.6,
         "y": 0,
-        "z": -4.449999999999999,
-        "rotY": 0.5,
+        "z": -5.75,
+        "rotY": -0.5,
         "scale": 1
-      },
-      {
-        "id": "tree-142",
-        "model": "tree_dead_large",
-        "group": "tree",
-        "x": -13.5,
-        "y": 0,
-        "z": -12,
-        "rotY": 6.091823610467837,
-        "scale": 1.1,
-        "tilt": [
-          -0.013058187253773213,
-          0.007650308292359111
-        ]
-      },
-      {
-        "id": "tree-143",
-        "model": "tree_dead_medium",
-        "group": "tree",
-        "x": -15.5,
-        "y": 0,
-        "z": -18.2,
-        "rotY": 2.6327842775546015,
-        "scale": 1.2,
-        "tilt": [
-          -0.030513347238302232,
-          -0.022176922410726548
-        ]
       },
       {
         "id": "tree-144",
         "model": "tree_dead_large",
         "group": "tree",
-        "x": -17.2,
+        "x": -11.1,
         "y": 0,
-        "z": -14.8,
-        "rotY": 5.220818278091029,
-        "scale": 1.1,
+        "z": -5.9,
+        "rotY": 1.5856654279492797,
+        "scale": 1.05,
         "tilt": [
-          0.03159675493836402,
-          0.03991652378812432
+          -0.014703605081886055,
+          0.02389501858502626
         ]
       },
       {
-        "id": "small-145",
-        "model": "forest_mushroom",
-        "group": "small",
-        "x": -7.01996652521193,
+        "id": "tree-145",
+        "model": "tree_dead_medium",
+        "group": "tree",
+        "x": -13.6,
         "y": 0,
-        "z": -1.8957089846022428,
-        "rotY": 1.586469700476679,
-        "scale": 2.1,
+        "z": -12.4,
+        "rotY": 0.9539812296349556,
+        "scale": 1.2,
         "tilt": [
-          -0.03675901270471514,
-          0.059737546462565655
+          0.0331367757357657,
+          0.03426073748618364
         ]
       },
       {
-        "id": "small-146",
-        "model": "forest_mushroom",
-        "group": "small",
-        "x": 9.749188607931137,
+        "id": "tree-146",
+        "model": "tree_dead_large",
+        "group": "tree",
+        "x": -10.4,
         "y": 0,
-        "z": -3.1412000647280363,
-        "rotY": 4.715331435292605,
-        "scale": 2.1,
+        "z": -13.6,
+        "rotY": 0.06548136699944734,
+        "scale": 1,
         "tilt": [
-          -0.06558127496391536,
-          0.01086560641415417
+          -0.021350453402847053,
+          -0.02757383443415165
         ]
       },
       {
         "id": "small-147",
         "model": "forest_mushroom",
         "group": "small",
-        "x": 11.481257328484206,
+        "x": -6.087263347441331,
         "y": 0,
-        "z": -2.631830725073814,
-        "rotY": 6.271100906032916,
-        "scale": 1.7,
+        "z": -14.316517521813513,
+        "rotY": 0.34820874246322925,
+        "scale": 2.1,
         "tilt": [
-          0.018512954888865354,
-          0.09871426448225976
+          0.0861137868836522,
+          -0.03017989564687014
         ]
       },
       {
-        "id": "tree-148",
-        "model": "tree_pine_orange_large",
-        "group": "tree",
-        "x": -23.878593165893108,
+        "id": "small-148",
+        "model": "forest_mushroom",
+        "group": "small",
+        "x": -3.2251341632101687,
         "y": 0,
-        "z": -36.860262273252005,
-        "rotY": 3.5141899803094567,
-        "scale": 1,
+        "z": -12.047906972980128,
+        "rotY": 1.222889821743926,
+        "scale": 2.1,
         "tilt": [
-          -0.010679380036890507,
-          0.03586603426374496
+          0.07133824261836708,
+          0.03741240645758809
         ]
       },
       {
         "id": "tree-149",
-        "model": "forest_twisted_c",
+        "model": "tree_dead_large",
         "group": "tree",
-        "x": -18.32009508088231,
+        "x": -21.069312914740294,
         "y": 0,
-        "z": -36.10508084893226,
-        "rotY": 5.472046327255667,
-        "scale": 0.3,
-        "tilt": [
-          -0.09468517475761473,
-          -0.07872560881078244
-        ]
+        "z": -28.348591869929805,
+        "rotY": 0.36261329511066553,
+        "scale": 1.3094305656617506
       },
       {
         "id": "tree-150",
-        "model": "tree_dead_large",
+        "model": "tree_dead_medium",
         "group": "tree",
-        "x": -14.219555941410363,
+        "x": -8.557333524338901,
         "y": 0,
-        "z": -36.41063885837793,
-        "rotY": 1.9475954579655081,
-        "scale": 1.2,
-        "tilt": [
-          0.004512767074629664,
-          -0.06816216097213329
-        ]
+        "z": -24.142742386786267,
+        "rotY": 4.6218064388011,
+        "scale": 0.8582235197303817
       },
       {
         "id": "tree-151",
-        "model": "tree_pine_yellow_medium",
+        "model": "tree_dead_large",
         "group": "tree",
-        "x": -21.754641086328775,
+        "x": 12.612933904165402,
         "y": 0,
-        "z": -32.48127765953541,
-        "rotY": 6.243059262922034,
-        "scale": 1.1,
+        "z": -19.132112335180864,
+        "rotY": 4.518465867645798,
+        "scale": 1.141549725877121,
         "tilt": [
-          -0.09696884863078595,
-          0.028857138752937328
+          -0.048612825036980216,
+          -0.0439821427455172
+        ]
+      },
+      {
+        "id": "tree-152",
+        "model": "tree_dead_medium",
+        "group": "tree",
+        "x": 15.473696120083332,
+        "y": 0,
+        "z": -25.36546250851825,
+        "rotY": 4.188866869495974,
+        "scale": 1.0145184627501294,
+        "tilt": [
+          -0.016940438118763272,
+          0.00106028800364584
         ]
       },
       {
         "id": "tree-153",
         "model": "tree_dead_medium",
         "group": "tree",
-        "x": -22.548687525792047,
+        "x": -3.256922122091055,
         "y": 0,
-        "z": -22.050097370753065,
-        "rotY": 5.564245023783297,
-        "scale": 0.8846968355821445,
+        "z": -28.87608704669401,
+        "rotY": 0.5274588014962522,
+        "scale": 0.7094895616988651,
         "tilt": [
-          0.07596020894125105,
-          0.009458080260083074
+          0.042081180843524635,
+          0.010779070667922497
         ]
       },
       {
         "id": "tree-154",
-        "model": "tree_dead_medium",
+        "model": "forest_twisted_c",
         "group": "tree",
-        "x": 25.73144822055474,
+        "x": -18.128070706967264,
         "y": 0,
-        "z": -13.471695528365672,
-        "rotY": 6.019899287261069,
-        "scale": 0.920998758787755,
+        "z": -31.398669369285926,
+        "rotY": 5.726733040526276,
+        "scale": 0.2667368104541674,
         "tilt": [
-          0.09179985858500003,
-          0.0020983125548809795
+          -0.047841606312431395,
+          0.030853523686528203
+        ]
+      },
+      {
+        "id": "tree-155",
+        "model": "forest_twisted_c",
+        "group": "tree",
+        "x": 23.356969599146396,
+        "y": 0,
+        "z": -35.85359255853109,
+        "rotY": 5.748978630732971,
+        "scale": 0.20763965371064844,
+        "tilt": [
+          -0.012599131581373511,
+          0.04412844420876354
         ]
       },
       {
         "id": "tree-156",
-        "model": "tree_dead_large",
+        "model": "tree_pine_orange_medium",
         "group": "tree",
-        "x": 22.29866600735113,
+        "x": -16.16497283615172,
         "y": 0,
-        "z": -9.46340190153569,
-        "rotY": 2.828009590152651,
-        "scale": 0.9030335616902448,
+        "z": -25.677209140034392,
+        "rotY": 4.055460280164619,
+        "scale": 0.9854286214802415,
         "tilt": [
-          -0.02037905300967395,
-          0.012829573592171073
+          -0.01324265280272812,
+          0.0423302058596164
+        ]
+      },
+      {
+        "id": "tree-157",
+        "model": "tree_pine_orange_medium",
+        "group": "tree",
+        "x": 18.03939892956987,
+        "y": 0,
+        "z": -30.397822215920314,
+        "rotY": 1.497738056013241,
+        "scale": 0.8634723959490658,
+        "tilt": [
+          0.0011367101920768605,
+          -0.04330942588858307
+        ]
+      },
+      {
+        "id": "tree-158",
+        "model": "tree_pine_orange_large",
+        "group": "tree",
+        "x": -24.352281358093023,
+        "y": 0,
+        "z": -35.762363554444164,
+        "rotY": 2.6017456277314137,
+        "scale": 1.0244718237780035,
+        "tilt": [
+          0.03265522662550212,
+          0.004514740873128177
+        ]
+      },
+      {
+        "id": "tree-159",
+        "model": "tree_pine_yellow_medium",
+        "group": "tree",
+        "x": 19.770520522259176,
+        "y": 0,
+        "z": -34.55318282684311,
+        "rotY": 5.992871203917606,
+        "scale": 0.8825489364564418,
+        "tilt": [
+          -0.041683227638714015,
+          -0.01471746270544827
+        ]
+      },
+      {
+        "id": "lantern-160",
+        "model": "lantern_hanging",
+        "group": "lantern",
+        "x": -23.024435645345548,
+        "y": 4.067401983454357,
+        "z": -28.62920479746628,
+        "rotY": 0,
+        "scale": 0.7
+      },
+      {
+        "id": "lantern-161",
+        "model": "lantern_hanging",
+        "group": "lantern",
+        "x": -8.65981013925404,
+        "y": 1.4675192664288919,
+        "z": -23.014531813026597,
+        "rotY": 0,
+        "scale": 0.7
+      },
+      {
+        "id": "fence-162",
+        "model": "crypt",
+        "group": "fence",
+        "x": -16.53151065693237,
+        "y": 0,
+        "z": -10.85796336864587,
+        "rotY": 0.3639001274947077,
+        "scale": 0.39454114051535727,
+        "tilt": [
+          0,
+          0
+        ]
+      },
+      {
+        "id": "fence-163",
+        "model": "crypt",
+        "group": "fence",
+        "x": 18.406448686495423,
+        "y": 0,
+        "z": -15.556541095022112,
+        "rotY": -0.4111509690526873,
+        "scale": 0.37826219115406273,
+        "tilt": [
+          0,
+          0
+        ]
+      },
+      {
+        "id": "fence-164",
+        "model": "fence_broken",
+        "group": "fence",
+        "x": -23.956092804204673,
+        "y": 0,
+        "z": -10.95065451064147,
+        "rotY": 0.2102770787663758,
+        "scale": 0.845572898676619,
+        "tilt": [
+          0.01526933474466205,
+          -0.036050057206302874
+        ]
+      },
+      {
+        "id": "fence-165",
+        "model": "fence_broken",
+        "group": "fence",
+        "x": -12.80419215071015,
+        "y": 0,
+        "z": -9.166641020681709,
+        "rotY": 0.19010035460814834,
+        "scale": 0.97985774804838,
+        "tilt": [
+          0.006831212304532541,
+          0.012445809021592147
+        ]
+      },
+      {
+        "id": "fence-166",
+        "model": "fence_broken",
+        "group": "fence",
+        "x": 20.165687637403607,
+        "y": 0,
+        "z": -10.323276733513921,
+        "rotY": -0.13653538315556943,
+        "scale": 0.8682690351735801,
+        "tilt": [
+          -0.10633146721869707,
+          0.08735891355201603
+        ]
+      },
+      {
+        "id": "fence-167",
+        "model": "fence_broken",
+        "group": "fence",
+        "x": 13.487625329056755,
+        "y": 0,
+        "z": -9.17623727885075,
+        "rotY": 0.049858755664899945,
+        "scale": 0.9045693100430071,
+        "tilt": [
+          0.012032982576638457,
+          -0.006611703447997566
+        ]
+      },
+      {
+        "id": "lantern-168",
+        "model": "post_lantern",
+        "group": "lantern",
+        "x": -14.477927801664919,
+        "y": 0,
+        "z": -20.085789053933695,
+        "rotY": 1.4074163332257907,
+        "scale": 0.9164835825562477,
+        "tilt": [
+          0.007083176351152361,
+          -0.0018600312760099769
+        ]
+      },
+      {
+        "id": "oldGrave-169",
+        "model": "grave_A",
+        "group": "oldGrave",
+        "x": -21.156791601795703,
+        "y": 0,
+        "z": -6.285805810708553,
+        "rotY": -0.08626070860773327,
+        "scale": 0.9275518356822431,
+        "tilt": [
+          0.14578563243150713,
+          0.15405074402689936
+        ]
+      },
+      {
+        "id": "oldGrave-170",
+        "model": "grave_B",
+        "group": "oldGrave",
+        "x": 21.818015083670616,
+        "y": 0,
+        "z": -6.970076172146946,
+        "rotY": -0.19986157754901795,
+        "scale": 1.0730085537885317,
+        "tilt": [
+          0.12583757393062114,
+          -0.09413127698004246
+        ]
+      },
+      {
+        "id": "oldGrave-171",
+        "model": "gravestone",
+        "group": "oldGrave",
+        "x": -15.862055202247575,
+        "y": 0,
+        "z": -5.42393497005105,
+        "rotY": 0.07081244809087367,
+        "scale": 0.8987441678997129,
+        "tilt": [
+          -0.15003010235726832,
+          0.14738917119801045
+        ]
+      },
+      {
+        "id": "oldGrave-172",
+        "model": "grave_A_destroyed",
+        "group": "oldGrave",
+        "x": 10.575282331788912,
+        "y": 0,
+        "z": -10.303154452238232,
+        "rotY": -0.09537326358258724,
+        "scale": 1.0575355162960478,
+        "tilt": [
+          0.11993888370692732,
+          -0.010358287617564188
+        ]
+      },
+      {
+        "id": "oldGrave-173",
+        "model": "grave_A",
+        "group": "oldGrave",
+        "x": -18.31743996590376,
+        "y": 0,
+        "z": -5.410876261070371,
+        "rotY": -0.09443218163214623,
+        "scale": 1.0130573407746852,
+        "tilt": [
+          0.11231167890131474,
+          -0.010938268080353725
+        ]
+      },
+      {
+        "id": "oldGrave-174",
+        "model": "grave_B",
+        "group": "oldGrave",
+        "x": 20.71657573687844,
+        "y": 0,
+        "z": -8.652022511698306,
+        "rotY": -0.10283575996290892,
+        "scale": 1.079167775483802,
+        "tilt": [
+          -0.037259348928928376,
+          0.1064490742981434
+        ]
+      },
+      {
+        "id": "oldGrave-175",
+        "model": "gravestone",
+        "group": "oldGrave",
+        "x": -20.919347191927955,
+        "y": 0,
+        "z": -10.556882076431066,
+        "rotY": -0.18579579691868275,
+        "scale": 0.9284307580324821,
+        "tilt": [
+          0.036589353531599034,
+          -0.14558642782270909
+        ]
+      },
+      {
+        "id": "oldGrave-176",
+        "model": "grave_A_destroyed",
+        "group": "oldGrave",
+        "x": 19.41330857644789,
+        "y": 0,
+        "z": -5.231337046250701,
+        "rotY": 0.21343782024923708,
+        "scale": 0.9118430135655217,
+        "tilt": [
+          -0.1569181613624096,
+          -0.01599073834717274
+        ]
+      },
+      {
+        "id": "oldGrave-177",
+        "model": "grave_A",
+        "group": "oldGrave",
+        "x": -7.300985590554774,
+        "y": 0,
+        "z": -7.756785391829908,
+        "rotY": -0.14885113302152603,
+        "scale": 0.989616608445067,
+        "tilt": [
+          0.08014591529965401,
+          -0.11618142388761044
+        ]
+      },
+      {
+        "id": "oldGrave-178",
+        "model": "grave_B",
+        "group": "oldGrave",
+        "x": 15.25211613229476,
+        "y": 0,
+        "z": -8.095894437283278,
+        "rotY": -0.08476388452108952,
+        "scale": 0.895848638867028,
+        "tilt": [
+          0.13231451265513897,
+          0.02723468646407126
+        ]
+      },
+      {
+        "id": "oldGrave-179",
+        "model": "gravestone",
+        "group": "oldGrave",
+        "x": -15.11497798957862,
+        "y": 0,
+        "z": -8.192407688125968,
+        "rotY": -0.12244739206507801,
+        "scale": 1.0809861858957448,
+        "tilt": [
+          -0.004645624384284008,
+          -0.06647874712944031
+        ]
+      },
+      {
+        "id": "oldGrave-180",
+        "model": "grave_A_destroyed",
+        "group": "oldGrave",
+        "x": 4.576039519160986,
+        "y": 0,
+        "z": -5.047245723195374,
+        "rotY": -0.026423100708052538,
+        "scale": 0.8782631139270961,
+        "tilt": [
+          -0.08634596705436706,
+          -0.1552519266307354
+        ]
+      },
+      {
+        "id": "oldGrave-181",
+        "model": "grave_A",
+        "group": "oldGrave",
+        "x": -12.870983394328505,
+        "y": 0,
+        "z": -10.344028871506453,
+        "rotY": 0.032332168240100156,
+        "scale": 1.0992122857365758,
+        "tilt": [
+          -0.007659578844904896,
+          -0.1546198896318674
+        ]
+      },
+      {
+        "id": "oldGrave-182",
+        "model": "grave_B",
+        "group": "oldGrave",
+        "x": 18.146018205443397,
+        "y": 0,
+        "z": -9.19058264233172,
+        "rotY": -0.3102788748918101,
+        "scale": 0.8790575150866061,
+        "tilt": [
+          0.057234868034720415,
+          -0.031762700825929635
+        ]
+      },
+      {
+        "id": "oldGrave-183",
+        "model": "gravestone",
+        "group": "oldGrave",
+        "x": -9.331268704030663,
+        "y": 0,
+        "z": -8.964200641959906,
+        "rotY": 0.11245048816781489,
+        "scale": 0.9198032599757425,
+        "tilt": [
+          0.0583530494570732,
+          0.09446271896362304
+        ]
+      },
+      {
+        "id": "oldGrave-184",
+        "model": "grave_A_destroyed",
+        "group": "oldGrave",
+        "x": 15.46781268902123,
+        "y": 0,
+        "z": -5.921624060720205,
+        "rotY": 0.18077633967623108,
+        "scale": 0.8568002786720171,
+        "tilt": [
+          -0.0036619134992361135,
+          0.13318366505205634
         ]
       }
     ],
     "lights": [
       {
         "kind": "cryptDoor",
-        "x": 7.30411047146329,
-        "y": 1.6,
-        "z": -23.010233369722865
-      },
-      {
-        "kind": "jackOLantern",
-        "x": -4.9,
-        "y": 0.65,
-        "z": 6.2
-      },
-      {
-        "kind": "jackOLantern",
-        "x": 4.9,
-        "y": 0.6174999999999999,
-        "z": 5.6
-      },
-      {
-        "kind": "jackOLantern",
-        "x": -10.2,
-        "y": 0.5655,
-        "z": 0.2
+        "x": 5.363498168635729,
+        "y": 0.8960000000000001,
+        "z": -5.957785971864128
       },
       {
         "kind": "lantern",
-        "x": -2,
-        "y": 0.75,
-        "z": -18.7
+        "x": -6.7107288276343535,
+        "y": 3.6610000000000005,
+        "z": 0.20082467925127245
       },
       {
-        "kind": "lantern",
-        "x": 3,
-        "y": 0.75,
-        "z": -18.7
+        "kind": "jackOLantern",
+        "x": -3.4,
+        "y": 0.8450000000000001,
+        "z": 6.6
+      },
+      {
+        "kind": "jackOLantern",
+        "x": -3.3,
+        "y": 0.7150000000000001,
+        "z": 4
+      },
+      {
+        "kind": "jackOLantern",
+        "x": 3.3,
+        "y": 0.8125,
+        "z": 6.3
+      },
+      {
+        "kind": "jackOLantern",
+        "x": 6.9,
+        "y": 0.6825000000000001,
+        "z": 3.6
       }
     ],
     "glows": [
       {
         "kind": "cryptDoor",
-        "x": 7.30411047146329,
-        "y": 1.3,
-        "z": -23.010233369722865
-      },
-      {
-        "kind": "jackOLantern",
-        "x": -4.9,
-        "y": 0.65,
-        "z": 6.2
-      },
-      {
-        "kind": "jackOLantern",
-        "x": 4.9,
-        "y": 0.6174999999999999,
-        "z": 5.6
-      },
-      {
-        "kind": "jackOLantern",
-        "x": -10.2,
-        "y": 0.5655,
-        "z": 0.2
-      },
-      {
-        "kind": "jackOLantern",
-        "x": 10.4,
-        "y": 0.546,
-        "z": -1.2
+        "x": 5.363498168635729,
+        "y": 0.7280000000000001,
+        "z": -5.957785971864128
       },
       {
         "kind": "lantern",
-        "x": -2,
-        "y": 0.75,
-        "z": -18.7
+        "x": -6.7107288276343535,
+        "y": 3.6610000000000005,
+        "z": 0.20082467925127245
       },
       {
         "kind": "lantern",
+        "x": 7.048932043007753,
+        "y": 2.0124,
+        "z": -0.10608409640562688
+      },
+      {
+        "kind": "jackOLantern",
+        "x": -3.4,
+        "y": 0.8450000000000001,
+        "z": 6.6
+      },
+      {
+        "kind": "jackOLantern",
+        "x": -3.3,
+        "y": 0.7150000000000001,
+        "z": 4
+      },
+      {
+        "kind": "jackOLantern",
         "x": 3,
-        "y": 0.75,
-        "z": -18.7
+        "y": 0.65,
+        "z": 3.9
+      },
+      {
+        "kind": "jackOLantern",
+        "x": 3.3,
+        "y": 0.8125,
+        "z": 6.3
+      },
+      {
+        "kind": "jackOLantern",
+        "x": 6.9,
+        "y": 0.6825000000000001,
+        "z": 3.6
+      },
+      {
+        "kind": "jackOLantern",
+        "x": -10.6,
+        "y": 0.5850000000000001,
+        "z": 2.4
+      },
+      {
+        "kind": "lantern",
+        "x": -2.0802,
+        "y": 0.6,
+        "z": -2.3
+      },
+      {
+        "kind": "lantern",
+        "x": 2.8802,
+        "y": 0.6,
+        "z": -2.3
       },
       {
         "kind": "postLantern",
-        "x": -13.5,
+        "x": -10.2,
         "y": 2.4,
-        "z": -5
+        "z": -2.2
       },
       {
         "kind": "postLantern",
-        "x": 13.5,
+        "x": 11.6,
         "y": 2.4,
-        "z": -2
-      },
-      {
-        "kind": "postLantern",
-        "x": -10,
-        "y": 2.4,
-        "z": -17
-      },
-      {
-        "kind": "postLantern",
-        "x": -18.5,
-        "y": 2.4,
-        "z": -14
+        "z": -1.6
       },
       {
         "kind": "candle",
-        "x": -3.6307692307692307,
+        "x": -2.003846153846154,
         "y": 0.79,
-        "z": 3.5,
+        "z": 7.6,
         "slot": 0
       },
       {
         "kind": "candle",
-        "x": 2.5692307692307694,
+        "x": 2.096153846153846,
         "y": 0.79,
-        "z": 3.5,
+        "z": 7.6,
         "slot": 1
       },
       {
         "kind": "candle",
-        "x": -2.4,
+        "x": -2.2824999999999998,
         "y": 0.63,
-        "z": -1.5,
+        "z": 5.4,
         "slot": 2
       },
       {
         "kind": "candle",
-        "x": 3.8000000000000003,
+        "x": 1.8174999999999997,
         "y": 0.79,
-        "z": -1.5,
+        "z": 5.4,
         "slot": 3
       },
       {
         "kind": "candle",
-        "x": -3.3230769230769233,
+        "x": -1.8624999999999998,
         "y": 0.79,
-        "z": -6.5,
+        "z": 3,
         "slot": 4
       },
       {
         "kind": "candle",
-        "x": 2.876923076923077,
+        "x": 2.2375,
         "y": 0.63,
-        "z": -6.5,
+        "z": 2.65,
         "slot": 5
       },
       {
         "kind": "candle",
-        "x": -3.05,
+        "x": -1.6054347826086954,
         "y": 0.79,
-        "z": -11,
+        "z": 1,
         "slot": 6
       },
       {
         "kind": "candle",
-        "x": 3.1500000000000004,
+        "x": 2.494565217391304,
         "y": 0.79,
-        "z": -11,
+        "z": 1,
         "slot": 7
       },
       {
         "kind": "candle",
-        "x": -2.513888888888889,
+        "x": -1.6249999999999998,
         "y": 0.63,
-        "z": -14.5,
+        "z": -0.8,
         "slot": 8
       },
       {
         "kind": "candle",
-        "x": 3.6861111111111113,
+        "x": 2.4749999999999996,
         "y": 0.79,
-        "z": -14.5,
+        "z": -0.8,
         "slot": 9
       },
       {
         "kind": "candle",
-        "x": -2.5833333333333335,
+        "x": -1.292391304347826,
         "y": 0.79,
-        "z": -17,
+        "z": -2.4,
         "slot": 10
       },
       {
         "kind": "candle",
-        "x": 3.6166666666666667,
+        "x": 2.1076086956521736,
         "y": 0.63,
-        "z": -17,
+        "z": -2.4,
         "slot": 11
       },
       {
         "kind": "candle",
-        "x": -5.9,
-        "y": 1.0270000000000001,
-        "z": 1.6
+        "x": -2.637705589015968,
+        "y": 1.24,
+        "z": 2.1058467708993707
       },
       {
         "kind": "candle",
-        "x": -4,
+        "x": 2.8256082474486903,
         "y": 1.0270000000000001,
-        "z": 1.7000000000000002
+        "z": 1.7302652636775746
       },
       {
         "kind": "candle",
-        "x": 3.1999999999999997,
-        "y": 1.0270000000000001,
-        "z": 0.2
+        "x": 4.954793759598397,
+        "y": 0.8819999999999999,
+        "z": 4.407990125054493
       },
       {
         "kind": "candle",
-        "x": 4.199999999999999,
-        "y": 0.8190000000000001,
-        "z": 0.75
+        "x": -4.958290940639563,
+        "y": 1.0270000000000001,
+        "z": 3.9377957219257946
+      },
+      {
+        "kind": "candle",
+        "x": -2.1279419928090646,
+        "y": 0.756,
+        "z": -1.4267744150711223
       },
       {
         "kind": "cauldron",
-        "x": 7.6,
+        "x": -3.9000000000000004,
         "y": 1.05,
-        "z": -2.4
+        "z": -5.6
       },
       {
         "kind": "mushroom",
-        "x": -7.01996652521193,
+        "x": -6.087263347441331,
         "y": 0.80325,
-        "z": -1.8957089846022428
+        "z": -14.316517521813513
       },
       {
         "kind": "mushroom",
-        "x": 9.749188607931137,
+        "x": -3.2251341632101687,
         "y": 0.80325,
-        "z": -3.1412000647280363
+        "z": -12.047906972980128
       },
       {
-        "kind": "mushroom",
-        "x": 11.481257328484206,
-        "y": 0.65025,
-        "z": -2.631830725073814
+        "kind": "lantern",
+        "x": -23.024435645345548,
+        "y": 4.508401983454357,
+        "z": -28.62920479746628
+      },
+      {
+        "kind": "lantern",
+        "x": -8.65981013925404,
+        "y": 1.908519266428892,
+        "z": -23.014531813026597
+      },
+      {
+        "kind": "postLantern",
+        "x": -13.573648892887055,
+        "y": 2.1995605981349944,
+        "z": -19.936719230580167
       }
     ],
     "pathCentres": [
       {
         "x": 0.3,
-        "z": 8.6
+        "z": 9.4
       },
       {
-        "x": -0.2533985905294664,
-        "z": 6.9398042284116
+        "x": 0.0765698511250795,
+        "z": 7.815677126159655
       },
       {
-        "x": -0.8067971810589327,
-        "z": 5.279608456823201
+        "x": -0.146860297749841,
+        "z": 6.23135425231931
       },
       {
-        "x": -0.5521635142912726,
-        "z": 3.5869142768082956
+        "x": -0.10151005126055282,
+        "z": 4.651486007203159
       },
       {
-        "x": -0.13388018182706574,
-        "z": 1.8876382386724546
+        "x": 0.17429847954304428,
+        "z": 3.0754372597540325
       },
       {
-        "x": 0.2844031506371413,
-        "z": 0.18836220053661368
+        "x": 0.44999325278456037,
+        "z": 1.4993792561795536
       },
       {
-        "x": 0.6979594754412967,
-        "z": -1.5110528413596431
+        "x": 0.43260297571482065,
+        "z": -0.1005262342365012
       },
       {
-        "x": 0.3802513863931159,
-        "z": -3.2319716570372883
-      },
-      {
-        "x": 0.06254329734493502,
-        "z": -4.952890472714935
-      },
-      {
-        "x": -0.2551647917032457,
-        "z": -6.673809288392581
-      },
-      {
-        "x": -0.4276166690806549,
-        "z": -8.394818168650973
-      },
-      {
-        "x": -0.11204289858885175,
-        "z": -10.116129644060809
-      },
-      {
-        "x": 0.2035308719029516,
-        "z": -11.837441119470645
-      },
-      {
-        "x": 0.519104642394755,
-        "z": -13.558752594880481
-      },
-      {
-        "x": 0.5638639811364266,
-        "z": -15.300896679088643
-      },
-      {
-        "x": 0.5152716134658084,
-        "z": -17.0502219152309
+        "x": 0.4152126986450809,
+        "z": -1.7004317246525562
       }
     ],
     "scenery": {
       "cat": {
-        "x": -7.8,
-        "y": 2.0736,
-        "z": -0.6,
-        "rotY": 0.1
+        "x": -4.2,
+        "y": 1.9968,
+        "z": -2.5,
+        "rotY": 0.2
       },
       "crows": [
         {
-          "x": 7.249999999999999,
+          "x": 6.7302,
           "y": 2.25,
-          "z": -20.4,
-          "rotY": -0.1677062820643187,
+          "z": -3.6,
+          "rotY": -0.3442850600928068,
           "seed": 1
         },
         {
-          "x": -6.249999999999999,
+          "x": -5.930199999999999,
           "y": 2.25,
-          "z": -20.4,
-          "rotY": 0.4855789749417455,
+          "z": -3.6,
+          "rotY": -0.40859868563711643,
           "seed": 2
         },
         {
-          "x": -10.849999999999998,
+          "x": 11.330199999999998,
           "y": 2.25,
-          "z": -20.4,
-          "rotY": 0.47343675051815814,
+          "z": -3.6,
+          "rotY": 0.11212725886143737,
           "seed": 3
         },
         {
-          "x": -15.2,
-          "y": 3.7439999999999998,
-          "z": -17.8,
-          "rotY": 0.5968239500653,
+          "x": -10.530199999999997,
+          "y": 2.25,
+          "z": -3.6,
+          "rotY": 0.48195791230537,
           "seed": 4
         },
         {
-          "x": -16.9,
-          "y": 3.6959999999999997,
-          "z": -14.4,
-          "rotY": -0.8018137094099075,
+          "x": -13.299999999999999,
+          "y": 3.7439999999999998,
+          "z": -12,
+          "rotY": 0.8631629210896791,
           "seed": 5
+        },
+        {
+          "x": -10.1,
+          "y": 3.36,
+          "z": -13.2,
+          "rotY": 0.48509874218143534,
+          "seed": 6
         }
       ],
       "owl": {
-        "x": -12,
-        "y": 3.0900000000000003,
-        "z": -9.8,
+        "x": -9.6,
+        "y": 2.97,
+        "z": -3.7,
         "rotY": 0.2,
         "branch": [
-          -13.5,
-          2.64,
-          -12,
-          -11.9,
-          2.94,
-          -9.6
+          -11.1,
+          2.52,
+          -5.9,
+          -9.5,
+          2.82,
+          -3.5000000000000004
         ]
       },
       "spiders": [
         {
-          "x": -14.8,
-          "topY": 3.8016,
-          "z": -10.3,
+          "x": -11.5,
+          "topY": 3.6288,
+          "z": -4.2,
           "drop": 1.5,
           "seed": 1
         },
         {
-          "x": -13.950000000000001,
-          "topY": 3.7016,
-          "z": -10,
+          "x": -10.65,
+          "topY": 3.5288,
+          "z": -3.9000000000000004,
           "drop": 2.1,
           "seed": 2
         },
         {
-          "x": -13.100000000000001,
-          "topY": 3.6016,
-          "z": -9.700000000000001,
+          "x": -9.8,
+          "topY": 3.4288,
+          "z": -3.6,
           "drop": 1.1,
           "seed": 3
         }
       ],
       "mounds": [
         {
-          "x": -5,
-          "z": -5.8,
-          "rotY": 4.421666489345953,
+          "x": -4.7,
+          "z": -0.2,
+          "rotY": 2.9466147165559233,
           "scale": 1,
           "seed": 0
         },
         {
-          "x": 7,
-          "z": -5.4,
-          "rotY": 4.224721202515066,
+          "x": 10,
+          "z": -2,
+          "rotY": 0.05980073256418109,
           "scale": 1,
           "seed": 1
         },
         {
-          "x": -12.5,
-          "z": -9.6,
-          "rotY": 1.859868247602135,
+          "x": -7,
+          "z": -9.8,
+          "rotY": 4.177621930269525,
           "scale": 1,
           "seed": 2
         }
       ],
       "cauldron": {
-        "x": 7.6,
+        "x": -3.9000000000000004,
         "y": 1.05,
-        "z": -2.4
+        "z": -5.6
       },
       "openCoffin": {
-        "x": -7.750000000000001,
-        "z": -4.449999999999999,
-        "rotY": 0.5
+        "x": 8.6,
+        "z": -5.75,
+        "rotY": -0.5
       },
       "wisps": [
         {
-          "x": -15.753077674424276,
-          "y": 2.369485429045744,
-          "z": 1.3984162039123476,
+          "x": -11.19540321547538,
+          "y": 0.7578876996878534,
+          "z": -4.0384966866113245,
           "seed": 1
         },
         {
-          "x": 10.28459033020772,
-          "y": 1.6091407002415508,
-          "z": -12.724661268759519,
+          "x": 7.59670729143545,
+          "y": 2.1234615969471635,
+          "z": -2.056654827669263,
           "seed": 2
         },
         {
-          "x": -12.220561045920476,
-          "y": 2.0583447170676665,
-          "z": -7.356184998061508,
+          "x": -12.016860937234014,
+          "y": 0.886194819631055,
+          "z": -7.670436795800924,
           "seed": 3
         },
         {
-          "x": 14.2786708062049,
-          "y": 1.6612366232322529,
-          "z": -1.584899703040719,
+          "x": 11.056126843206584,
+          "y": 1.1139975511934608,
+          "z": -0.18390808114781976,
           "seed": 4
         },
         {
-          "x": -17.636436836095527,
-          "y": 1.7015184184769168,
-          "z": -9.837788989767432,
+          "x": -6.892068225890398,
+          "y": 0.8561532163759693,
+          "z": 0.6080890018492937,
           "seed": 5
         },
         {
-          "x": 8.512899716151878,
-          "y": 1.988216193532571,
-          "z": -4.222347578033805,
+          "x": 6.370438377838582,
+          "y": 1.1792153743328526,
+          "z": -7.50882132537663,
           "seed": 6
         }
       ],
       "cobwebs": [
         {
-          "x": -12.5,
+          "x": 4.928480143006891,
           "y": 0.95,
-          "z": -3.6999999999999997,
-          "w": 4.75,
+          "z": -1.3707193774171174,
+          "w": 1.9914596812333916,
           "h": 1.5,
           "rotY": 0
         }
@@ -2340,21 +2789,27 @@
     },
     "ghostSpots": [
       {
-        "x": -9.5,
-        "y": 1.7,
-        "z": -9.5
+        "x": -5.6,
+        "y": 1,
+        "z": -2.2
       },
       {
-        "x": 10.5,
-        "y": 1.9,
-        "z": -10.5
+        "x": 4.4,
+        "y": 0.9,
+        "z": -2.6
+      },
+      {
+        "x": 11.2,
+        "y": 1.1,
+        "z": -1.4
       }
     ],
     "cryptDoor": {
-      "x": 7.30411047146329,
-      "y": 1.3,
-      "z": -23.010233369722865,
-      "rotY": -0.17268149161800544
+      "x": 5.363498168635729,
+      "y": 0.7280000000000001,
+      "z": -5.957785971864128,
+      "rotY": -0.45,
+      "scale": 0.56
     }
   }
 }

@@ -1,7 +1,7 @@
 import { useFrame } from '@react-three/fiber';
 import { useMemo, useRef } from 'react';
-import { type Group, Vector3 } from 'three';
-import { MOON } from '../../../../lib/scene/sky';
+import { type Camera, type Group, Vector3 } from 'three';
+import { MOON, moonScreenRadiusScaled, moonTarget } from '../../../../lib/scene/sky';
 import { sceneColorsFor } from './colors';
 import { useDisplay } from './display';
 import { useColorSync, useSceneTheme } from './themeColors';
@@ -60,6 +60,24 @@ void main() {
   gl_FragColor = vec4(col, 1.0);
 }`;
 const forward = new Vector3();
+const edge = new Vector3();
+const axis = new Vector3();
+/**
+ * The moon's real box on screen (0 to 1, y from the top), measured from the drawn disc: its centre and four edge points
+ * projected with the real camera. Written on the canvas as `data-moon-box` a few times a second, so the demo checks
+ * (`npm run console:check`) can test what is drawn, not what was planned.
+ */
+function writeBox(el: HTMLElement, g: Group, camera: Camera, worldRadius: number): void {
+  let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+  for (const [ax, sign] of [[0, 1], [0, -1], [1, 1], [1, -1]] as const) {
+    axis.set(ax === 0 ? 1 : 0, ax === 1 ? 1 : 0, 0).applyQuaternion(g.quaternion);
+    edge.copy(g.position).addScaledVector(axis, sign * worldRadius).project(camera);
+    const sx = (edge.x + 1) / 2, sy = (1 - edge.y) / 2;
+    x0 = Math.min(x0, sx); x1 = Math.max(x1, sx); y0 = Math.min(y0, sy); y1 = Math.max(y1, sy);
+  }
+  const box = [x0, y0, x1, y1].map((v) => v.toFixed(4)).join(',');
+  if (el.dataset.moonBox !== box) el.dataset.moonBox = box;
+}
 /**
  * The moon: a plain Mars-like disc with no face. It always faces the camera at the moon direction, far away.
  *
@@ -82,19 +100,36 @@ export function Moon({ behind }: { behind?: number } = {}) {
   });
   // A theme may ask for a crisp disc (sharp patches, firm edge).
   const crisp = useSceneTheme().scene.unique?.moon.crisp ? 1 : 0;
-  useFrame(({ camera }) => {
+  const frames = useRef(0);
+  useFrame(({ camera, gl }) => {
     uniforms.uCrisp.value = crisp;
     const g = group.current;
     if (!g) return;
     // At a view depth the moon is that far along the camera's forward axis, scaled down so it keeps its size on screen.
     camera.getWorldDirection(forward);
-    const along = placed ? behind / Math.max(0.2, display.moon.dot(forward)) : DISTANCE;
+    // How far off the view axis the moon is. The disc faces the camera, so off the axis it would show 1 / cos larger than
+    // `moonScreenRadiusScaled` (which every layout test plans with): the scale takes the cos back out, so the drawn size
+    // matches the planned one at every window shape and wherever the moon sits.
+    const cos = Math.max(0.2, display.moon.dot(forward));
+    const along = placed ? behind / cos : DISTANCE;
     g.position.copy(camera.position).addScaledVector(display.moon, along);
     g.quaternion.copy(camera.quaternion);
-    g.scale.setScalar(display.moonScale * (along / DISTANCE));
+    g.scale.setScalar(display.moonScale * (along / DISTANCE) * cos);
+    // (The test renderer's canvas is not a DOM element, so it has no dataset.)
+    if (frames.current++ % 15 === 0 && gl.domElement.dataset) {
+      writeBox(gl.domElement, g, camera, radiusAt(MOON.discDeg) * g.scale.x);
+      // The planned box (the target and radius the layout tests use), to compare with the drawn one.
+      const a = display.aspect;
+      const t = (display.moonTarget ?? moonTarget)(a);
+      const r = moonScreenRadiusScaled(a, display.moonScale).disc;
+      const plan = [t.x - r / a, t.y - r, t.x + r / a, t.y + r].map((v) => v.toFixed(4)).join(',');
+      if (gl.domElement.dataset.moonPlan !== plan) gl.domElement.dataset.moonPlan = plan;
+    }
   });
   return (
-    <group ref={group} renderOrder={-90}>
+    // No renderOrder on the group: a group's renderOrder sorts all its children before ungrouped objects, so the
+    // disc would be drawn before the sky dome (-100, no depth test), which then paints over it.
+    <group ref={group}>
       <mesh renderOrder={-90}>
         <planeGeometry args={[radiusAt(MOON.discDeg) * 2, radiusAt(MOON.discDeg) * 2]} />
         <shaderMaterial vertexShader={vertex} fragmentShader={discFragment} uniforms={uniforms} transparent={false} depthWrite={placed} depthTest={placed} toneMapped={false} fog={false} />

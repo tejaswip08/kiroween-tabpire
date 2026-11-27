@@ -1,8 +1,11 @@
+import { useFrame } from '@react-three/fiber';
 import { useMemo } from 'react';
+import { flicker } from '../../../../../lib/scene/flicker';
 import { cauldronFxAt } from '../../../../../lib/scene/uniqueScenes/forest';
 import type { UniqueSceneSpec } from '../../../../../lib/scene/uniqueScenes/types';
 import { CauldronFx } from '../CauldronFx';
-import { SafeModelBatch, type ModelLook } from '../ModelBatch';
+import { useDisplay } from '../display';
+import { SafeModelBatch, faceGlowLevel, type ModelLook } from '../ModelBatch';
 import { useSceneTheme } from '../themeColors';
 import { ForestTrees } from './ForestTrees';
 import { ForestFire } from './ForestFire';
@@ -24,8 +27,17 @@ const TREE_LOOK: Record<string, ModelLook> = {
   forest_rock_large: { color: '#7f9a74' },
   forest_rocks: { color: '#7f9a74' },
   // The carved face reads orange: the texture is darkened a little so the fire light and the glow do not blow it out white.
-  pumpkin_orange_jackolantern: { color: '#c98a52' },
+  // The eyes and mouth glow warm orange-yellow from inside, with a soft flicker (`JackFlicker`).
+  pumpkin_orange_jackolantern: { color: '#c98a52', faceGlow: '#ffb02e' },
 };
+/** Writes the soft candle flicker of the glowing jack-o'-lantern faces (held still with reduced motion). */
+function JackFlicker() {
+  const display = useDisplay();
+  useFrame(() => {
+    faceGlowLevel.value = 2.2 * flicker(display.time, 3.1, display.reduced);
+  });
+  return null;
+}
 /** Two lights from the sides with no shadows: hot red-orange from the left (the fire) and eerie green from the right. */
 function SideLights() {
   const { colors } = useSceneTheme();
@@ -53,6 +65,7 @@ export function WitchsForestScene({ spec }: { spec: UniqueSceneSpec }) {
   return (
     <>
       <SideLights />
+      <JackFlicker />
       <ForestFloor path={spec.path} graves={parts.graves} grass={parts.grass} />
       {groups.map((g) => (
         <SafeModelBatch key={g.id} id={g.id} placements={g.placements} look={TREE_LOOK[g.id]} />

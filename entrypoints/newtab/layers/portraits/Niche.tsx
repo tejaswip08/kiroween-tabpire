@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Color, Vector3 } from 'three';
+import { Color, Vector3, Vector4, type WebGLRenderer } from 'three';
 import type { VampireState } from '../../../../lib/hunger';
 import { themeById, type ThemeId } from '../../../../lib/themes';
 import { FRAME } from '../../../../lib/vampire/rig';
@@ -53,8 +53,25 @@ const vertex = /* glsl */ `
 varying vec2 vUv;
 void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`;
 const fragment = /* glsl */ `
-varying vec2 vUv; uniform vec3 uTint; uniform vec3 uLow; uniform vec3 uHigh;
+varying vec2 vUv; uniform vec3 uTint; uniform vec3 uLow; uniform vec3 uHigh; uniform vec4 uVp;
+// Outside the portrait window's arch (a half-circle top and small bottom corners, as .portrait-slot),
+// so the square corners of the view never show past the card's rounded top. uVp is the view in pixels.
+bool outsideArch(vec2 q) {
+  float w = uVp.z;
+  float h = uVp.w;
+  float pad = 1.5;
+  float r = w * 0.5 + pad;
+  vec2 top = vec2(w * 0.5, h - w * 0.5);
+  if (q.y > top.y && length(q - top) > r) return true;
+  float c = w * (14.0 / 190.0);
+  vec2 bl = vec2(c, c);
+  vec2 br = vec2(w - c, c);
+  if (q.y < c && q.x < c && length(q - bl) > c + pad) return true;
+  if (q.y < c && q.x > w - c && length(q - br) > c + pad) return true;
+  return false;
+}
 void main() {
+  if (uVp.z > 0.0 && outsideArch(gl_FragCoord.xy - uVp.xy)) discard;
   // The same dark purple as the card around it, so the window blends into the card, with a soft glow
   // in the state colour behind the head and a faint brightening toward the rim of the arch.
   vec3 card = mix(uLow, uHigh, vUv.y);
@@ -73,7 +90,12 @@ export function Niche({ state }: { state: VampireState }) {
     uTint: { value: new Color(STATE_COLOR.awake) },
     uLow: { value: new Vector3(...CRYPT_LOW) },
     uHigh: { value: new Vector3(...CRYPT_HIGH) },
+    uVp: { value: new Vector4(0, 0, 0, 0) },
   }), []);
+  // The view's viewport is set just before this mesh draws, in the same pixels as gl_FragCoord.
+  const onBeforeRender = (gl: WebGLRenderer) => {
+    gl.getCurrentViewport(uniforms.uVp.value);
+  };
 
   const { id } = useSceneTheme();
   const [low, high] = nicheBase(id);
@@ -81,7 +103,7 @@ export function Niche({ state }: { state: VampireState }) {
   uniforms.uHigh.value.set(high[0], high[1], high[2]);
   uniforms.uTint.value.set(nicheTint(id, state));
   return (
-    <mesh position={[0, FRAME.centreY, -1.0]} renderOrder={-10}>
+    <mesh position={[0, FRAME.centreY, -1.0]} renderOrder={-10} onBeforeRender={onBeforeRender}>
       <planeGeometry args={[3.2, 2.4]} />
       <shaderMaterial vertexShader={vertex} fragmentShader={fragment} uniforms={uniforms} depthWrite={false} fog={false} />
     </mesh>

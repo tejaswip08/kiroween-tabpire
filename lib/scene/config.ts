@@ -19,8 +19,8 @@ export const QUALITY = {
 
 export const BUDGET = {
   sceneDrawCalls: 150,
-  /** Raised from 175,000 for the theme props (earlier 150,000 for the richer yard). Every hidden instance and the shadow pass are counted. `sceneDrawCalls` stays 150. */
-  sceneTriangles: 200_000,
+  /** Raised from 200,000 (earlier 175,000 and 150,000) for the theme fill: the small props that fill the empty ground. Every hidden instance and the shadow pass are counted. `sceneDrawCalls` stays 150. */
+  sceneTriangles: 215_000,
   vampireTriangles: 15_000,
   maxPointLights: 6,
   /** No exit animation, including the Dawn stagger, lasts longer than this. */

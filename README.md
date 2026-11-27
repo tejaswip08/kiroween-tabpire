@@ -7,7 +7,9 @@
 A Chrome and Firefox new tab page where every open tab is a vampire, living in a 3D graveyard.
 The longer you ignore a tab, the hungrier it gets.
 
-[**Try the web demo**](https://tejaswip08.github.io/kiroween-tabpire/) · [Install](#install) · [How it works](#how-it-works) · [Built with Kiro](#built-with-kiro)
+### 🔗 Live demo: https://tejaswip08.github.io/kiroween-tabpire/
+
+No install needed. [Install for judges](#install-for-judges) · [Install from source](#install-from-source) · [How it works](#how-it-works) · [How Kiro was used](#how-kiro-was-used)
 
 <img src="docs/screenshots/crypt.jpg" alt="The Crypt: a 3D night graveyard with a blood-red moon, and one arched card per open tab, each with its own 3D vampire" width="100%">
 
@@ -74,7 +76,21 @@ The [web demo](https://tejaswip08.github.io/kiroween-tabpire/) runs the real new
 popup in an ordinary browser tab, against an in-memory fake browser with about 20 sample tabs. Every action
 and theme works, and nothing leaves your browser. **Reset demo** brings the sample tabs back.
 
-## Install
+## Install for judges
+
+No build needed. This is for Chrome (or Edge, Brave, Arc).
+
+1. Open the [latest release](https://github.com/tejaswip08/kiroween-tabpire/releases/latest) and download
+   `tabpire-<version>-chrome.zip`.
+2. Unzip it into a folder. Keep the folder; Chrome reads the files from it.
+3. Open `chrome://extensions`.
+4. Turn on **Developer mode** (top right).
+5. Click **Load unpacked** and pick the unzipped folder (the one that contains `manifest.json`).
+6. Open a new tab.
+
+Firefox users can follow the build steps below.
+
+## Install from source
 
 You need Node.js 22.
 
@@ -99,6 +115,8 @@ npm run typecheck
 npm test                 # Vitest, including fast-check property tests
 npm run demo:dev         # the web demo, in a normal browser tab
 npm run demo:build       # builds the demo into demo/dist
+npm run zip              # store upload zip for Chrome (.output/)
+npm run zip:firefox      # store upload zip for Firefox (.output/)
 ```
 
 Add `#fps` to the new tab address to show a small frame-rate readout.
@@ -108,8 +126,14 @@ Pages setting must use the **GitHub Actions** source.
 
 ## Privacy
 
-Tabpire is local-first: no account, no backend, no analytics. Your tabs, stats, saved tabs and settings stay in
-the browser's own extension storage. Two things use the network, as a browser does on its own:
+Tabpire is local-first: no account, no backend, no analytics. No data goes to any Tabpire server.
+- **Settings sync through your browser account.** The theme, pinned pages and garlic list are kept in
+  `browser.storage.sync`, so Chrome Sync or Firefox Sync carries them to your other devices. If sync is off or full,
+  they stay on this device instead. Settings saved by an older version are copied to sync once on the first run.
+- **Everything else stays on each device.** The crypt (saved tabs), the hunt log and the stats are in
+  `browser.storage.local` and are never synced.
+
+Two things use the network, as a browser does on its own, and neither involves a Tabpire server:
 
 - **Search suggestions:** what you type in the search box is sent to Google's suggestion service.
 - **Icons for pinned pages:** fetched from the site itself, or from DuckDuckGo's icon service if the site has none.
@@ -125,28 +149,65 @@ Permissions: `tabs`, `storage`, `alarms`, `search` and `favicon`, plus access to
 - Vitest, Testing Library and fast-check
 - Fonts: Grenze Gotisch, Sora and Outfit, bundled with Fontsource
 
-## Built with Kiro
+## How Kiro was used
 
-Tabpire was built for the **Kiroween 2026** hackathon with [Kiro](https://kiro.dev), spec by spec. Everything Kiro
-worked from is in [`.kiro/`](.kiro):
+Tabpire was built for **Kiroween 2026** with [Kiro](https://kiro.dev), one spec at a time. Everything Kiro worked
+from is in [`.kiro/`](.kiro).
 
-- **Steering (product):** [`product.md`](.kiro/steering/product.md), [`style.md`](.kiro/steering/style.md) and
-  [`roadmap.md`](.kiro/steering/roadmap.md)
-- **Steering (tech):** [`tech.md`](.kiro/steering/tech.md) and [`structure.md`](.kiro/steering/structure.md)
-- **Specs**, each with requirements, design and tasks:
-  [project and tab rules](.kiro/specs/project-and-tab-rules),
-  [tab actions, Dawn and badge](.kiro/specs/tab-actions-dawn-badge),
-  [the Crypt page](.kiro/specs/crypt-page),
-  [3D graveyard](.kiro/specs/graveyard-3d),
-  [themes](.kiro/specs/themes) and
-  [web demo](.kiro/specs/web-demo)
-- **Hooks:** run the tests and the typecheck when a file is saved, and check that CSS keyframes only animate
-  `transform` and `opacity` when a stylesheet is saved
+### Specs
+Each spec folder has `requirements.md`, `design.md` and `tasks.md`, and the work was done task by task.
 
-### How this was built
-An earlier prototype of the idea was made with another AI tool before the hackathon. The code in this repository
-was rebuilt from scratch in Kiro for Kiroween, spec by spec. The only pre-existing assets are the CC0 3D models
-(Kenney, KayKit, Quaternius) and the vampire model, listed under [Credits](#credits).
+| Spec | Covers |
+| --- | --- |
+| [`project-and-tab-rules`](.kiro/specs/project-and-tab-rules) | WXT project, tab states, hunger, memory estimates, storage |
+| [`tab-actions-dawn-badge`](.kiro/specs/tab-actions-dawn-badge) | Stake, Coffin, Crypt, Garlic, Resurrect, Dawn, toolbar badge |
+| [`crypt-page`](.kiro/specs/crypt-page) | The new tab page: header, cards, search, pinned pages |
+| [`graveyard-3d`](.kiro/specs/graveyard-3d) | 3D graveyard, moon, sky life, the vampire on every card |
+| [`themes`](.kiro/specs/themes) | The four enabled themes, their scenes and weather |
+| [`popup-and-blood-bank`](.kiro/specs/popup-and-blood-bank) | Toolbar popup and Blood Bank page |
+| [`web-demo`](.kiro/specs/web-demo) | The judges' demo against a fake `browser` |
+
+### Steering
+The files in [`.kiro/steering`](.kiro/steering) were loaded into every Kiro session:
+[`product.md`](.kiro/steering/product.md) (states and actions),
+[`style.md`](.kiro/steering/style.md) (look, fonts, animation limits),
+[`tech.md`](.kiro/steering/tech.md) (stack, commands, performance rules),
+[`structure.md`](.kiro/steering/structure.md) (folders and naming) and
+[`roadmap.md`](.kiro/steering/roadmap.md) (the whole plan, so each spec fits the rest).
+
+### Hooks
+The hooks in [`.kiro/hooks`](.kiro/hooks) run when a file is saved:
+
+- **Test on save:** `npm test` when a hunger file or a file under `tests/` is saved.
+- **Typecheck on save:** `npm run typecheck` when a `.ts` or `.tsx` file is saved.
+- **CSS animation check:** `node tools/check-css-animations.mjs` when a `.css` file is saved. It fails if a
+  `@keyframes` block animates anything except `transform` and `opacity`.
+
+### Property-based tests
+The rules in `lib/` are pure, so they are tested with [fast-check](https://fast-check.dev) properties
+(for example [`tests/hunger.test.ts`](tests/hunger.test.ts) and [`tests/dawn.test.ts`](tests/dawn.test.ts)):
+
+- every tab has exactly one state;
+- a memory estimate is stable for a tab, never negative, and rounded to 5 MB;
+- hunger never goes down while a tab stays unused;
+- Dawn never touches the active tab, pinned tabs, tabs playing sound, or garlic sites.
+
+The scene layouts are also tested as pure data (inside the ground, no overlaps, clear of the moon and the cards).
+
+### Pre-existing prototype
+This repository did not start empty. I made a first prototype of Tabpire with another AI tool (Claude Code) on
+2 November 2026, early in the Kiroween submission period (which started 30 October 2026), and then rebuilt it spec by
+spec in Kiro. It was committed as `f464485` ("First Commit", 2 November 2026) and its history is kept in this
+repository. It contained a first version of the hunger rules, storage, tab actions, search suggestions, Blood
+Bank, popup, a 3D graveyard and its own early `.kiro` spec and steering files.
+
+What is still related to it today: 16 source files sit at the same paths as in the prototype
+(`lib/hunger.ts`, `lib/store.ts`, `lib/tabs.ts`, `lib/suggest.ts`, `entrypoints/background.ts`,
+`entrypoints/newtab/Haunts.tsx`, the Blood Bank and popup entry files, `tests/hunger.test.ts`, `wxt.config.ts`).
+Kiro rewrote them during specs 1 to 6, and none is unchanged, but they began as prototype code. The other
+prototype source files were removed. Everything else (the Crypt page components, the 3D scenes, the four themes,
+the web demo, the build tooling and the tests) was written in Kiro for Kiroween. The 3D models and the
+vampire model are third-party or generated assets; see [Credits](#credits).
 
 ## Credits
 

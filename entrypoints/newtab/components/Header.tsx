@@ -71,7 +71,8 @@ export function Header({
         </div>
         <HeaderButton
           label="Blood Bank"
-          icon={<BloodOrbIcon size={26} />}
+          className="header-btn-bank"
+          icon={<BloodOrbIcon size={22} />}
           tip={BLOOD_BANK_TIP}
           onClick={() => void openBloodBank()}
         />

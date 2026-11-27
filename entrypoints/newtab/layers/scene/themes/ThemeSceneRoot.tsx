@@ -4,6 +4,7 @@ import { Bats } from '../Bats';
 import { Clouds } from '../Clouds';
 import { Effects } from '../Effects';
 import { Embers } from '../Embers';
+import { FillProps } from '../Fill';
 import { Fog } from '../Fog';
 import { Ghosts } from '../Ghosts';
 import { Glows } from '../Glows';
@@ -36,10 +37,11 @@ export function ThemeSceneRoot({ id }: { id: ThemeId }) {
       {layers.clouds && <Clouds />}
       {layers.witch && <Witch />}
       {layers.bats > 0 && <Bats boost={layers.bats} />}
-      {layers.ghosts && <Ghosts tint={layers.ghostTint} />}
+      {layers.ghosts && <Ghosts tint={layers.ghostTint} wind={layers.ghostWind} />}
       <Fog />
       <Lights />
       <Scene spec={spec} />
+      <FillProps />
       <Glows />
       {layers.mist && <Mist />}
       {layers.embers && <Embers />}

@@ -24,8 +24,8 @@ export default defineConfig({
     action: { default_title: 'Tabpire', default_icon: ICONS, default_popup: 'popup.html' },
     browser_specific_settings: {
       gecko: {
-        // Placeholder. Replace with the real add-on id before submission.
-        id: 'tabpire@example.invalid',
+        // A fixed id lets Firefox Sync match installs across devices. Change the domain to one you own.
+        id: 'tabpire@tabpire.app',
       },
     },
   },

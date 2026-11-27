@@ -1,5 +1,6 @@
-// The only module that touches browser.storage.local.
-// Local-first: no synced storage and no network calls here.
+// The only module that touches browser.storage (local and sync).
+// Settings (theme, haunts, garlic) live in storage.sync, so the browser account carries them between devices.
+// The crypt, log and stats stay in storage.local (too big for the sync limits). No network calls here.
 import { browser } from 'wxt/browser';
 import { DEFAULT_THEME, isEnabledThemeId, type ThemeId } from './themes';
 
@@ -49,7 +50,12 @@ export const KEYS = {
   /** The key haunts were saved under before they were renamed. Read once as a fallback. */
   legacyPinned: 'tabpire:pinned',
   theme: 'tabpire:theme',
+  /** Local flag: the one-time copy of settings from local to sync has finished. */
+  syncMigrated: 'tabpire:sync-migrated',
 } as const;
+
+/** The settings that follow the user's browser account. */
+const SYNC_KEYS: readonly string[] = [KEYS.theme, KEYS.haunts, KEYS.garlic];
 
 export { DEFAULT_THEME };
 
@@ -114,6 +120,110 @@ async function write(key: string, value: unknown): Promise<void> {
   await browser.storage.local.set({ [key]: value });
 }
 
+// ---------- synced settings ----------
+// A synced key is held in storage.sync. storage.local holds it only when sync is unavailable or a write
+// to sync failed (quota, sync turned off), so a local value is the newest value on this device.
+// Reads look at local first, then sync. A successful sync write removes the local copy.
+
+/** The sync area, or null where the browser has none. */
+function syncArea(): typeof browser.storage.local | null {
+  try {
+    const area = (browser.storage as unknown as { sync?: typeof browser.storage.local }).sync;
+    return area ?? null;
+  } catch {
+    return null;
+  }
+}
+
+async function dropLocal(key: string): Promise<void> {
+  try {
+    const has = key in (await browser.storage.local.get(key));
+    if (has) await browser.storage.local.remove(key);
+  } catch {
+    /* the local copy stays and is read first: still the newest value on this device */
+  }
+}
+
+let migration: Promise<void> | null = null;
+
+/**
+ * Copies settings saved by older versions from local to sync, once.
+ * A value already in sync wins (another device saved it). Any failure leaves the local copy and retries next run.
+ */
+function migrateToSync(): Promise<void> {
+  const sync = syncArea();
+  if (!sync) return Promise.resolve();
+  migration ??= (async () => {
+    try {
+      const flagged = (await browser.storage.local.get(KEYS.syncMigrated))[KEYS.syncMigrated];
+      if (flagged === true) return;
+      const keys = [...SYNC_KEYS, KEYS.legacyPinned];
+      const local = await browser.storage.local.get(keys);
+      const remote = await sync.get([...SYNC_KEYS]);
+      let complete = true;
+      for (const key of SYNC_KEYS) {
+        const legacy = key === KEYS.haunts && local[key] === undefined ? KEYS.legacyPinned : key;
+        const value: unknown = local[legacy];
+        if (value !== undefined && remote[key] === undefined) {
+          try {
+            await sync.set({ [key]: value });
+          } catch {
+            complete = false;
+            continue;
+          }
+        }
+        if (local[key] !== undefined) await dropLocal(key);
+      }
+      if (complete) await write(KEYS.syncMigrated, true);
+    } catch {
+      /* sync is off or unreadable: try again on the next run */
+    }
+    if (!(await migrated())) migration = null;
+  })();
+  return migration;
+}
+
+async function migrated(): Promise<boolean> {
+  try {
+    return (await browser.storage.local.get(KEYS.syncMigrated))[KEYS.syncMigrated] === true;
+  } catch {
+    return false;
+  }
+}
+
+/** Reads a synced setting: this device's local fallback copy first, then sync. */
+async function readSynced<T>(key: string, guard: (v: unknown) => v is T, fallback: () => T): Promise<T> {
+  await migrateToSync();
+  const local = (await browser.storage.local.get(key))[key];
+  if (guard(local)) return local;
+  const sync = syncArea();
+  if (sync) {
+    try {
+      const remote = (await sync.get(key))[key];
+      if (guard(remote)) return remote;
+    } catch {
+      /* sync unreadable: use the default */
+    }
+  }
+  return fallback();
+}
+
+/** Writes a synced setting to sync, or to local when sync is unavailable or the write fails. */
+async function writeSynced(key: string, value: unknown): Promise<void> {
+  await migrateToSync();
+  const sync = syncArea();
+  if (sync) {
+    try {
+      await sync.set({ [key]: value });
+      await dropLocal(key);
+      return;
+    } catch {
+      /* quota or sync off: fall back silently */
+    }
+  }
+  await write(key, value);
+}
+
 export const store = {
   getStats: () => read(KEYS.stats, isStats, defaultStats),
   setStats: (v: Stats) => write(KEYS.stats, v),
@@ -131,26 +241,26 @@ export const store = {
   getCrypt: () => read(KEYS.crypt, arrayOf(isCryptItem), () => []),
   setCrypt: (v: CryptEntry[]) => write(KEYS.crypt, v),
 
-  getGarlic: () => read(KEYS.garlic, arrayOf(isStr), () => []),
-  setGarlic: (v: string[]) => write(KEYS.garlic, v),
+  getGarlic: () => readSynced(KEYS.garlic, arrayOf(isStr), () => []),
+  setGarlic: (v: string[]) => writeSynced(KEYS.garlic, v),
 
   getHaunts: async (): Promise<Haunt[]> => {
-    const now = (await browser.storage.local.get(KEYS.haunts))[KEYS.haunts];
-    if (arrayOf(isHaunt)(now)) return now;
+    const now = await readSynced<Haunt[] | null>(KEYS.haunts, (v): v is Haunt[] | null => v === null || arrayOf(isHaunt)(v), () => null);
+    if (now) return now;
     const old = (await browser.storage.local.get(KEYS.legacyPinned))[KEYS.legacyPinned];
     return arrayOf(isHaunt)(old) ? old : [];
   },
-  setHaunts: (v: Haunt[]) => write(KEYS.haunts, v),
+  setHaunts: (v: Haunt[]) => writeSynced(KEYS.haunts, v),
 
   /** An unknown, missing or unreadable value gives the default theme. Never throws. */
   getTheme: async (): Promise<ThemeId> => {
     try {
-      return await read(KEYS.theme, isEnabledThemeId, () => DEFAULT_THEME);
+      return await readSynced(KEYS.theme, isEnabledThemeId, () => DEFAULT_THEME);
     } catch {
       return DEFAULT_THEME;
     }
   },
-  setTheme: (v: ThemeId) => write(KEYS.theme, v),
+  setTheme: (v: ThemeId) => writeSynced(KEYS.theme, v),
 };
 
 // ---------- transactions ----------
@@ -178,13 +288,15 @@ export function transact<T>(fn: () => Promise<T>): Promise<T> {
 // ---------- change notifications ----------
 
 /**
- * Calls listener with the changed Tabpire keys, for local storage only.
- * Lets one page react to writes made by another. Returns an unsubscribe function.
+ * Calls listener with the changed Tabpire keys: any key from local storage, and the synced settings from
+ * sync storage (a change made on another device). Lets one page react to writes made by another. Returns an unsubscribe function.
  */
 export function onStoreChange(listener: (changedKeys: string[]) => void): () => void {
   const handler = (changes: Record<string, unknown>, area: string) => {
-    if (area !== 'local') return;
-    const keys = Object.keys(changes).filter((k) => k.startsWith('tabpire:'));
+    if (area !== 'local' && area !== 'sync') return;
+    const keys = Object.keys(changes).filter(
+      (k) => k.startsWith('tabpire:') && (area === 'local' || SYNC_KEYS.includes(k)),
+    );
     if (keys.length > 0) listener(keys);
   };
   browser.storage.onChanged.addListener(handler);

@@ -43,8 +43,8 @@ describe('collectParts', () => {
     expect(box.max.y).toBeCloseTo(4);
     expect(box.max.x).toBeCloseTo(1);
   });
-  it('is set only on forest_rocks, blood_ruins, castle_torch and castle_wall_flag', () => {
+  it('is set only on forest_rocks, blood_ruins, castle_torch, castle_wall_flag and the Crypt\'s hanging lantern', () => {
     const set = (Object.keys(MODELS) as (keyof typeof MODELS)[]).filter((k) => (MODELS[k] as { recentre?: true }).recentre);
-    expect(set.sort()).toEqual(['blood_ruins', 'castle_torch', 'castle_wall_flag', 'forest_rocks']);
+    expect(set.sort()).toEqual(['blood_ruins', 'castle_torch', 'castle_wall_flag', 'forest_rocks', 'lantern_hanging']);
   });
 });

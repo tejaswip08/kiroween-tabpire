@@ -3,7 +3,7 @@ import type { SceneInputs } from '../../../lib/scene/meaning';
 import { DEFAULT_THEME, type ThemeId } from '../../../lib/themes';
 import { clearPortraitsReady } from './portraitReady';
 import { LayerBoundary } from './LayerBoundary';
-import { useWebgl } from './useWebgl';
+import { detectWebgl, useContextState } from './useWebgl';
 
 // The 3D code is a separate chunk. These imports run only when WebGL is available.
 const SceneLayer = lazy(() => import('./SceneLayer'));
@@ -24,14 +24,15 @@ function useAfterFirstPaint(): boolean {
   }, []);
   return done;
 }
-
 /** Whether to load a 3D layer now. Without WebGL, nothing 3D is loaded and no error is shown.
+ * The WebGL check makes a throwaway context, which can take seconds on a machine without a GPU, so it runs only
+ * after the first paint (never in a render that the cards wait for).
  * When the context is lost the layer stays mounted but hidden, because its canvas is the one that is
  * told when the context returns. It then mounts fresh (the epoch changes). */
 function useLayerGate(): { show: boolean; lost: boolean; epoch: number } {
-  const { available, lost, epoch } = useWebgl();
+  const { lost, epoch } = useContextState();
   const painted = useAfterFirstPaint();
-  return { show: available && painted, lost, epoch };
+  return { show: painted && detectWebgl(), lost, epoch };
 }
 
 /** The full-window graveyard behind the page. Hidden from screen readers, takes no clicks. */

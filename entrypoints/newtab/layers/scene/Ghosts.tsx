@@ -20,7 +20,7 @@ function ghostGeometry(): LatheGeometry {
 }
 
 const vertex = /* glsl */ `
-uniform float uTime; uniform float uCount;
+uniform float uTime; uniform float uCount; uniform float uWind;
 varying vec3 vLocal; varying vec3 vN; varying vec3 vView; varying float vShown;
 void main() {
   float id = float(gl_InstanceID);
@@ -28,14 +28,19 @@ void main() {
   float ang = atan(p.z, p.x);
   // A scalloped hem that ripples, and a slow bob.
   float hem = 1.0 - clamp(p.y / 0.5, 0.0, 1.0);
-  p.y += hem * 0.17 * (0.5 + 0.5 * sin(ang * 6.0 + uTime * 2.4 + id * 2.0)) - hem * 0.1;
+  p.y += hem * 0.17 * (1.0 + 0.6 * uWind) * (0.5 + 0.5 * sin(ang * 6.0 + uTime * (2.4 + 1.6 * uWind) + id * 2.0)) - hem * 0.1;
   vLocal = p;
   vec3 center = (instanceMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
-  center += vec3(sin(uTime * 0.23 + id * 1.7) * 0.9, sin(uTime * 0.9 + id * 2.0) * 0.22, cos(uTime * 0.19 + id * 2.3) * 0.7);
+  // In a wind (uWind 1) the sideways drift follows the gusts instead of a plain sway, and stays inside the same 0.9.
+  float gust = 0.5 + 0.5 * sin(uTime * 0.7 + 1.3 + id * 0.9);
+  float blown = clamp(0.4 * sin(uTime * 0.21 + id * 1.7) + 0.6 * (2.0 * gust * gust - 1.0), -1.0, 1.0);
+  center += vec3(mix(sin(uTime * 0.23 + id * 1.7), blown, uWind) * 0.9, sin(uTime * 0.9 + id * 2.0) * 0.22, cos(uTime * 0.19 + id * 2.3) * 0.7);
   // Turn to face the camera.
   float a = atan(cameraPosition.x - center.x, cameraPosition.z - center.z);
   float c = cos(a); float s = sin(a);
   vec3 q = vec3(p.x * c + p.z * s, p.y, -p.x * s + p.z * c);
+  // The hem trails downwind (+x) and the head leans with it.
+  q.x += uWind * (0.12 + 0.2 * gust) * (hem * 0.8 + p.y * 0.08);
   vec3 n = vec3(normal.x * c + normal.z * s, normal.y, -normal.x * s + normal.z * c);
   vec4 mv = viewMatrix * vec4(center + q, 1.0);
   vN = normalize(mat3(viewMatrix) * n);
@@ -71,9 +76,10 @@ void main() {
 const GHOST_BODY = 0.95;
 /**
  * Cute mint-green ghosts with hollow eyes, floating over the graves (a theme may pass a `tint`). Two are always out, and a Crypt
- * with items shows a third. They bob and sway, and always turn to face the camera.
+ * with items shows a third. They bob and sway, and always turn to face the camera. A theme with `wind` (the Frozen Cemetery) has them
+ * drift with its gusts, their hems trailing downwind.
  */
-export function Ghosts({ tint }: { tint?: string } = {}) {
+export function Ghosts({ tint, wind = 0 }: { tint?: string; wind?: number } = {}) {
   const display = useDisplay();
   const { scene } = useSceneTheme();
   const mesh = useMemo(() => {
@@ -83,6 +89,7 @@ export function Ghosts({ tint }: { tint?: string } = {}) {
       uniforms: {
         uTime: { value: 0 },
         uCount: { value: MIN_GHOSTS },
+        uWind: { value: 0 },
         uBody: { value: sceneColorsFor('crypt').ghost.clone().multiplyScalar(GHOST_BODY) },
         uRim: { value: sceneColorsFor('crypt').ghost.clone().multiplyScalar(LOOK.glow.ghostRim) },
       },
@@ -120,6 +127,7 @@ export function Ghosts({ tint }: { tint?: string } = {}) {
   useFrame(() => {
     const u = (mesh.material as ShaderMaterial).uniforms;
     u.uTime!.value = display.time;
+    u.uWind!.value = display.reduced ? 0 : wind;
     u.uCount!.value = Math.min(MAX_GHOSTS, spots, Math.max(MIN_GHOSTS, display.ghosts));
   });
   return <primitive object={mesh} />;

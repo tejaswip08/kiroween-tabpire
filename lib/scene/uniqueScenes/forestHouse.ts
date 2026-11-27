@@ -117,7 +117,7 @@ export function forestMidground(path: readonly { x: number; z: number }[], halfW
   const groupAt: [number, number][] = [[-9, -24], [11, -22], [-15, -33], [16, -34], [-5, -17], [8, -14]];
   for (const [gx, gz] of groupAt) {
     const count = 3 + Math.floor(rng() * 2);
-    for (let n = 0; n < count * 8 && graves.filter((g) => Math.hypot(g.x - gx, g.z - gz) < 3.4).length < count; n++) {
+    for (let n = 0; n < count * 30 && graves.filter((g) => Math.hypot(g.x - gx, g.z - gz) < 3.4).length < count; n++) {
       const x = gx + between(-2.4, 2.4);
       const z = gz + between(-1.8, 1.8);
       if (!clear(x, z, 0.6) || inLane(x, z) || stumps.some((s) => Math.hypot(s.x - x, s.z - z) < 1.6) || logs.some((l) => Math.hypot(l.x - x, l.z - z) < 2.4) || graves.some((g) => Math.hypot(g.x - x, g.z - z) < 1.3)) continue;

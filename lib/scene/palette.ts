@@ -2,8 +2,9 @@
 // so the contrast between them can be tested by hue.
 
 export const COLD = {
-  skyTop: '#140632',
-  fog: '#3b2270',
+  // The first prototype's sky: deep violet at the top to rose-pink at the horizon, with a violet fog.
+  skyTop: '#170838',
+  fog: '#592176',
   hemisphereSky: '#9a78ff',
   hemisphereGround: '#4a2a78',
   rim: '#9a86ff',
@@ -24,22 +25,27 @@ export const ACCENT = {
 
 /** Crypt colours that used to sit as literals in colors.ts and the scene components. */
 export const CRYPT_EXTRA = {
-  skyMid: '#2a0e58',
-  skyHorizon: '#5c1a5c',
-  haze: '#74205c',
+  skyMid: '#3a1468',
+  skyHorizon: '#a4377f',
+  haze: '#c45a9e',
   mushroom: '#35e8d0',
   cauldron: '#5cff58',
   wisp: '#58f0c8',
   ghost: '#a8f0d0',
-  lowCloud: '#2a1648',
+  // Soft pink-magenta clouds along the horizon.
+  lowCloud: '#e07cb0',
   farSilhouette: '#190c36',
   groundBase: '#2d2832',
   groundTint: '#b4aab4',
+  /** The mausoleum's doorway glows soft purple, and the blood moon throws a red rim light. */
+  door: '#b57cff',
+  rim: '#b0588c',
 } as const;
 /** Crypt shader literals, linear RGB (the numbers the GPU sees). */
 export const CRYPT_SHADER = {
-  moonLight: [0.462, 0.058, 0.023],
-  moonDark: [0.195, 0.018, 0.009],
+  // A glowing red blood moon with subtle darker craters.
+  moonLight: [0.82, 0.03, 0.035],
+  moonDark: [0.42, 0.012, 0.016],
   cloudBody: [0.045, 0.045, 0.1],
   cloudTint: [0.2, 0.07, 0.12],
 } as const;

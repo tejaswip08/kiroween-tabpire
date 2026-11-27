@@ -3,6 +3,7 @@ import { dawnKeepReason, dawnTargets, type DawnKeepReason, type VampireState } f
 import { filterByState, toggleFilter } from '../../lib/legend';
 import { emitSceneEvent } from '../../lib/scene/bus';
 import { actionNotice, dawnNotice, resurrectNotice } from '../../lib/messages';
+import { addressOf } from '../../lib/address';
 import { openInThisTab, searchWithDefaultEngine, showTab } from '../../lib/nav';
 import type { Suggestion } from '../../lib/suggest';
 import { coffin, crypt, dawn, garlic, resurrect, stake, ungarlic, wake, type ActionResult } from '../../lib/tabs';
@@ -90,6 +91,11 @@ export function App() {
 
   const onSearch = useCallback(
     (text: string) => {
+      const address = addressOf(text);
+      if (address) {
+        openInThisTab(address).catch(() => push({ kind: 'error', text: 'The browser could not open that address.' }));
+        return;
+      }
       searchWithDefaultEngine(text).catch(() =>
         push({ kind: 'error', text: 'The browser could not start that search.' }),
       );

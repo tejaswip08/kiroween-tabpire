@@ -81,7 +81,7 @@ const sc = new Vector3();
 export function Glows() {
   const display = useDisplay();
   const { scene } = useSceneTheme();
-  const sources = useMemo(() => scene.layout.glows, [scene.layout]);
+  const sources = useMemo(() => (scene.fill ? [...scene.layout.glows, ...scene.fill.glows] : scene.layout.glows), [scene.layout, scene.fill]);
   const flames = useMemo(() => sources.filter((s) => FLAME_SIZE[s.kind] > 0), [sources]);
   const pools = useMemo(() => makeMesh(sources, false, 2.2, poolLevel), [sources]);
   const flameMesh = useMemo(() => makeMesh(flames, true, 2.6, flameLevel), [flames]);

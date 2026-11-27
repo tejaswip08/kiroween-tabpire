@@ -82,8 +82,8 @@ describe('scene budget', () => {
   const counts = new Map<ModelId, number>();
   for (const p of L.placements) counts.set(p.model, (counts.get(p.model) ?? 0) + 1);
 
-  it('stays within the 200,000 triangle budget with every instance at full capacity, shadow pass included', () => {
-    expect(BUDGET.sceneTriangles).toBe(200_000);
+  it('stays within the 215,000 triangle budget with every instance at full capacity, shadow pass included', () => {
+    expect(BUDGET.sceneTriangles).toBe(215_000);
     let total = 0;
     for (const [id, n] of counts) {
       const t = MODELS[id].tris * n;
@@ -170,7 +170,7 @@ function plan(id: ThemeId) {
 
 describe.each(THEME_IDS)('budget of theme %s (Property 13)', (id) => {
   const { lay, weather, counts, tris, draws } = plan(id);
-  it('stays within 200,000 triangles (shadow pass and weather included)', () => {
+  it('stays within the triangle budget (shadow pass and weather included)', () => {
     expect(weatherTriangles(weather)).toBe(weather ? 2 * weather.count : 0);
     expect(tris).toBeLessThanOrEqual(BUDGET.sceneTriangles);
   });
@@ -207,8 +207,9 @@ describe.each(THEME_IDS.filter((id) => themeScene(id).unique))('the plan of uniq
   it('never counts the Crypt village and critters', () => {
     const cryptExtras = Object.values(EXTRAS).reduce((sum, e) => sum + e.tris, 0);
     // The Witch's Forest builds dozens of trees itself, and the Pumpkin Patch its tree, skeletons, haunted house and extra trees
-    // (about 59k), so their own parts may outweigh the village; the village is still not counted.
-    expect(unique!.extras.tris).toBeLessThan(Math.max(cryptExtras, 64_000));
+    // and far scenery with its dusk clouds (about 64k), so their own parts may outweigh the village; the village is still not counted.
+    // Raised from 64,000 for the Pumpkin Patch's far scenery (hills, farmhouses, steeple, water tower, trees, field-edge props).
+    expect(unique!.extras.tris).toBeLessThan(Math.max(cryptExtras, 66_000));
   });
   it('stays within the budgets', () => {
     expect(tris).toBeLessThanOrEqual(BUDGET.sceneTriangles);
@@ -223,8 +224,10 @@ describe('the Crypt plan is the plan before the themes work', () => {
     const crypt = plan('crypt');
     expect(crypt.weather).toBeNull();
     expect(crypt.lay.placements).toEqual(L.placements);
-    expect(crypt.tris).toBe(115_524);
-    expect(crypt.draws).toBe(113);
+    // Requirement changed: the Crypt's backdrop behind the fence (dead trees, pines, two mausoleums, broken fence, a lamp post and
+    // tombstones), the far village and the depth fog. Still well inside BUDGET.sceneTriangles and BUDGET.sceneDrawCalls.
+    expect(crypt.tris).toBe(145_115);
+    expect(crypt.draws).toBe(124);
   });
   it('keeps the render quality settings', () => {
     expect(QUALITY).toEqual({

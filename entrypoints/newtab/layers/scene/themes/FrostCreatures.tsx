@@ -5,7 +5,7 @@ import { type FrostAttached, type FrostPlan, howlAmount } from '../../../../../l
 import { useDisplay } from '../display';
 import { Icicles } from './Icicles';
 import {
-  NECK, buildCrow, buildOwlBody, buildOwlHead, buildWolfBody, buildWolfEyes, buildWolfHead,
+  NECK, buildCrow, buildWolfBody, buildWolfEyes, buildWolfHead,
 } from './frostShapes';
 import { disposeMesh, glowMaterial, litMaterial, makeInstanced, placeAt } from './frostParts';
 const EYES_BLUE = '#8fe0ff';
@@ -64,34 +64,6 @@ function Wolves({ wolves }: { wolves: FrostPlan['wolves'] }) {
     </>
   );
 }
-/** A snowy owl on a tombstone. Its head slowly turns from side to side and back (it holds still under reduced motion). */
-function SnowyOwl({ owl }: { owl: FrostPlan['owl'] }) {
-  const display = useDisplay();
-  const head = useRef<Group>(null);
-  const built = useMemo(() => {
-    const body = new Mesh(buildOwlBody(), litMaterial('#3a5a8c', 0.5));
-    body.name = 'frost-owl';
-    body.castShadow = true;
-    const top = new Mesh(buildOwlHead(), litMaterial('#3a5a8c', 0.5));
-    top.name = 'frost-owl-head';
-    return { body, top };
-  }, []);
-  useEffect(() => () => {
-    disposeMesh(built.body);
-    disposeMesh(built.top);
-  }, [built]);
-  useFrame(() => {
-    if (head.current) head.current.rotation.y = display.reduced ? 0 : 0.7 * Math.sin(display.time * 0.28) * Math.abs(Math.sin(display.time * 0.11));
-  });
-  return (
-    <group position={[owl.x, owl.y, owl.z]} rotation={[0, owl.rotY, 0]} scale={1.3}>
-      <primitive object={built.body} />
-      <group ref={head} position={[0, 0.58, 0.02]}>
-        <primitive object={built.top} />
-      </group>
-    </group>
-  );
-}
 /** Two crows sitting on the branches of the bare tree, and the icicles under its branches. */
 function TreeThings({ attached }: { attached: FrostAttached }) {
   const crows = useMemo(() => makeInstanced(buildCrow(), litMaterial('#14305a', 0.5), attached.crows.map((c) => placeAt(c.x, c.y, c.z, c.rotY, 1.5)), 'frost-crows', { castShadow: true }), [attached]);
@@ -103,12 +75,11 @@ function TreeThings({ attached }: { attached: FrostAttached }) {
     </>
   );
 }
-/** The creatures of the Frozen Cemetery: the wolves on the far ridge, the owl in the left corner, the crows on the bare tree. */
+/** The creatures of the Frozen Cemetery: the wolves on the far ridge and the crows on the bare tree. */
 export function FrostCreatures({ plan, attached }: { plan: FrostPlan; attached: FrostAttached }) {
   return (
     <>
       <Wolves wolves={plan.wolves} />
-      <SnowyOwl owl={plan.owl} />
       <TreeThings attached={attached} />
     </>
   );

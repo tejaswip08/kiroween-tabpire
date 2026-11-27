@@ -9,6 +9,7 @@ import {
 } from '../layout';
 import { mulberry32 } from '../rng';
 import type { BloodParts } from './bloodmoonParts';
+import type { FillPlan } from './fill';
 import type { CastleParts } from './castleParts';
 import type { AutumnPlan } from './autumn';
 import type { Icicle, Mound } from './frostIce';
@@ -77,6 +78,8 @@ export interface UniqueLayers {
   moon?: boolean;
   /** A colour (hex) the ghosts are tinted instead of the theme's ghost colour (Frozen Cemetery: icy blue). Missing keeps the palette. */
   ghostTint?: string;
+  /** How much the ghosts drift and lean with the wind (0 or absent: no wind). Only the Frozen Cemetery sets it. */
+  ghostWind?: number;
 }
 /** An upper bound for the triangles and draw calls of the theme's own parts (scarecrow, path, ground, snow mounds). */
 export interface UniqueExtras {
@@ -116,8 +119,8 @@ export interface UniqueSceneSpec {
   sunk?: Record<string, number>;
   /** The ice of the Frozen Cemetery: the ids of the gravestones in the lake, the icicles under their tops and the snow mounds. */
   ice?: { stones: string[]; icicles: Icicle[]; mounds: Mound[] };
-  /** The Frozen Cemetery's own parts: the chapel, the graveyard, the ice pillars, the wolves and what hangs from the dead trees. */
-  frost?: { plan: FrostPlan; attached: FrostAttached; drifts: Mound[]; lanternSpots: { kind: 'lantern'; x: number; y: number; z: number }[] };
+  /** The Frozen Cemetery's own parts: the house, the graveyard, the lanterns, the wolves and what hangs from the dead tree. */
+  frost?: { plan: FrostPlan; attached: FrostAttached; drifts: Mound[]; lanternSpots: { kind: 'lantern'; x: number; y: number; z: number }[]; pines: { x: number; z: number; rotY: number; height: number }[] };
   /**
    * Placements that stand on a platform the scene draws itself (the Blood Moon ruins): id to the height of the platform top.
    * Their lowest point is that high above y = 0, not on the ground.
@@ -136,6 +139,8 @@ export interface UniqueSceneSpec {
   mounted?: Record<string, string>;
   /** The parts the Haunted Castle draws itself or lays out by rule: the lit windows, the wall pieces, the torch tops and the lightning seed. */
   castle?: CastleParts;
+  /** The small props that fill the empty ground (`fill.ts`). They are not in `placements`; the scene draws them with its own `FillProps`. */
+  fill?: FillPlan;
   /** Multiplies the depth fog density (the memory factor still applies on top). Missing is 1, the Crypt's fog. */
   fogScale?: number;
 }

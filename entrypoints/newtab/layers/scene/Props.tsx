@@ -6,7 +6,7 @@ import { LOOK } from '../../../../lib/scene/config';
 import { MODELS, modelFile } from '../../../../lib/scene/layout';
 import { useDisplay, type SceneDisplay } from './display';
 import { buildBatches, dynamicOf, SafeModelBatch, stepDynamic, type Batch, type LastCounts } from './ModelBatch';
-import { useSceneTheme } from './themeColors';
+import { useColorSync, useSceneTheme } from './themeColors';
 export { collectParts, type Part } from './ModelBatch';
 
 
@@ -71,7 +71,7 @@ function CryptProps() {
     </>
   );
 }
-// The warm glowing doorway of the crypt: a bright arch drawn in front of the door.
+// The glowing doorway of the crypt (the theme's door colour): a bright arch drawn in front of the door.
 const doorVertex = /* glsl */ `
 varying vec2 vUv;
 void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`;
@@ -86,15 +86,21 @@ void main() {
   gl_FragColor = vec4(uColor * a * uLevel, a);
 }`;
 
+/** The Crypt's purple doorway would bloom to white at the old warm door's brightness, so it glows less to keep its colour. */
+const DOOR_GLOW = 1.3;
 function CryptDoor({ display }: { display: SceneDisplay }) {
   const { scene } = useSceneTheme();
   const door = scene.layout.cryptDoor;
-  const uniforms = useMemo(() => ({ uColor: { value: new Vector3(1, 0.69, 0.4).multiplyScalar(LOOK.glow.door) }, uLevel: { value: 1 } }), []);
+  const k = door.scale ?? 1;
+  const uniforms = useMemo(() => ({ uColor: { value: new Vector3(0.46, 0.2, 1).multiplyScalar(DOOR_GLOW) }, uLevel: { value: 1 } }), []);
+  useColorSync((c) => {
+    uniforms.uColor.value.set(c.door.r, c.door.g, c.door.b).multiplyScalar(DOOR_GLOW);
+  });
   useFrame(() => {
     uniforms.uLevel.value = 0.9 + 0.1 * Math.sin(display.time * 6.1);
   });
   return (
-    <mesh position={[door.x, door.y + 0.25, door.z]} rotation={[0, door.rotY, 0]}>
+    <mesh position={[door.x, door.y + 0.25 * k, door.z]} rotation={[0, door.rotY, 0]} scale={k}>
       <planeGeometry args={[1.9, 2.7]} />
       <shaderMaterial
         vertexShader={doorVertex}

@@ -76,6 +76,10 @@ const subscribe = (l: () => void) => {
 };
 const snapshot = () => state;
 
+/** Whether the context is lost, and a key that changes when it returns. Does not probe for WebGL. */
+export function useContextState(): ContextState {
+  return useSyncExternalStore(subscribe, snapshot, snapshot);
+}
 /** Whether 3D can be shown now, and a key that changes when the context returns. */
 export function useWebgl(): { available: boolean; lost: boolean; epoch: number } {
   const s = useSyncExternalStore(subscribe, snapshot, snapshot);

@@ -95,6 +95,34 @@
 .add-page-btn[aria-disabled='true'] {
   opacity: 0.5;
 }
+.add-page-plus {
+  display: grid;
+  place-items: center;
+}
+/* No pinned pages yet: a round + button with "Add page" under it, centred under the search box. */
+.add-page-round {
+  flex-direction: column;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 12px;
+  color: var(--ink-dim);
+}
+.add-page-round .add-page-plus {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  color: var(--ink);
+  border: 1px solid var(--card-edge);
+  background: linear-gradient(180deg, var(--button-top), var(--button-bottom));
+  box-shadow: var(--shadow-button);
+}
+.haunts-add:has(.add-page-round) .add-form {
+  right: auto;
+  left: 50%;
+  transform: translateX(-50%);
+}
 
 .add-page-btn[aria-disabled='true']:hover {
   transform: none;

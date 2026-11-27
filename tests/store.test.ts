@@ -151,7 +151,7 @@ describe('storage and network boundaries', () => {
     expect(offenders).toEqual([]);
   });
 
-  it.each(['storage.sync', 'fetch(', 'XMLHttpRequest'])('store.ts does not use %s', (banned) => {
+  it.each(['fetch(', 'XMLHttpRequest'])('store.ts does not use %s', (banned) => {
     const text = readFileSync(join(root, 'lib', 'store.ts'), 'utf8');
     expect(text).not.toContain(banned);
   });

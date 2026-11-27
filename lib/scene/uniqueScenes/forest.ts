@@ -12,6 +12,7 @@ import {
   CAULDRON, FIRE, FLAME_COUNT, FLAME_TRIS, FOREST_PARTS, GHOSTS, GRAVES, MUSHROOMS, PLANT_TRIS, SCARECROWS, SOUP_LEVEL,
   SOUP_RADIUS, SPARK_COUNT, TUFT_TRIS, WISP, SCARY_TREE_TRIS, THORN_TRIS, LOG_TRIS, EXTRA_GRAVE_TRIS, flames, scaryGround, grass, graveFootprint, scarecrowFootprint, type ForestParts,
 } from './forestParts';
+import { buildFill } from './fill';
 import { HOUSE_FOOTPRINT, HOUSE_LANE, MOON_DEPTH, forestMidground, midgroundTris } from './forestHouse';
 import { Placer, VIEW_ASPECTS, modelsOf, sampleLine, solidFootprint, type UniqueMoon, type UniqueSceneSpec } from './types';
 export { CAULDRON, FIRE };
@@ -24,12 +25,20 @@ export const FOREST_SEED = 7211;
  */
 export const FOREST_MOON_DEPTH = MOON_DEPTH;
 /**
- * A large pale yellow-green full moon, low in the sky right behind the witch's house, below the search box and the header.
- * It is a crisp disc with soft patches and no wide halo. Its lower part sinks into the ground fog.
+ * A large pale yellow-green full moon high in the right sky, under the header buttons and well above the pine line.
+ * It is a crisp disc with soft patches and no wide halo.
  */
+/**
+ * The disc's size (times the Crypt's). The moon fits between the header buttons (whose Dawn button wraps to a second row
+ * at 1280x600, down to 0.20) and the pine line (its tops at about 0.34 of the height under the moon), with sky under it.
+ */
+export const FOREST_MOON_SCALE = 0.65;
+/** Top of the moon's disc (share of the window height): just under the header buttons at every usual window size. */
+export const FOREST_MOON_TOP = 0.215;
 export const FOREST_MOON: UniqueMoon = {
-  target: (aspect) => clearSkyMoon(aspect, 1.4),
-  scale: 1.4,
+  // Raised clear of the pine line: the whole disc floats in the sky with open sky under it, still on the right.
+  target: (aspect) => ({ x: clearSkyMoon(aspect, FOREST_MOON_SCALE).x, y: FOREST_MOON_TOP + moonScreenRadiusScaled(aspect, FOREST_MOON_SCALE).disc }),
+  scale: FOREST_MOON_SCALE,
   crisp: true,
   // The branches of the dark trees cross in front of it, so it shows through the gaps.
   seeThrough: true,
@@ -145,12 +154,13 @@ export function buildWitchsForest(seed: number): UniqueSceneSpec {
   const jack = placer.fixed(placer.make('pumpkin_orange_jackolantern', 'themed', JACK.x, JACK.z, JACK.rotY, JACK.scale), { margin: 0.05, anyMoon: true });
   const jackTop = MODELS.pumpkin_orange_jackolantern.h * JACK.scale;
   lights.push({ kind: 'torch', x: FIRE.x + 0.4, y: 1.0, z: FIRE.z + 0.7 });
-  // Behind the face, so the carved face is lit by the fire and reads orange instead of blowing out white.
-  lights.push({ kind: 'jackOLantern', x: jack.x + 0.2, y: jackTop * 0.9, z: jack.z - 1.7 });
+  // Low in front of the face: the candle inside spills a small warm pool on the ground around the pumpkin.
+  lights.push({ kind: 'jackOLantern', x: jack.x, y: jackTop * 0.35, z: jack.z + 1.1 });
   // A second, higher light throws the glow of the fire up the trunk and on the face.
   lights.push({ kind: 'torch', x: FIRE.x - 1.0, y: 3.4, z: FIRE.z - 0.8 });
   for (const [dx, dz] of [[-0.5, 0], [0.5, 0.3], [0, -0.5]] as const) glows.push({ kind: 'torch', x: FIRE.x + dx, y: 0.7, z: FIRE.z + dz, size: 0.7 });
-  glows.push({ kind: 'jackOLantern', x: jack.x, y: jackTop * 0.5, z: jack.z + 0.4, size: 0.45 });
+  // The soft orange glow on the ground around it (the carved face itself glows in its material, see WitchsForestScene).
+  glows.push({ kind: 'jackOLantern', x: jack.x, y: jackTop * 0.5, z: jack.z + 0.4, size: 0.8 });
   // ----- the small cauldron beside the path, with a few small glowing mushrooms -----
   const pot = placer.fixed(placer.make('forest_cauldron', 'themed', CAULDRON.x, CAULDRON.z, CAULDRON.rotY, CAULDRON.scale), { margin: 0.05, anyMoon: true });
   const potTop = MODELS.forest_cauldron.h * pot.scale;
@@ -206,6 +216,8 @@ export function buildWitchsForest(seed: number): UniqueSceneSpec {
     moreGraves,
     mid,
   };
+  const allLogs = [...logs, ...mid.logs];
+  const allGraves = [...moreGraves, ...mid.graves];
   const extras = {
     tris:
       FOREST_PARTS.groundTris + 2 * centre.length + FLAME_COUNT * FLAME_TRIS + 2 * SPARK_COUNT +
@@ -234,6 +246,20 @@ export function buildWitchsForest(seed: number): UniqueSceneSpec {
     layers: { clouds: false, witch: false, bats: 0, ghosts: false, mist: true, embers: false },
     extras,
     forest: parts,
+    fill: buildFill({
+      theme: 'forest',
+      seed,
+      placements,
+      keepOut: [
+        ...placer.reserved,
+        ...[...scary, ...thorns, ...mid.farTrees, ...mid.moonTrees].map((t) => ({ x: t.x, z: t.z, hx: 0.8, hz: 0.8, rotY: 0 })),
+        ...allLogs.map((l) => ({ x: l.x, z: l.z, hx: 1.0, hz: 1.0, rotY: 0 })),
+        ...allGraves.map((g) => ({ x: g.x, z: g.z, hx: 0.7, hz: 0.7, rotY: 0 })),
+        ...mid.stumps.map((s) => ({ x: s.x, z: s.z, hx: 0.8, hz: 0.8, rotY: 0 })),
+      ],
+      path: { centre, halfWidth: TRAIL_HALF_WIDTH },
+      moon: FOREST_MOON,
+    }),
     // Thick green fog: the far trees fade into it, and it lies low on the ground.
     fogScale: 2.6,
   };

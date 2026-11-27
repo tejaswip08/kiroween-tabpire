@@ -129,3 +129,17 @@
   font-size: 12px;
   color: var(--ink-dim);
 }
+
+/* The small "Enter" key on the right of the search box. */
+.search-hint {
+  flex: none;
+  padding: 3px 9px;
+  border-radius: 7px;
+  border: 1px solid var(--card-edge);
+  background: var(--glass);
+  font-family: var(--font-label);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--ink-dim);
+}

@@ -5,7 +5,10 @@ import { modelFile } from '../../../../lib/scene/layout';
 import { sceneThemeFor } from './themeColors';
 
 /** The extension's own model files of a theme, through assetUrl. */
-export const themeFiles = (id: ThemeId): string[] => sceneThemeFor(id).scene.models.map(modelFile);
+export const themeFiles = (id: ThemeId): string[] => {
+  const { scene } = sceneThemeFor(id);
+  return [...new Set([...scene.models, ...(scene.fill?.models ?? [])])].map(modelFile);
+};
 
 /** How many files one idle slot loads. */
 export const PRELOAD_PER_SLOT = 2;

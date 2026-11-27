@@ -1,4 +1,4 @@
-// The Frozen Cemetery (.kiro/specs/themes/unique-scenes.md, brief 3): the spec, the aurora and the palette. The scene rules (chapel, pond,
+// The Frozen Cemetery (.kiro/specs/themes/unique-scenes.md, brief 3): the spec, the aurora and the palette. The scene rules (house, pond,
 // graveyard, creatures, backdrop) are in tests/frostScene.test.ts and the shared rules for every unique theme in tests/uniqueScenes.test.ts.
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
@@ -45,18 +45,19 @@ describe('the aurora', () => {
   });
 });
 describe('the Frozen Cemetery spec', () => {
-  it('is a simple scene: a few pines and one bare tree, snow ground, a snowy path, falling snow, icy ghosts, no clouds, witch, bats or mist', () => {
+  it('is a simple scene: model pines and bare trees, snow ground, a snowy path, blowing snow, icy ghosts in the wind, no clouds, witch, bats or shared mist', () => {
     const count = (m: string) => spec.placements.filter((p) => p.model === m).length;
+    // Two model pines (the far one and the big corner one); the cluster pines are light shapes of their own (spec.frost.pines).
     expect(count('frost_pine_a')).toBe(2);
-    expect(count('tree_dead_large')).toBe(1);
-    expect(spec.placements).toHaveLength(3);
+    expect(count('tree_dead_large')).toBeGreaterThanOrEqual(4);
+    expect(spec.placements).toHaveLength(2 + count('tree_dead_large'));
     expect(count('frost_rock')).toBe(0);
     expect(spec.ground.kind).toBe('snow');
     expect(spec.path.kind).toBe('snow');
     expect(spec.weather!.kind).toBe('snow');
     expect(spec.layers.ghostTint).toBe(FROST_GHOST_TINT);
     expect(spec.layers.ghosts).toBe(true);
-    expect(spec.layers).toMatchObject({ clouds: false, witch: false, bats: 0, mist: false, embers: false });
+    expect(spec.layers).toMatchObject({ clouds: false, witch: false, bats: 0, mist: false, embers: false, ghostWind: 1 });
   });
   it('has no real point lights and no shared glow sprites: the lanterns carry their own small flame', () => {
     expect(spec.lights).toEqual([]);

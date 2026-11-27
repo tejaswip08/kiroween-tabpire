@@ -43,6 +43,13 @@ export function Tooltip({
   const setPos = useCallback((next: { left: number; top: number } | null) => {
     setPosState((cur) => (cur === next || (cur && next && cur.left === next.left && cur.top === next.top) ? cur : next));
   }, []);
+  // When the popover from this button closes (a theme picked, Escape, a click outside), keep the tip closed until the
+  // pointer leaves or focus moves away, so it does not pop back up over the page.
+  const wasHidden = useRef(hidden);
+  useLayoutEffect(() => {
+    if (wasHidden.current && !hidden) setDismissed(true);
+    wasHidden.current = hidden;
+  }, [hidden]);
   const open = (hover || focus) && !dismissed && !hidden;
   const place = useCallback(() => {
     const anchor = wrap.current?.firstElementChild ?? wrap.current;

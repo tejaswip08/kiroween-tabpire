@@ -479,7 +479,22 @@
 .legend-chip[data-empty] {
   opacity: 0.5;
 }
+/* The Pumpkin Patch: the chips sit over the bright barn and windmill, so they get the solid card backing and
+   empty chips stay readable (dimmed less). */
+:root[data-theme='pumpkin'] .legend-chip {
+  background: linear-gradient(180deg, var(--card-top), var(--card-bottom));
+}
+:root[data-theme='pumpkin'] .legend-chip[data-empty] {
+  opacity: 0.86;
+}
 
+/* The Frozen Cemetery: the haunted house roof sits behind the chips, so they get the same solid backing. */
+:root[data-theme='frost'] .legend-chip {
+  background: linear-gradient(180deg, var(--card-top), var(--card-bottom));
+}
+:root[data-theme='frost'] .legend-chip[data-empty] {
+  opacity: 0.86;
+}
 .legend-chip[aria-pressed='true'] {
   border-color: var(--chip);
   box-shadow: 0 0 0 1px var(--chip) inset;
