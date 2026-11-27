@@ -317,7 +317,14 @@ export interface PlacerOptions {
   moon: UniqueMoon;
   /** Path centre points and half width; props keep `PATH_CLEARANCE` plus their own reach away. */
   path: { centre: readonly { x: number; z: number }[]; halfWidth: number };
+  /**
+   * Most triangles (shadow pass counted, see `planCost`) the props added through this placer may reach. `tryAdd` leaves out
+   * a prop that would pass it, so no seed can go over. Fixed props are always placed and counted.
+   */
+  triLimit?: number;
 }
+/** Triangles one placement costs in the budget plan: twice when the model casts shadows. */
+export const planCost = (m: ModelId): number => MODELS[m].tris * (MODELS[m].shadow ? 2 : 1);
 export const PATH_CLEARANCE = 0.5;
 /** Fixed-prop problems already logged, so each is logged once. */
 const warned = new Set<string>();
@@ -332,6 +339,8 @@ export class Placer {
   readonly reserved: Footprint[] = [];
   readonly rng: () => number;
   private counter = 0;
+  /** Triangles of the props added through `tryAdd` and `fixed` so far. */
+  tris = 0;
   constructor(private readonly o: PlacerOptions) {
     this.rng = mulberry32(o.seed);
   }
@@ -363,12 +372,13 @@ export class Placer {
   }
   /** Adds the placement when it fits. */
   tryAdd(p: Placement, opts: PlaceOptions = {}, isCentrepiece = false): Placement | null {
-    const why = this.problem(p, opts, isCentrepiece);
+    const why = this.tris + planCost(p.model) > (this.o.triLimit ?? Infinity) ? 'over the triangle limit' : this.problem(p, opts, isCentrepiece);
     if (why) {
       this.counter--;
       return null;
     }
     this.placements.push(p);
+    this.tris += planCost(p.model);
     return p;
   }
   /** A placement that must fit: a bad number fails the tests at once. */
@@ -385,6 +395,7 @@ export class Placer {
       return p;
     }
     this.placements.push(p);
+    this.tris += planCost(p.model);
     return p;
   }
   /** Up to `count` random props of one model; each tries `tries` spots and is dropped if none fits. Returns what was placed. */

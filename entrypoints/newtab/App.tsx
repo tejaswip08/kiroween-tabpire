@@ -11,6 +11,7 @@ import type { SceneInputs } from '../../lib/scene/meaning';
 import { sumMb, type Card } from '../../lib/view';
 import { CardGrid } from './components/CardGrid';
 import { CardSkeleton } from './components/CardSkeleton';
+import { CardsToggle } from './components/CardsToggle';
 import { EmptyState } from './components/EmptyState';
 import { ErrorState } from './components/ErrorState';
 import { Header } from './components/Header';
@@ -24,6 +25,7 @@ import { useCrypt } from './components/useCrypt';
 import { useTheme } from './components/useTheme';
 import { prefersReducedMotion } from './hooks/useExitingCards';
 import { useToasts } from './hooks/useToasts';
+import { useCardsHidden } from './hooks/useCardsHidden';
 import { FpsReadout } from './layers/FpsReadout';
 import { Sunrise } from './components/Sunrise';
 import { PortraitLayerHost, SceneLayerHost } from './layers/hosts';
@@ -56,6 +58,7 @@ export function App() {
   /** Goes up each time Dawn starts, which plays the sunrise once. */
   const [sunrise, setSunrise] = useState(0);
   const [filter, setFilter] = useState<VampireState | null>(null);
+  const { hidden: cardsHidden, toggle: toggleCards } = useCardsHidden();
   const running = useRef(new Set<number>());
   const dawnRunning = useRef(false);
   const { reload } = data;
@@ -214,7 +217,10 @@ export function App() {
           />
           <Haunts pages={data.haunts} tabIcons={tabIcons} />
           {data.status === 'ready' && data.cards.length > 0 && (
-            <StateLegend cards={data.cards} filter={filter} onToggle={(s) => setFilter((f) => toggleFilter(f, s))} />
+            <div className="legend-row">
+              <StateLegend cards={data.cards} filter={filter} onToggle={(s) => setFilter((f) => toggleFilter(f, s))} />
+              <CardsToggle hidden={cardsHidden} onToggle={toggleCards} />
+            </div>
           )}
           {data.status === 'loading' && <CardSkeleton />}
           {data.status === 'error' && <ErrorState onRetry={reload} />}
@@ -224,7 +230,14 @@ export function App() {
             ) : shownCards.length === 0 ? (
               <p className="legend-empty">No vampires are {filter} right now.</p>
             ) : (
-              <CardGrid cards={shownCards} busyIds={busyIds} allBusy={dawnBusy} onAction={onAction} />
+              <CardGrid
+                cards={shownCards}
+                busyIds={busyIds}
+                allBusy={dawnBusy}
+                onAction={onAction}
+                hidden={cardsHidden}
+                onShow={toggleCards}
+              />
             ))}
         </main>
         <Toasts toasts={toasts} onDismiss={dismiss} />

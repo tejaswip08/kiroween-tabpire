@@ -109,6 +109,25 @@ try {
     measured.push({ width, height, areaWidth: Math.floor(m.area.width), areaHeight: Math.floor(m.area.bottom - m.area.top), cards: m.cards, more: m.more });
     await page.close();
   }
+  // The header buttons (Themes, Blood Bank, Dawn) stay on one row at every width from 1024 px, and never overlap the stats panel.
+  for (const width of [1024, 1280, 1366, 1440, 1600, 1680, 1920]) {
+    const page = await browser.newPage({ viewport: { width, height: 900 } });
+    await page.goto(url);
+    await page.waitForSelector('.header-actions .header-btn-dawn', { timeout: 20000 });
+    await page.waitForTimeout(500);
+    const h = await page.evaluate(() => {
+      const btns = [...document.querySelectorAll('.header-actions .header-btn')].map((b) => b.getBoundingClientRect());
+      const stats = document.querySelector('.stats-panel').getBoundingClientRect();
+      const overlaps = (a, b) => a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom;
+      return { tops: btns.map((b) => b.top), count: btns.length, overlap: btns.some((b) => overlaps(b, stats)) };
+    });
+    const tag = `header at ${width}`;
+    if (h.count !== 3) failures.push(`${tag}: ${h.count} header buttons, not 3`);
+    if (Math.max(...h.tops) - Math.min(...h.tops) > 0.5) failures.push(`${tag}: the header buttons wrap (tops ${h.tops.map((t) => t.toFixed(1)).join(', ')})`);
+    if (h.overlap) failures.push(`${tag}: a header button overlaps the stats panel`);
+    console.log(`${tag}: buttons on one row${h.overlap ? ', OVERLAP' : ''}`);
+    await page.close();
+  }
 } finally {
   await browser.close();
   close();

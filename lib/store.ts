@@ -50,6 +50,8 @@ export const KEYS = {
   /** The key haunts were saved under before they were renamed. Read once as a fallback. */
   legacyPinned: 'tabpire:pinned',
   theme: 'tabpire:theme',
+  /** Local flag: the cards are hidden ("Hide tabs") so the whole 3D scene shows. */
+  cardsHidden: 'tabpire:cards-hidden',
   /** Local flag: the one-time copy of settings from local to sync has finished. */
   syncMigrated: 'tabpire:sync-migrated',
 } as const;
@@ -261,6 +263,15 @@ export const store = {
     }
   },
   setTheme: (v: ThemeId) => writeSynced(KEYS.theme, v),
+  /** Whether the cards are hidden. Missing or unreadable gives false (cards shown). Never throws. */
+  getCardsHidden: async (): Promise<boolean> => {
+    try {
+      return await read(KEYS.cardsHidden, (v): v is boolean => typeof v === 'boolean', () => false);
+    } catch {
+      return false;
+    }
+  },
+  setCardsHidden: (v: boolean) => write(KEYS.cardsHidden, v),
 };
 
 // ---------- transactions ----------

@@ -182,10 +182,11 @@ describe('blur', () => {
     rule.decls.filter((d) => /blur\(/i.test(d.value)).map((d) => ({ rule, d })),
   );
 
-  it('appears only as a backdrop-filter on the stats panel, at most 10px', () => {
+  // The "+N more" panel and its backdrop were asked to be frosted glass; they exist only while the panel is open.
+  it('appears only as a backdrop-filter on the stats panel and the hidden tabs panel, at most 10px', () => {
     for (const { rule, d } of blurred) {
       expect(['backdrop-filter', '-webkit-backdrop-filter'], `${rule.sheet} ${rule.selector}`).toContain(d.prop);
-      expect(rule.selector, `${rule.sheet}: blur on ${rule.selector}`).toContain('.stats-panel');
+      expect(rule.selector, `${rule.sheet}: blur on ${rule.selector}`).toMatch(/\.stats-panel|\.hidden-panel|\.hidden-backdrop/);
       const radius = Number(/blur\(\s*([\d.]+)px\s*\)/i.exec(d.value)?.[1]);
       expect(radius).toBeGreaterThan(0);
       expect(radius).toBeLessThanOrEqual(10);

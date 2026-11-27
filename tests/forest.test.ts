@@ -490,6 +490,12 @@ describe('the budget', () => {
       { numRuns: 6 },
     );
   });
+  // 4994 went over the limit in CI (181,868); 7211 is the real seed of the theme (THEME_SEED.forest).
+  it.each([4994, 7211])('keeps seed %i inside the triangle limit', (seed) => {
+    const s = buildWitchsForest(seed);
+    expect(planTriangles(s.placements)).toBeLessThanOrEqual(PLACEMENT_TRI_LIMIT);
+    expect(s.placements.some((p) => p.id === s.forest!.hero.id)).toBe(true);
+  });
   it('is one mesh per kind: the hand-built shapes each merge to one geometry', () => {
     for (const g of [buildScaryTree(0), buildThornBush(), buildWitchScarecrow(), buildGhost(), buildGraves(GRAVES), buildTuft(), buildPlant(), buildForestGround(FIRE)]) {
       expect(g.getAttribute('position').count).toBeGreaterThan(0);

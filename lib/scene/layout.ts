@@ -419,6 +419,17 @@ export function behindControls(p: Placement, which: (index: number) => boolean =
 // ---------- building the layout ----------
 const slug = (s: string) => s.replace(/[^a-z0-9]+/gi, '-');
 
+/**
+ * Triangles of the Crypt's placements (shadow pass counted). Its random props are left out once they would pass it, keeping
+ * room for the fixed props placed after them, so no seed goes over. The real layout uses about 93,000.
+ */
+export const CRYPT_TRI_LIMIT = 150_000;
+const planCostOf = (m: ModelId): number => MODELS[m].tris * (MODELS[m].shadow ? 2 : 1);
+/** The fixed props placed after the first random ones: the big graves, the cat's gravestone, the mounds, cauldron, coffin spot and perch trees. */
+const CRYPT_LATE_FIXED = ([
+  'grave_A', 'grave_B', 'gravestone', 'grave_B', 'grave_A_destroyed', 'gravestone', 'gravestone', 'dirt_mound', 'dirt_mound', 'dirt_mound',
+  'forest_cauldron', 'open_coffin_spot', 'tree_dead_large', 'tree_dead_medium', 'tree_dead_large',
+] as const).reduce((sum, m) => sum + planCostOf(m), 0);
 export function buildLayout(seed: number = LAYOUT_SEED): Layout {
   const rng = mulberry32(seed);
   // The first part of the layout uses `rng`; the details added later use their own numbers (`next`), so the
@@ -513,6 +524,8 @@ export function buildLayout(seed: number = LAYOUT_SEED): Layout {
   };
   /** Random items: they try a few spots and are dropped if none fits. */
   const tryAdd = (model: ModelId, group: Group, region: () => { x: number; z: number; rotY?: number; scale?: number }, tries = 80): Placement | null => {
+    const used = placements.reduce((sum, q) => sum + planCostOf(q.model), 0);
+    if (used + planCostOf(model) + CRYPT_LATE_FIXED > CRYPT_TRI_LIMIT) return null;
     for (let i = 0; i < tries; i++) {
       const r = region();
       const p = make(model, group, r.x, r.z, r.rotY ?? between(0, Math.PI * 2), r.scale ?? 1);

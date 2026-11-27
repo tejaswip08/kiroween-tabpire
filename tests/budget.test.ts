@@ -2,7 +2,10 @@ import { describe, expect, it } from 'vitest';
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { BUDGET, QUALITY } from '../lib/scene/config';
-import { MODELS, buildLayout, modelFile, modelInfo, type ModelId } from '../lib/scene/layout';
+import { CRYPT_TRI_LIMIT, MODELS, buildLayout, modelFile, modelInfo, type ModelId } from '../lib/scene/layout';
+import { PUMPKIN_TRI_LIMIT, buildPumpkinPatch } from '../lib/scene/uniqueScenes/pumpkin';
+import { FROST_TRI_LIMIT, buildFrozenCemetery } from '../lib/scene/uniqueScenes/frost';
+import { FILL_TRI_LIMIT } from '../lib/scene/uniqueScenes/fill';
 import { EXTRAS } from '../lib/scene/depth';
 import { themeScene } from '../lib/scene/themeLayout';
 import { weatherDraws, weatherTriangles } from '../lib/scene/weather';
@@ -242,5 +245,18 @@ describe('bundle size', () => {
     readdirSync(dir, { withFileTypes: true }).reduce((sum, e) => sum + (e.isDirectory() ? size(join(dir, e.name)) : statSync(join(dir, e.name)).size), 0);
   it.skipIf(!existsSync(OUT))('stays within the bundle limit when the built output exists', () => {
     expect(size(OUT)).toBeLessThanOrEqual(BUDGET.maxBundleBytes);
+  });
+});
+describe('triangle limits of the builders', () => {
+  // Each builder leaves out optional props that would pass its limit, so no seed can go over. 4994 once pushed the Witch's
+  // Forest over; the others are the real seeds of the themes (THEME_SEED).
+  const cost = (ps: readonly { model: ModelId }[]) => ps.reduce((s, p) => s + MODELS[p.model].tris * (MODELS[p.model].shadow ? 2 : 1), 0);
+  it.each([4994, 7101, 7211, 7321])('keeps seed %i of the Crypt, Pumpkin Patch, Frozen Cemetery and their fill inside the limits', (seed) => {
+    expect(cost(buildLayout(seed).placements)).toBeLessThanOrEqual(CRYPT_TRI_LIMIT);
+    const pumpkin = buildPumpkinPatch(seed);
+    expect(cost(pumpkin.placements)).toBeLessThanOrEqual(PUMPKIN_TRI_LIMIT);
+    const frost = buildFrozenCemetery(seed);
+    expect(cost(frost.placements)).toBeLessThanOrEqual(FROST_TRI_LIMIT);
+    for (const s of [pumpkin, frost]) expect(s.fill!.tris).toBeLessThanOrEqual(FILL_TRI_LIMIT);
   });
 });

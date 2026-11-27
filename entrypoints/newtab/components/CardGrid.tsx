@@ -10,12 +10,17 @@ export function CardGrid({
   busyIds,
   allBusy,
   onAction,
+  hidden: hiddenCards = false,
+  onShow,
 }: {
   cards: Card[];
   busyIds: ReadonlySet<number>;
   /** True while Dawn runs. */
   allBusy: boolean;
   onAction: (card: Card, action: CardAction) => void;
+  /** "Hide tabs": the cards slide down out of view and a small bar offers to bring them back. */
+  hidden?: boolean;
+  onShow?: () => void;
 }) {
   const display = useExitingCards(cards);
   const [area, size] = useAreaSize<HTMLDivElement>();
@@ -33,16 +38,19 @@ export function CardGrid({
   }, []);
   // Nothing left to list: the panel closes by itself.
   useEffect(() => {
-    if (panelOpen && hidden.length === 0) setPanelOpen(false);
-  }, [panelOpen, hidden.length]);
+    if (panelOpen && (hidden.length === 0 || hiddenCards)) setPanelOpen(false);
+  }, [panelOpen, hidden.length, hiddenCards]);
   return (
-    <section className="cards-area" ref={area} aria-labelledby="open-tabs-heading">
+    <section className="cards-area" ref={area} aria-labelledby="open-tabs-heading" data-hidden={hiddenCards || undefined}>
       <h2 id="open-tabs-heading" className="sr-only">
         Open tabs, hungriest first
       </h2>
       <ul
+        id="card-grid"
         className="card-grid"
         role="list"
+        inert={hiddenCards || undefined}
+        aria-hidden={hiddenCards || undefined}
         data-compact={fit.scale < COMPACT_BELOW || undefined}
         style={{ '--card-scale': fit.scale } as CSSProperties}
       >
@@ -75,7 +83,18 @@ export function CardGrid({
           </li>
         )}
       </ul>
-      {panelOpen && hidden.length > 0 && (
+      {hiddenCards && (
+        <div className="cards-hidden-bar">
+          <span>
+            {display.length === 1 ? '1 vampire hidden' : `${display.length} vampires hidden`}
+            <span aria-hidden="true"> · </span>
+          </span>
+          <button type="button" className="cards-hidden-show" onClick={onShow}>
+            Show tabs
+          </button>
+        </div>
+      )}
+      {panelOpen && !hiddenCards && hidden.length > 0 && (
         <HiddenTabsPanel cards={hidden} busyIds={busyIds} allBusy={allBusy} onAction={onAction} onClose={closePanel} />
       )}
     </section>

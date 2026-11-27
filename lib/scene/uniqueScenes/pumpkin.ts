@@ -65,10 +65,15 @@ export const PUMPKIN_PARTS = {
 
 const JACK: ModelId = 'pumpkin_orange_jackolantern';
 
+/**
+ * Triangles of the placements (shadow pass counted). The placer leaves out any optional prop past it, so no seed goes over;
+ * the real seeds use about 138,000. With the own parts (about 63,500) and the leaves it stays inside BUDGET.sceneTriangles.
+ */
+export const PUMPKIN_TRI_LIMIT = 150_000;
 export function buildPumpkinPatch(seed: number): UniqueSceneSpec {
   const line = sampleLine(smoothPolyline(TRACK, 8), 1.5);
   const centre = line.map(({ x, z }) => ({ x, z }));
-  const placer = new Placer({ id: 'pumpkin', seed: PUMPKIN_SEED + seed, moon: PUMPKIN_MOON, path: { centre, halfWidth: LANE_KEEP } });
+  const placer = new Placer({ id: 'pumpkin', seed: PUMPKIN_SEED + seed, moon: PUMPKIN_MOON, path: { centre, halfWidth: LANE_KEEP }, triLimit: PUMPKIN_TRI_LIMIT });
   const { between } = placer;
   const lights: WarmSource[] = [];
   const glows: WarmSource[] = [];

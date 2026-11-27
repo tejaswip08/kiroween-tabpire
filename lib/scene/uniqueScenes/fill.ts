@@ -17,6 +17,8 @@ export const FILL_TOP_Y = 0.43;
 export const FILL_SEED: Record<FillTheme, number> = { crypt: 9101, pumpkin: 9202, forest: 9303, frost: 9404 };
 /** Props taller than this are never part of the fill: they could reach the moon, the header or the chips. */
 export const FILL_MAX_HEIGHT = 3.4;
+/** Triangles of the fill props (shadow pass counted). A prop that would pass it is left out, so no seed goes over. */
+export const FILL_TRI_LIMIT = 40_000;
 
 /** A firefly that hovers low over the ground (the Witch's Forest). */
 export interface FillFirefly {
@@ -120,7 +122,7 @@ interface Opts extends PlaceOptions {
 }
 
 export function buildFill(ctx: FillContext): FillPlan {
-  const placer = new FillPlacer({ id: ctx.theme as ThemeId, seed: FILL_SEED[ctx.theme] + ctx.seed, moon: ctx.moon, path: { centre: ctx.path.centre, halfWidth: ctx.path.halfWidth } });
+  const placer = new FillPlacer({ id: ctx.theme as ThemeId, seed: FILL_SEED[ctx.theme] + ctx.seed, moon: ctx.moon, path: { centre: ctx.path.centre, halfWidth: ctx.path.halfWidth }, triLimit: FILL_TRI_LIMIT });
   const { between, pick } = placer;
   placer.placements.push(...ctx.placements);
   for (const f of ctx.keepOut) placer.reserve(f);

@@ -14,7 +14,7 @@ import {
 } from './forestParts';
 import { buildFill } from './fill';
 import { HOUSE_FOOTPRINT, HOUSE_LANE, MOON_DEPTH, forestMidground, midgroundTris } from './forestHouse';
-import { Placer, VIEW_ASPECTS, modelsOf, sampleLine, solidFootprint, type UniqueMoon, type UniqueSceneSpec } from './types';
+import { Placer, VIEW_ASPECTS, planCost, modelsOf, sampleLine, solidFootprint, type UniqueMoon, type UniqueSceneSpec } from './types';
 export { CAULDRON, FIRE };
 export { WITCH_HOUSE } from './forestHouse';
 /** Added to the caller's seed, so this theme has its own random stream. */
@@ -96,6 +96,10 @@ export const PLACEMENT_TRI_LIMIT = 178_000;
 /** Triangles of some placements as the budget plan counts them: every instance, twice when the model casts shadows. */
 export const planTriangles = (placements: readonly Placement[]): number =>
   placements.reduce((sum, p) => sum + MODELS[p.model].tris * (MODELS[p.model].shadow ? 2 : 1), 0);
+/** The most that the props placed after the trees can add (jack-o'-lantern, cauldron, its mushrooms, rocks, mushroom clusters). */
+const AFTER_TREES_MAX =
+  planCost('pumpkin_orange_jackolantern') + planCost('forest_cauldron') + MUSHROOMS.length * planCost('forest_mushroom') +
+  5 * planCost('forest_rock_large') + planCost('forest_rocks') + 3 * 3 * planCost('forest_mushroom');
 /** The green liquid of the cauldron: its centre and radius for `CauldronFx`. Pure. */
 export function cauldronFxAt(p: Pick<Placement, 'x' | 'y' | 'z' | 'scale'>): { x: number; y: number; z: number; radius: number } {
   return { x: p.x, y: p.y + SOUP_LEVEL * p.scale, z: p.z, radius: SOUP_RADIUS * p.scale };
@@ -114,9 +118,13 @@ const FAR_TREES: readonly [number, number, Tree][] = [
 export function buildWitchsForest(seed: number): UniqueSceneSpec {
   const line = sampleLine(TRAIL, 1.5);
   const centre = line.map(({ x, z }) => ({ x, z }));
-  const placer = new Placer({ id: 'forest', seed: FOREST_SEED + seed, moon: FOREST_MOON, path: { centre, halfWidth: TRAIL_HALF_WIDTH } });
+  const placer = new Placer({ id: 'forest', seed: FOREST_SEED + seed, moon: FOREST_MOON, path: { centre, halfWidth: TRAIL_HALF_WIDTH }, triLimit: PLACEMENT_TRI_LIMIT });
   const { between } = placer;
   const lights: WarmSource[] = [];
+  // The placer leaves out any optional prop that would pass the limit. A tree also keeps room for the props placed after
+  // the trees (`AFTER_TREES_MAX`), so the fixed jack-o'-lantern and cauldron always fit. Only a rare, crowded seed (for
+  // example 4994) is thinned; the real seeds are far enough under the limit to stay as they were.
+  const treeFits = (m: Tree) => placer.tris + planCost(m) + AFTER_TREES_MAX <= PLACEMENT_TRI_LIMIT;
   const glows: WarmSource[] = [];
   // Things the scene draws itself keep their footprint free first, so no model stands in them.
   for (const s of SCARECROWS) placer.reserve(scarecrowFootprint(s));
@@ -127,6 +135,7 @@ export function buildWitchsForest(seed: number): UniqueSceneSpec {
   const tree = (model: Tree, x: number, z: number, rotY: number, scale: number, group: 'themed' | 'centre' = 'themed', must = false, overMoon = false) => {
     // The crown is checked where it is: its middle is shifted sideways from the trunk, turned with the tree.
     const shift = CROWN_SHIFT[model] * scale;
+    if (!must && !treeFits(model)) return null;
     if (!must && !overMoon && blocksMoonWindow(x + Math.cos(rotY) * shift, z - Math.sin(rotY) * shift, MODELS[model].h * scale, CROWN_REACH * scale)) return null;
     const p = placer.make(model, group, x, z, rotY, scale, TREE_FOOT * scale + 0.004);
     return must ? placer.fixed(p, { margin: 0.05 }, group === 'centre') : placer.tryAdd(p, { margin: 0.05 }, group === 'centre');

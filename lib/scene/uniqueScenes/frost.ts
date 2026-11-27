@@ -8,7 +8,7 @@ import { WEATHER } from '../weather';
 import { ICICLE_TRIS, LAKE_SEGMENTS, MOUND_TRIS, moundSet } from './frostIce';
 import { buildFill } from './fill';
 import { FROST_MOON_SCALE, PATH_HALF_WIDTH, PINE_SPOT, TREE_SPOT, attachToPlacements, buildFrostPlan, frostMoonTarget, LANTERN_POST } from './frostPlan';
-import { distToPath as distToPathOf, Placer, VIEW_ASPECTS, modelsOf, viewOf, type UniqueMoon, type UniqueSceneSpec } from './types';
+import { distToPath as distToPathOf, Placer, planCost, VIEW_ASPECTS, modelsOf, viewOf, type UniqueMoon, type UniqueSceneSpec } from './types';
 /** Added to the caller's seed, so this theme has its own random stream. */
 export const FROST_SEED = 7321;
 
@@ -103,7 +103,11 @@ export function buildFrozenCemetery(seed: number): UniqueSceneSpec {
       }
     }
   }
+  // The cluster pines are drawn light and counted in the extras, so FROST_TRI_LIMIT is for the other placements. A bare tree
+  // that would pass it is left out, so no seed goes over (the real seeds use under 10,000).
+  const keptTris = () => placer.placements.reduce((sum, p) => sum + (extraPines.has(p) ? 0 : planCost(p.model)), 0);
   for (const [x, z, scale] of DEAD_TREES) {
+    if (keptTris() + planCost('tree_dead_large') > FROST_TRI_LIMIT) break;
     for (let k = 0; k < 6; k++) if (tall('tree_dead_large', x + (k ? placer.between(-1.5, 1.5) : 0), z + (k ? placer.between(-1.5, 1.5) : 0), scale)) break;
   }
   const pines = [...extraPines].map((p) => ({ x: p.x, z: p.z, rotY: p.rotY, height: MODELS.frost_pine_a.h * p.scale }));

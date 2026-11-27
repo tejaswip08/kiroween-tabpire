@@ -237,6 +237,33 @@ export function CloseIcon(props: IconProps) {
   );
 }
 
+/** Eye: "Show tabs". */
+export function EyeIcon(props: IconProps) {
+  const id = useId();
+  return (
+    <Svg {...props}>
+      <defs>
+        <Grad id={`${id}e`} from="#fff1d6" to="#f4b860" />
+      </defs>
+      <path d="M3 16c3.5-6 8-9 13-9s9.5 3 13 9c-3.5 6-8 9-13 9S6.5 22 3 16z" fill="none" stroke={`url(#${id}e)`} strokeWidth="2.6" strokeLinejoin="round" />
+      <circle cx="16" cy="16" r="4.5" fill={`url(#${id}e)`} />
+    </Svg>
+  );
+}
+/** Eye with a slash: "Hide tabs". */
+export function EyeOffIcon(props: IconProps) {
+  const id = useId();
+  return (
+    <Svg {...props}>
+      <defs>
+        <Grad id={`${id}e`} from="#fff1d6" to="#f4b860" />
+      </defs>
+      <path d="M3 16c3.5-6 8-9 13-9s9.5 3 13 9c-3.5 6-8 9-13 9S6.5 22 3 16z" fill="none" stroke={`url(#${id}e)`} strokeWidth="2.6" strokeLinejoin="round" opacity="0.75" />
+      <circle cx="16" cy="16" r="4.5" fill={`url(#${id}e)`} opacity="0.75" />
+      <path d="M6 26L26 6" stroke="#ff6b6b" strokeWidth="3" strokeLinecap="round" />
+    </Svg>
+  );
+}
 /** Brand mark: a cute bat. */
 export function BatMark({ size = 32, className }: IconProps) {
   const id = useId();
