@@ -10,7 +10,7 @@ import type { Route } from './route';
 import './demo.css';
 
 export const BANNER_TEXT =
-  'Demo: sample tabs, nothing leaves your browser. Install the extension for real tabs.';
+  'Demo: sample tabs, nothing leaves your browser, so site icons show as letters. Install the extension for real tabs and icons.';
 export const ERROR_TEXT = 'This demo page failed. Reset the demo.';
 const NOTICE_MS = 4000;
 

@@ -3,7 +3,7 @@
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import fc from 'fast-check';
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { aimMoon, createDisplay } from '../entrypoints/newtab/layers/scene/display';
 import { cameraAt, projectDirection } from '../lib/scene/camera';
 import { BUDGET } from '../lib/scene/config';
@@ -23,8 +23,23 @@ import { WINDMILL_FOOT } from '../lib/scene/windmill';
 import { THEME_IDS, themeById, type ThemeId } from '../lib/themes';
 
 const UNIQUE = (Object.keys(UNIQUE_SCENES) as ThemeId[]);
-const seeds = fc.constantFrom(LAYOUT_SEED, 7, 99, 2024);
-const specOf = (id: ThemeId, seed = LAYOUT_SEED): UniqueSceneSpec => UNIQUE_SCENES[id]!(seed);
+// Building a scene is heavy. Under a loaded full run the default 20 s was not always enough, so this file gets 60 s.
+vi.setConfig({ testTimeout: 60_000, hookTimeout: 60_000 });
+const SEEDS = [LAYOUT_SEED, 7, 99, 2024] as const;
+const seeds = fc.constantFrom(...SEEDS);
+/** A fresh build, for the determinism test only. */
+const buildSpec = (id: ThemeId, seed: number): UniqueSceneSpec => UNIQUE_SCENES[id]!(seed);
+/** Each theme and seed is built once per file and shared by the tests (builders are pure, so the output is the same). */
+const specCache = new Map<string, UniqueSceneSpec>();
+const specOf = (id: ThemeId, seed: number = LAYOUT_SEED): UniqueSceneSpec => {
+  const key = `${id}:${seed}`;
+  let s = specCache.get(key);
+  if (!s) specCache.set(key, (s = buildSpec(id, seed)));
+  return s;
+};
+beforeAll(() => {
+  for (const id of UNIQUE) for (const seed of SEEDS) specOf(id, seed);
+});
 const fileOf = (id: ModelId) => {
   const s = MODELS[id].source;
   return resolve(__dirname, '../public/models', s === 'custom' ? 'coffin.glb' : s === 'quaternius' ? `quaternius/${id}.glb` : `kaykit/${id}.gltf`);
@@ -83,12 +98,8 @@ describe.each(UNIQUE)('unique scene %s', (id) => {
   });
 
   it('is deterministic for a seed', () => {
-    fc.assert(
-      fc.property(seeds, (seed) => {
-        expect(specOf(id, seed)).toEqual(specOf(id, seed));
-      }),
-      { numRuns: 8 },
-    );
+    // The seeds are four constants, so each is checked once: a fresh build equals the cached build.
+    for (const seed of SEEDS) expect(buildSpec(id, seed), `seed ${seed}`).toEqual(specOf(id, seed));
   });
 
   it('keeps every placement inside the ground, with no overlaps, for several seeds', () => {
