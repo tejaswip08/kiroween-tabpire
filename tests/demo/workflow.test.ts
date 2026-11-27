@@ -32,8 +32,8 @@ describe('Pages workflow', () => {
 
   it('builds, tests, then uploads demo/dist', () => {
     const order = [
-      'actions/checkout@v4',
-      'actions/setup-node@v4',
+      'actions/checkout@v7',
+      'actions/setup-node@v7',
       'npm ci',
       'npm run typecheck',
       'npm run demo:build',
