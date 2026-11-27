@@ -152,6 +152,8 @@ asleep). Every action and theme works.
 - **Reset demo** brings all the sample tabs back.
 - Site icons show as letters, because the demo makes no outside requests. The installed extension shows real icons.
 
+> Tabpire renders a live 3D scene. It runs smoothly on most laptops; on very low-spec machines the scene can load slowly, but the tab features still work.
+
 ## Install for judges
 
 No build needed.
@@ -174,6 +176,8 @@ No build needed.
 3. Click **This Firefox**.
 4. Click **Load Temporary Add-on** and pick `manifest.json` in the unzipped folder.
 5. Open a new tab. (A temporary add-on stays until Firefox restarts.)
+
+> Tabpire renders a live 3D scene. It runs smoothly on most laptops; on very low-spec machines the scene can load slowly, but the tab features still work.
 
 ## Install from source
 
